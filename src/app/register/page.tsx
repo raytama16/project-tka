@@ -51,7 +51,7 @@ export default function RegisterPage() {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900"
-              placeholder="Raya Geandy Pratama"
+              placeholder="Nama mu..."
             />
           </div>
 

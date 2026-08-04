@@ -32,6 +32,7 @@ export async function middleware(request: NextRequest) {
   const SPECIAL_ADMIN_EMAIL = "gpraya257@gmail.com"
   const path = request.nextUrl.pathname
 
+  // Proteksi Halaman Admin
   if (path.startsWith('/admin') && path !== '/admin/login') {
     if (!user || user.email?.toLowerCase() !== SPECIAL_ADMIN_EMAIL.toLowerCase()) {
       const url = request.nextUrl.clone()
@@ -40,9 +41,18 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Proteksi Halaman User / Mapel TKA (Belum login diarahkan ke halaman utama / login)
+  if (path.startsWith('/mapel-tka')) {
+    if (!user) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login' // atau arahkan ke halaman login jika sudah punya halamannya
+      return NextResponse.redirect(url)
+    }
+  }
+
   return supabaseResponse
 }
 
 export const config = {
-  matcher: ['/admin', '/admin/:path*'],
+  matcher: ['/admin', '/admin/:path*', '/mapel-tka', '/mapel-tka/:path*'],
 }

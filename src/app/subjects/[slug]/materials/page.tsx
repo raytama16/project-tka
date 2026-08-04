@@ -3,12 +3,14 @@
 import { use, useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import MathText from '@/components/MathText'
+import { Lock, Sparkles, X, MessageCircle, CheckCircle2 } from 'lucide-react'
 
 type SubMaterial = {
   id: string
   title: string
   content: string
   order_index: number
+  is_free: boolean
 }
 
 type Material = {
@@ -28,6 +30,10 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(true)
 
+  // State untuk sistem pengecekan premium user & modal WhatsApp
+  const [isPremium, setIsPremium] = useState<boolean>(false)
+  const [showModal, setShowModal] = useState<boolean>(false)
+
   const supabase = createClient()
 
   useEffect(() => {
@@ -36,6 +42,21 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
     const fetchMaterialsBySlug = async () => {
       setIsLoading(true)
       try {
+        // 1. Cek status user login & status is_premium dari tabel profiles
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('is_premium')
+            .eq('id', user.id)
+            .single()
+          
+          if (profileData && isMounted) {
+            setIsPremium(!!profileData.is_premium)
+          }
+        }
+
+        // 2. Ambil ID subject berdasarkan slug
         const { data: subjectData, error: subjectError } = await supabase
           .from('subjects')
           .select('id')
@@ -48,6 +69,7 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
           return
         }
 
+        // 3. Ambil data materials beserta sub_materials (pastikan is_free ikut diselect)
         const { data, error } = await supabase
           .from('materials')
           .select(`
@@ -57,7 +79,8 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
               id,
               title,
               content,
-              order_index
+              order_index,
+              is_free
             )
           `)
           .eq('subject_id', subjectData.id)
@@ -86,10 +109,22 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
     return () => {
       isMounted = false
     }
-  }, [slug])
+  }, [slug, supabase])
 
   const toggleMaterial = (materialId: string) => {
     setOpenMaterialId(openMaterialId === materialId ? null : materialId)
+  }
+
+  // Handler saat sub-materi diklik di sidebar
+  const handleSubMaterialClick = (sub: SubMaterial) => {
+    // Jika sub-materi gratis ATAU user sudah premium, izinkan buka materi
+    if (sub.is_free || isPremium) {
+      setActiveSubMaterial(sub)
+      if (window.innerWidth < 1024) setSidebarOpen(false)
+    } else {
+      // Jika terkunci, tampilkan modal langganan WhatsApp
+      setShowModal(true)
+    }
   }
 
   const filteredMaterials = materials.filter((material) => {
@@ -99,6 +134,11 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
     )
     return matchesChapter || matchesSub
   })
+
+  // Kontak WhatsApp Admin (Ganti dengan nomor aslimu)
+  const adminWhatsAppNumber = "6281234567890" 
+  const messageText = encodeURIComponent("Halo Admin, saya ingin berlangganan akun Premium Platform Belajar untuk membuka semua akses materi dan modul pembelajaran.")
+  const whatsappUrl = `https://wa.me/${adminWhatsAppNumber}?text=${messageText}`
 
   return (
     <div className="flex h-[calc(100vh-4rem)] bg-slate-50 overflow-hidden relative font-sans">
@@ -158,7 +198,7 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
                     isOpen ? 'border-blue-200 shadow-md bg-blue-50/10' : 'border-slate-200/80 hover:border-slate-300 bg-white shadow-sm'
                   }`}
                 >
-                  <div className="flex items-center justify-between p-3.5 bg-linear-to-r from-slate-50/50 to-white">
+                  <div className="flex items-center justify-between p-3.5 bg-gradient-to-r from-slate-50/50 to-white">
                     <span className="font-semibold text-xs text-slate-800 line-clamp-2 pr-2 leading-relaxed">
                       {material.title}
                     </span>
@@ -179,20 +219,25 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
                       {material.sub_materials?.length > 0 ? (
                         material.sub_materials.map((sub) => {
                           const isActive = activeSubMaterial?.id === sub.id
+                          const isAccessible = sub.is_free || isPremium
+
                           return (
                             <button
                               key={sub.id}
-                              onClick={() => {
-                                setActiveSubMaterial(sub)
-                                if (window.innerWidth < 1024) setSidebarOpen(false)
-                              }}
+                              onClick={() => handleSubMaterialClick(sub)}
                               className={`w-full text-left px-3 py-2.5 rounded-xl text-xs transition-all duration-150 flex items-center justify-between group ${
                                 isActive
                                   ? 'bg-blue-600 text-white font-medium shadow-md shadow-blue-500/20'
-                                  : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
+                                  : isAccessible 
+                                    ? 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
+                                    : 'text-slate-400 hover:bg-slate-50 bg-slate-50/50'
                               }`}
                             >
-                              <span className="line-clamp-1 pr-2">{sub.title}</span>
+                              <div className="flex items-center gap-2 pr-2 overflow-hidden">
+                                {!isAccessible && <Lock className="w-3.5 h-3.5 shrink-0 text-amber-500" />}
+                                <span className="line-clamp-1">{sub.title}</span>
+                              </div>
+
                               <span
                                 className={`w-1.5 h-1.5 rounded-full shrink-0 transition-all ${
                                   isActive ? 'bg-white' : 'bg-transparent group-hover:bg-slate-300'
@@ -258,9 +303,20 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
             ) : activeSubMaterial ? (
               <div className="space-y-8">
                 <div className="border-b border-slate-100 pb-6 text-center">
-                  <span className="inline-block px-3 py-1 bg-blue-50 text-blue-600 font-semibold text-xs rounded-full mb-3 uppercase tracking-wider">
-                    Modul Pembelajaran
-                  </span>
+                  <div className="flex items-center justify-center gap-2 mb-3">
+                    <span className="inline-block px-3 py-1 bg-blue-50 text-blue-600 font-semibold text-xs rounded-full uppercase tracking-wider">
+                      Modul Pembelajaran
+                    </span>
+                    {activeSubMaterial.is_free ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-extrabold rounded-full">
+                        <CheckCircle2 className="w-3 h-3" /> Gratis
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 text-[10px] font-extrabold rounded-full">
+                        <Lock className="w-3 h-3" /> Premium
+                      </span>
+                    )}
+                  </div>
                   <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">
                     {activeSubMaterial.title}
                   </h1>
@@ -291,6 +347,61 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
           </div>
         </div>
       </main>
+
+      {/* ================= MODAL POP-UP LANGGANAN WHATSAPP ================= */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative border border-gray-100 text-center overflow-hidden">
+            
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100/60 rounded-full blur-2xl pointer-events-none" />
+
+            <button 
+              onClick={() => setShowModal(false)}
+              className="absolute top-4 right-4 w-9 h-9 bg-gray-100 hover:bg-gray-200 text-gray-500 rounded-full flex items-center justify-center transition cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="w-16 h-16 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-blue-200">
+              <Lock className="w-8 h-8" />
+            </div>
+
+            <div className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 text-[10px] font-extrabold px-3 py-1 rounded-full border border-blue-100 mb-3">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Konten Khusus Premium</span>
+            </div>
+
+            <h3 className="text-xl font-black text-slate-900 tracking-tight">
+              Akses Terbatas ke Sub-Materi Ini
+            </h3>
+
+            <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+              Materi dan pembahasan mendalam ini hanya terbuka untuk akun yang telah berlangganan paket Premium. Hubungi admin untuk upgrade sekarang!
+            </p>
+
+            <div className="mt-8 flex flex-col gap-3">
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-4 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-emerald-200 transition flex items-center justify-center gap-2.5 cursor-pointer"
+              >
+                <MessageCircle className="w-5 h-5 fill-current" />
+                <span>Langganan via Chat WhatsApp</span>
+              </a>
+
+              <button
+                onClick={() => setShowModal(false)}
+                className="w-full py-3 px-6 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold text-xs rounded-2xl transition cursor-pointer"
+              >
+                Nanti Saja
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }

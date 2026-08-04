@@ -41,7 +41,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     await signOut()
-    router.push('/login')
+    router.push('/')
     router.refresh()
 }
 
@@ -54,17 +54,23 @@ return (
       <div className="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
         
         {/* Logo / Brand */}
-        <Link href="/dashboard" className="text-xl font-bold text-blue-600 flex items-center gap-2">
-          <span>AdaDeh</span>
+        <Link href="/" className="text-xl font-bold text-blue-600 flex items-center gap-2">
+          <span>TKA</span>
         </Link>
 
         {/* Menu Navigasi Desktop */}
         <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
           <Link 
+            href="/" 
+            className={`transition hover:text-blue-600 ${pathname === '/' ? 'text-blue-600 font-semibold' : ''}`}
+          >
+            Dashboard
+          </Link>
+          <Link 
             href="/mapel-tka" 
             className={`transition hover:text-blue-600 ${pathname === '/mapel-tka' ? 'text-blue-600 font-semibold' : ''}`}
           >
-            Dashboard
+            Mapel
           </Link>
           <Link 
             href="/history" 

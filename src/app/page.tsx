@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { createBrowserClient } from '@supabase/ssr'
 import {
   BookOpen,
   Sparkles,
@@ -32,6 +33,34 @@ export default function LandingPage() {
   const [state, setState] = useState<{ message?: string; success?: boolean }>({})
   const [isPending, setIsPending] = useState(false)
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+  
+  // State untuk melacak status user login
+  const [user, setUser] = useState<any>(null)
+  const [loadingUser, setLoadingUser] = useState(true)
+
+  // Inisialisasi client supabase browser
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+
+  useEffect(() => {
+    async function checkUser() {
+      const { data: { session } } = await supabase.auth.getSession()
+      setUser(session?.user || null)
+      setLoadingUser(false)
+    }
+    checkUser()
+  }, [supabase])
+
+  // Fungsi tombol utama navbar & card
+  const handleMainButtonClick = () => {
+    if (user) {
+      router.push('/mapel-tka')
+    } else {
+      router.push('/login') // Sesuaikan dengan halaman loginmu jika ada
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -55,7 +84,7 @@ export default function LandingPage() {
           message: 'Terima kasih! Kritik dan saran Anda berhasil dikirim.',
           success: true,
         })
-          ; (e.target as HTMLFormElement).reset()
+        ; (e.target as HTMLFormElement).reset()
       } else {
         throw new Error(data.message || 'Gagal mengirim pesan.')
       }
@@ -115,13 +144,14 @@ export default function LandingPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <a
-            href="#modul"
-            className="flex items-center gap-2 text-xs font-extrabold text-white bg-purple-600 hover:bg-purple-700 px-5 py-3 rounded-2xl shadow-md shadow-purple-200 transition"
+          <button
+            onClick={handleMainButtonClick}
+            disabled={loadingUser}
+            className="flex items-center gap-2 text-xs font-extrabold text-white bg-purple-600 hover:bg-purple-700 px-5 py-3 rounded-2xl shadow-md shadow-purple-200 transition cursor-pointer disabled:opacity-50"
           >
-            <span>Mulai Belajar</span>
+            <span>{user ? "Mulai Belajar" : "Login / Register"}</span>
             <ArrowRight className="w-4 h-4" />
-          </a>
+          </button>
         </div>
       </nav>
 
@@ -184,7 +214,7 @@ export default function LandingPage() {
 
             {/* Card 2: UTAMA - Latihan TKA (Tengah - Fokus Utama) */}
             <div
-              onClick={() => router.push('/mapel-tka')}
+              onClick={handleMainButtonClick}
               className="bg-white rounded-3xl p-8 border-2 border-purple-500 shadow-2xl shadow-purple-200/50 hover:shadow-3xl hover:scale-[1.03] transition-all cursor-pointer flex flex-col justify-between text-left group relative overflow-hidden h-72"
             >
               <div className="absolute top-4 right-4 bg-purple-600 text-white text-[10px] font-extrabold px-3.5 py-1 rounded-full shadow-md">
@@ -206,7 +236,7 @@ export default function LandingPage() {
               </div>
 
               <div className="pt-4 border-t border-gray-100 flex items-center justify-between text-xs font-bold text-purple-600 group-hover:translate-x-1 transition-transform">
-                <span>Mulai Belajar Sekarang</span>
+                <span>{user ? "Mulai Belajar Sekarang" : "Login untuk Akses"}</span>
                 <ArrowRight className="w-4 h-4" />
               </div>
             </div>
@@ -224,7 +254,7 @@ export default function LandingPage() {
 
           </div>
 
-          {/* Tampilan Mobile (Swiper Slider Responsif - Fokus Default ke TKA di Tengah) */}
+          {/* Tampilan Mobile (Swiper Slider Responsif) */}
           <div className="block md:hidden w-full pb-6">
             <Swiper
               modules={[Pagination]}
@@ -248,10 +278,10 @@ export default function LandingPage() {
                 </div>
               </SwiperSlide>
 
-              {/* Slide 1: UTAMA - Latihan TKA (Diam di Tengah Saat Pertama Dibuka) */}
+              {/* Slide 1: UTAMA - Latihan TKA */}
               <SwiperSlide>
                 <div
-                  onClick={() => router.push('/mapel-tka')}
+                  onClick={handleMainButtonClick}
                   className="bg-white rounded-3xl p-6 border-2 border-purple-500 shadow-2xl shadow-purple-100/50 cursor-pointer flex flex-col justify-between text-left relative overflow-hidden h-64"
                 >
                   <div className="absolute top-4 right-4 bg-purple-600 text-white text-[10px] font-extrabold px-3 py-1 rounded-full shadow-sm">
@@ -273,7 +303,7 @@ export default function LandingPage() {
                   </div>
 
                   <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-xs font-bold text-purple-600">
-                    <span>Mulai Belajar</span>
+                    <span>{user ? "Mulai Belajar" : "Login untuk Akses"}</span>
                     <ArrowRight className="w-4 h-4" />
                   </div>
                 </div>

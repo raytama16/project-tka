@@ -23,7 +23,7 @@ export default function LoginPage() {
     if (error) {
       setError(error.message)
     } else {
-      router.push('/dashboard') // Diubah ke dashboard
+      router.push('/') // Diubah ke dashboard
       router.refresh()
     }
 
