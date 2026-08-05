@@ -1,11 +1,40 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import remarkGfm from 'remark-gfm'
+import mermaid from 'mermaid'
 import 'katex/dist/katex.min.css'
+
+// Inisialisasi awal Mermaid di sisi client
+if (typeof window !== 'undefined') {
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    securityLevel: 'loose',
+  })
+}
+
+// Komponen helper khusus untuk merender blok Mermaid
+function MermaidBlock({ chart }: { chart: string }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (containerRef.current) {
+      mermaid.run({
+        nodes: [containerRef.current],
+      }).catch((err) => console.error('Mermaid parsing error:', err))
+    }
+  }, [chart])
+
+  return (
+    <div ref={containerRef} className="mermaid flex justify-center my-4 overflow-x-auto">
+      {chart}
+    </div>
+  )
+}
 
 export default function MathText({ content, inline = false }: { content: string; inline?: boolean }) {
   if (!content) return null
@@ -35,16 +64,28 @@ export default function MathText({ content, inline = false }: { content: string;
           th: ({ node, ...props }) => <th className="border border-gray-300 px-4 py-2 font-semibold text-gray-900" {...props} />,
           td: ({ node, ...props }) => <td className="border border-gray-300 px-4 py-2 text-gray-700" {...props} />,
 
-          // Styling custom untuk blok kode / diagram ASCII agar rata (monospace)
-          pre: ({ node, ...props }) => (
-            <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-4 font-mono text-sm leading-tight" {...props} />
-          ),
-          code: ({ node, inline, ...props }: any) => 
-            inline ? (
-              <code className="bg-gray-100 text-red-600 px-1 py-0.5 rounded text-sm font-mono" {...props} />
+          // Handling blok kode, pre, dan deteksi bahasa 'mermaid'
+          code: ({ node, inline, className, children, ...props }: any) => {
+            const match = /language-mermaid/.exec(className || '')
+            const codeString = String(children).replace(/\n$/, '')
+
+            // Jika block code menggunakan bahasa mermaid
+            if (!inline && match) {
+              return <MermaidBlock chart={codeString} />
+            }
+
+            return inline ? (
+              <code className="bg-gray-100 text-red-600 px-1 py-0.5 rounded text-sm font-mono" {...props}>
+                {children}
+              </code>
             ) : (
-              <code className="font-mono text-sm" {...props} />
-            ),
+              <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-4 font-mono text-sm leading-tight">
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              </pre>
+            )
+          },
         }}
       >
         {content}
