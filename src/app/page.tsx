@@ -56,7 +56,7 @@ export default function LandingPage() {
   // Fungsi tombol utama navbar & card
   const handleMainButtonClick = () => {
     if (user) {
-      router.push('/mapel-tka')
+      router.push('/#modul')
     } else {
       router.push('/login') // Sesuaikan dengan halaman loginmu jika ada
     }
@@ -122,12 +122,12 @@ export default function LandingPage() {
   ]
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-indigo-50/30 flex flex-col justify-between selection:bg-purple-600 selection:text-white font-sans text-gray-900">
+    <main className="min-h-screen bg-linear-to-b from-slate-50 via-white to-indigo-50/30 flex flex-col justify-between selection:bg-purple-600 selection:text-white font-sans text-gray-900">
 
       {/* ================= TOP NAVBAR ================= */}
       <nav className="w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 bg-gradient-to-tr from-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-purple-200">
+          <div className="w-11 h-11 bg-linear-to-tr from-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-purple-200">
             <GraduationCap className="w-6 h-6" />
           </div>
           <div>
@@ -166,7 +166,7 @@ export default function LandingPage() {
 
         {/* Judul Utama */}
         <h1 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tight max-w-4xl leading-[1.15]">
-          Persiapkan Ujian Terbaikmu Bersama <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600">Sistem Evaluasi Terpadu</span>
+          Persiapkan Ujian Terbaikmu Bersama <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-600 via-indigo-600 to-blue-600">Sistem Evaluasi Terpadu</span>
         </h1>
 
         {/* Deskripsi Web */}

@@ -90,7 +90,7 @@ export default function AccountPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-indigo-50/30 flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-linear-to-b from-slate-50 via-white to-indigo-50/30 flex flex-col items-center justify-center p-4">
         <div className="w-12 h-12 bg-purple-600 rounded-2xl animate-spin flex items-center justify-center text-white shadow-lg shadow-purple-200 mb-4">
           <Sparkles className="w-6 h-6 animate-pulse" />
         </div>
@@ -100,7 +100,7 @@ export default function AccountPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-indigo-50/30 py-12 px-4 sm:px-6 font-sans text-gray-900 selection:bg-purple-600 selection:text-white">
+    <main className="min-h-screen bg-linear-to-b from-slate-50 via-white to-indigo-50/30 py-12 px-4 sm:px-6 font-sans text-gray-900 selection:bg-purple-600 selection:text-white">
       <div className="max-w-3xl mx-auto">
         
         {/* Top Navigation / Back Button */}
@@ -130,7 +130,7 @@ export default function AccountPage() {
 
           {/* Header Section */}
           <div className="flex items-start gap-4 mb-8 pb-6 border-b border-gray-100">
-            <div className="w-14 h-14 bg-gradient-to-tr from-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-purple-200 shrink-0">
+            <div className="w-14 h-14 bg-linear-to-tr from-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-purple-200 shrink-0">
               <User className="w-7 h-7" />
             </div>
             <div>

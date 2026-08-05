@@ -89,7 +89,7 @@ return (
             <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
               {userEmail ? userEmail.charAt(0).toUpperCase() : 'U'}
             </div>
-            <span className="max-w-[120px] truncate">{userEmail || 'Akun'}</span>
+            <span className="max-w-30 truncate">{userEmail || 'Akun'}</span>
             <svg className={`w-4 h-4 transition-transform ${isAccountDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
             </svg>

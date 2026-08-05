@@ -143,7 +143,7 @@ export default function SubjectDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-slate-50 to-indigo-50/20 gap-3">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-linear-to-b from-slate-50 to-indigo-50/20 gap-3">
         <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg animate-bounce">
           <Sparkles className="w-6 h-6 animate-pulse" />
         </div>
@@ -153,7 +153,7 @@ export default function SubjectDetailPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-indigo-50/30 flex items-center justify-center p-4 sm:p-6 md:p-12 relative font-sans text-gray-900 selection:bg-blue-600 selection:text-white">
+    <main className="min-h-screen bg-linear-to-b from-slate-50 via-white to-indigo-50/30 flex items-center justify-center p-4 sm:p-6 md:p-12 relative font-sans text-gray-900 selection:bg-blue-600 selection:text-white">
       
       {/* ================= MODAL KONFIRMASI RESET HISTORY EXAM ================= */}
       {showExamConfirm && (
@@ -212,7 +212,7 @@ export default function SubjectDetailPage() {
               <X className="w-5 h-5" />
             </button>
 
-            <div className="w-16 h-16 bg-gradient-to-tr from-amber-500 to-orange-500 text-white rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-amber-200">
+            <div className="w-16 h-16 bg-linear-to-tr from-amber-500 to-orange-500 text-white rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-amber-200">
               <Lock className="w-8 h-8" />
             </div>
 
@@ -278,7 +278,7 @@ export default function SubjectDetailPage() {
           </div>
 
           {isPremium ? (
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-extrabold px-4 py-2.5 rounded-2xl shadow-md flex items-center gap-2 shrink-0 self-start sm:self-center">
+            <div className="bg-linear-to-r from-blue-600 to-indigo-600 text-white text-xs font-extrabold px-4 py-2.5 rounded-2xl shadow-md flex items-center gap-2 shrink-0 self-start sm:self-center">
               <Sparkles className="w-4 h-4" />
               <span>Akun Premium Aktif</span>
             </div>
@@ -296,7 +296,7 @@ export default function SubjectDetailPage() {
           {/* 1. Modul (Materi) */}
           <Link
             href={`/subjects/${slug}/materials`}
-            className="bg-gradient-to-b from-blue-50/60 to-white hover:from-blue-50 hover:to-blue-50/30 border border-blue-100 hover:border-blue-300 p-6 sm:p-7 rounded-3xl transition-all duration-300 flex flex-col justify-between group shadow-sm hover:shadow-xl hover:shadow-blue-100/50"
+            className="bg-linear-to-b from-blue-50/60 to-white hover:from-blue-50 hover:to-blue-50/30 border border-blue-100 hover:border-blue-300 p-6 sm:p-7 rounded-3xl transition-all duration-300 flex flex-col justify-between group shadow-sm hover:shadow-xl hover:shadow-blue-100/50"
           >
             <div>
               <div className="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-sm">
@@ -324,7 +324,7 @@ export default function SubjectDetailPage() {
           {/* 2. Latihan Soal (Kuis) */}
           <Link
             href={`/subjects/${slug}/practice`}
-            className="bg-gradient-to-b from-emerald-50/60 to-white hover:from-emerald-50 hover:to-emerald-50/30 border border-emerald-100 hover:border-emerald-300 p-6 sm:p-7 rounded-3xl transition-all duration-300 flex flex-col justify-between group shadow-sm hover:shadow-xl hover:shadow-emerald-100/50"
+            className="bg-linear-to-b from-emerald-50/60 to-white hover:from-emerald-50 hover:to-emerald-50/30 border border-emerald-100 hover:border-emerald-300 p-6 sm:p-7 rounded-3xl transition-all duration-300 flex flex-col justify-between group shadow-sm hover:shadow-xl hover:shadow-emerald-100/50"
           >
             <div>
               <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 shadow-sm">
@@ -353,7 +353,7 @@ export default function SubjectDetailPage() {
           <Link
             href={`/subjects/${slug}/exam`}
             onClick={handleExamClick}
-            className={`bg-gradient-to-b ${isPremium ? 'from-amber-50/60 hover:from-amber-50 border-amber-100 hover:border-amber-300 hover:shadow-amber-100/50' : 'from-slate-50 hover:from-slate-100/80 border-slate-200/80'} to-white p-6 sm:p-7 rounded-3xl transition-all duration-300 flex flex-col justify-between group shadow-sm hover:shadow-xl relative overflow-hidden`}
+            className={`bg-linear-to-b ${isPremium ? 'from-amber-50/60 hover:from-amber-50 border-amber-100 hover:border-amber-300 hover:shadow-amber-100/50' : 'from-slate-50 hover:from-slate-100/80 border-slate-200/80'} to-white p-6 sm:p-7 rounded-3xl transition-all duration-300 flex flex-col justify-between group shadow-sm hover:shadow-xl relative overflow-hidden`}
           >
             {checkingExam && (
               <div className="absolute inset-0 bg-white/80 backdrop-blur-xs rounded-3xl flex flex-col items-center justify-center z-20 gap-2">
