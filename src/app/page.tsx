@@ -56,6 +56,14 @@ export default function LandingPage() {
   // Fungsi tombol utama navbar & card
   const handleMainButtonClick = () => {
     if (user) {
+      router.push('/mapel-tka')
+    } else {
+      router.push('/login') // Sesuaikan dengan halaman loginmu jika ada
+    }
+  }
+
+  const handleMainButtonClick2 = () => {
+    if (user) {
       router.push('/#modul')
     } else {
       router.push('/login') // Sesuaikan dengan halaman loginmu jika ada
@@ -145,7 +153,7 @@ export default function LandingPage() {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={handleMainButtonClick}
+            onClick={handleMainButtonClick2}
             disabled={loadingUser}
             className="flex items-center gap-2 text-xs font-extrabold text-white bg-purple-600 hover:bg-purple-700 px-5 py-3 rounded-2xl shadow-md shadow-purple-200 transition cursor-pointer disabled:opacity-50"
           >
