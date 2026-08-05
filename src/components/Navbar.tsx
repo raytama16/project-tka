@@ -145,11 +145,18 @@ return (
             <p className="text-sm font-semibold text-gray-800 truncate">{userEmail}</p>
           </div>
           <Link
-            href="/dashboard"
+            href="/"
             onClick={() => setIsMobileMenuOpen(false)}
             className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition"
           >
             Dashboard
+          </Link>
+          <Link
+            href="/mapel-tka"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition"
+          >
+          Mapel
           </Link>
           <Link
             href="/history"
