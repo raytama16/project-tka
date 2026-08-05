@@ -36,6 +36,61 @@ function MermaidBlock({ chart }: { chart: string }) {
   )
 }
 
+// Koleksi Komponen SVG Lingkaran Venn Asli
+function VennSvgRenderer({ type }: { type: string }) {
+  switch (type.trim().toLowerCase()) {
+    case 'berpotongan':
+      return (
+        <div className="flex justify-center my-4">
+          <svg width="300" height="180" viewBox="0 0 300 180" className="border-2 border-gray-300 rounded-lg bg-white shadow-sm">
+            <text x="15" y="25" className="text-sm font-bold fill-gray-800">U</text>
+            <circle cx="110" cy="90" r="55" className="fill-blue-400 fill-opacity-30 stroke-blue-600 stroke-2" />
+            <text x="80" y="95" className="text-sm font-bold fill-blue-900">A</text>
+            <circle cx="190" cy="90" r="55" className="fill-red-400 fill-opacity-30 stroke-red-600 stroke-2" />
+            <text x="210" y="95" className="text-sm font-bold fill-red-900">B</text>
+            <text x="135" y="95" className="text-xs font-semibold fill-gray-700">A ∩ B</text>
+          </svg>
+        </div>
+      )
+    case 'saling-lepas':
+      return (
+        <div className="flex justify-center my-4">
+          <svg width="300" height="180" viewBox="0 0 300 180" className="border-2 border-gray-300 rounded-lg bg-white shadow-sm">
+            <text x="15" y="25" className="text-sm font-bold fill-gray-800">U</text>
+            <circle cx="95" cy="90" r="50" className="fill-blue-400 fill-opacity-30 stroke-blue-600 stroke-2" />
+            <text x="85" y="95" className="text-sm font-bold fill-blue-900">A</text>
+            <circle cx="205" cy="90" r="50" className="fill-red-400 fill-opacity-30 stroke-red-600 stroke-2" />
+            <text x="195" y="95" className="text-sm font-bold fill-red-900">B</text>
+          </svg>
+        </div>
+      )
+    case 'himpunan-bagian':
+      return (
+        <div className="flex justify-center my-4">
+          <svg width="300" height="180" viewBox="0 0 300 180" className="border-2 border-gray-300 rounded-lg bg-white shadow-sm">
+            <text x="15" y="25" className="text-sm font-bold fill-gray-800">U</text>
+            <circle cx="150" cy="90" r="70" className="fill-red-400 fill-opacity-20 stroke-red-600 stroke-2" />
+            <text x="200" y="55" className="text-sm font-bold fill-red-900">B</text>
+            <circle cx="135" cy="95" r="40" className="fill-blue-400 fill-opacity-40 stroke-blue-600 stroke-2" />
+            <text x="125" y="100" className="text-sm font-bold fill-blue-900">A</text>
+          </svg>
+        </div>
+      )
+    case 'himpunan-sama':
+      return (
+        <div className="flex justify-center my-4">
+          <svg width="300" height="180" viewBox="0 0 300 180" className="border-2 border-gray-300 rounded-lg bg-white shadow-sm">
+            <text x="15" y="25" className="text-sm font-bold fill-gray-800">U</text>
+            <circle cx="150" cy="90" r="55" className="fill-purple-400 fill-opacity-30 stroke-purple-600 stroke-2" />
+            <text x="135" y="95" className="text-sm font-bold fill-purple-900">A = B</text>
+          </svg>
+        </div>
+      )
+    default:
+      return null
+  }
+}
+
 export default function MathText({ content, inline = false }: { content: string; inline?: boolean }) {
   if (!content) return null
 
@@ -54,7 +109,6 @@ export default function MathText({ content, inline = false }: { content: string;
           li: ({ node, ...props }) => <li className="text-gray-700" {...props} />,
           strong: ({ node, ...props }) => <strong className="font-bold text-gray-900" {...props} />,
           
-          // Styling custom untuk tabel agar rapi
           table: ({ node, ...props }) => (
             <div className="overflow-x-auto my-4">
               <table className="min-w-full border-collapse border border-gray-300 text-left text-sm" {...props} />
@@ -64,13 +118,16 @@ export default function MathText({ content, inline = false }: { content: string;
           th: ({ node, ...props }) => <th className="border border-gray-300 px-4 py-2 font-semibold text-gray-900" {...props} />,
           td: ({ node, ...props }) => <td className="border border-gray-300 px-4 py-2 text-gray-700" {...props} />,
 
-          // Handling blok kode, pre, dan deteksi bahasa 'mermaid'
           code: ({ node, inline, className, children, ...props }: any) => {
-            const match = /language-mermaid/.exec(className || '')
             const codeString = String(children).replace(/\n$/, '')
+            const mermaidMatch = /language-mermaid/.exec(className || '')
+            const vennMatch = /language-venn/.exec(className || '')
 
-            // Jika block code menggunakan bahasa mermaid
-            if (!inline && match) {
+            if (!inline && vennMatch) {
+              return <VennSvgRenderer type={codeString} />
+            }
+
+            if (!inline && mermaidMatch) {
               return <MermaidBlock chart={codeString} />
             }
 
