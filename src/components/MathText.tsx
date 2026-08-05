@@ -4,6 +4,7 @@ import React from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
+import remarkGfm from 'remark-gfm' // 1. Import remarkGfm buat ngebaca tabel
 import 'katex/dist/katex.min.css'
 
 export default function MathText({ content, inline = false }: { content: string; inline?: boolean }) {
@@ -12,7 +13,7 @@ export default function MathText({ content, inline = false }: { content: string;
   return (
     <div className={`prose prose-slate max-w-none ${inline ? 'inline-block [&>p]:m-0' : 'leading-relaxed'}`}>
       <ReactMarkdown
-        remarkPlugins={[remarkMath]}
+        remarkPlugins={[remarkMath, remarkGfm]} // 2. Masukin remarkGfm ke sini
         rehypePlugins={[rehypeKatex]}
         components={{
           h1: ({ node, ...props }) => <h1 className="text-2xl font-bold mt-6 mb-3 text-gray-900" {...props} />,
@@ -23,6 +24,16 @@ export default function MathText({ content, inline = false }: { content: string;
           ol: ({ node, ...props }) => <ol className="list-decimal pl-5 mb-4 space-y-1 text-gray-700" {...props} />,
           li: ({ node, ...props }) => <li className="text-gray-700" {...props} />,
           strong: ({ node, ...props }) => <strong className="font-bold text-gray-900" {...props} />,
+          
+          // 3. Tambahan custom styling untuk tabel agar rapi dan tidak berantakan
+          table: ({ node, ...props }) => (
+            <div className="overflow-x-auto my-4">
+              <table className="min-w-full border-collapse border border-gray-300 text-left text-sm" {...props} />
+            </div>
+          ),
+          thead: ({ node, ...props }) => <thead className="bg-gray-100" {...props} />,
+          th: ({ node, ...props }) => <th className="border border-gray-300 px-4 py-2 font-semibold text-gray-900" {...props} />,
+          td: ({ node, ...props }) => <td className="border border-gray-300 px-4 py-2 text-gray-700" {...props} />,
         }}
       >
         {content}
