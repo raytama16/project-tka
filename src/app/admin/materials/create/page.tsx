@@ -67,7 +67,7 @@ export default function CreateMaterialPage() {
       setTitle('')
       setContent('')
       setTimeout(() => {
-        router.push('/dashboard')
+        router.push('/admin/materials')
       }, 1500)
     }
   }
