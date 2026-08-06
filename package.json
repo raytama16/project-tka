@@ -11,6 +11,8 @@
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.111.0",
+    "d3": "^7.9.0",
+    "function-plot": "^1.25.4",
     "katex": "^0.18.1",
     "lucide-react": "^1.11.0",
     "mermaid": "^11.16.1",

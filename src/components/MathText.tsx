@@ -6,6 +6,7 @@ import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import remarkGfm from 'remark-gfm'
 import mermaid from 'mermaid'
+import functionPlot from 'function-plot'
 import 'katex/dist/katex.min.css'
 
 // Inisialisasi awal Mermaid di sisi client
@@ -32,6 +33,38 @@ function MermaidBlock({ chart }: { chart: string }) {
   return (
     <div ref={containerRef} className="mermaid flex justify-center my-4 overflow-x-auto">
       {chart}
+    </div>
+  )
+}
+
+// Komponen helper khusus untuk merender Grafik Fungsi menggunakan function-plot
+function FunctionPlotBlock({ fn }: { fn: string }) {
+  const rootEl = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (rootEl.current) {
+      try {
+        functionPlot({
+          target: rootEl.current,
+          width: 500,
+          height: 300,
+          grid: true,
+          data: [
+            {
+              fn: fn.trim(),
+              color: 'rgb(37, 99, 235)', // Warna biru Tailwind (blue-600)
+            },
+          ],
+        })
+      } catch (err) {
+        console.error('Function plot error:', err)
+      }
+    }
+  }, [fn])
+
+  return (
+    <div className="flex justify-center my-4 overflow-x-auto">
+      <div ref={rootEl} className="border-2 border-gray-300 rounded-lg bg-white shadow-sm p-2" />
     </div>
   )
 }
@@ -86,21 +119,15 @@ function VennSvgRenderer({ type }: { type: string }) {
           </svg>
         </div>
       )
-      // Tambahkan kode ini di dalam switch-case fungsi VennSvgRenderer
     case 'tiga-himpunan':
       return (
         <div className="flex justify-center my-4">
           <svg width="320" height="200" viewBox="0 0 320 200" className="border-2 border-gray-300 rounded-lg bg-white shadow-sm">
             <text x="15" y="25" className="text-sm font-bold fill-gray-800">U</text>
-            {/* Lingkaran A (Kiri Atas) */}
             <circle cx="120" cy="85" r="55" className="fill-blue-400 fill-opacity-20 stroke-blue-600 stroke-2" />
             <text x="90" y="65" className="text-sm font-bold fill-blue-900">A</text>
-            
-            {/* Lingkaran B (Kanan Atas) */}
             <circle cx="200" cy="85" r="55" className="fill-red-400 fill-opacity-20 stroke-red-600 stroke-2" />
             <text x="220" y="65" className="text-sm font-bold fill-red-900">B</text>
-            
-            {/* Lingkaran C (Bawah Tengah) */}
             <circle cx="160" cy="130" r="55" className="fill-green-400 fill-opacity-20 stroke-green-600 stroke-2" />
             <text x="155" y="170" className="text-sm font-bold fill-green-900">C</text>
           </svg>
@@ -142,6 +169,7 @@ export default function MathText({ content, inline = false }: { content: string;
             const codeString = String(children).replace(/\n$/, '')
             const mermaidMatch = /language-mermaid/.exec(className || '')
             const vennMatch = /language-venn/.exec(className || '')
+            const functionPlotMatch = /language-function-plot/.exec(className || '')
 
             if (!inline && vennMatch) {
               return <VennSvgRenderer type={codeString} />
@@ -149,6 +177,10 @@ export default function MathText({ content, inline = false }: { content: string;
 
             if (!inline && mermaidMatch) {
               return <MermaidBlock chart={codeString} />
+            }
+
+            if (!inline && functionPlotMatch) {
+              return <FunctionPlotBlock fn={codeString} />
             }
 
             return inline ? (
