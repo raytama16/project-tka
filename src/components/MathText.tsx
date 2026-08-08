@@ -144,7 +144,11 @@ export default function MathText({ content, inline = false }: { content: string;
   // PERBAIKAN UTAMA: Normalisasi string agar \n terbaca sebagai baris baru 
   // dan memperbaiki masalah escape backslash agar KaTeX / Markdown tidak rusak.
   const processedContent = content
-    .replace(/\\n/g, '\n') // Mengubah teks literal "\n" dari database menjadi baris baru asli
+    .replace(/\\n/g, '\n')       // Ubah \n literal jadi enter biasa
+    .replace(/\n(?=\d+\.)/g, '\n\n')
+    .replace(/mid/g, '\\mid')
+    .replace(/le/g, '\\le')
+    .replace(/text/g, '\\text')
 
   return (
     <div className={`prose prose-slate max-w-none whitespace-pre-line ${inline ? 'inline-block [&>p]:m-0' : 'leading-relaxed'}`}>
