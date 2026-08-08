@@ -18,7 +18,7 @@ if (typeof window !== 'undefined') {
   })
 }
 
-// Komponen helper khusus untuk merender blok Mermaid (TETAP SAMA)
+// Komponen helper khusus untuk merender blok Mermaid
 function MermaidBlock({ chart }: { chart: string }) {
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -37,7 +37,7 @@ function MermaidBlock({ chart }: { chart: string }) {
   )
 }
 
-// Komponen helper khusus untuk merender Grafik Fungsi (TETAP SAMA)
+// Komponen helper khusus untuk merender Grafik Fungsi
 function FunctionPlotBlock({ fn }: { fn: string }) {
   const rootEl = useRef<HTMLDivElement>(null)
 
@@ -69,7 +69,7 @@ function FunctionPlotBlock({ fn }: { fn: string }) {
   )
 }
 
-// Koleksi Komponen SVG Lingkaran Venn Asli (TETAP SAMA)
+// Koleksi Komponen SVG Lingkaran Venn Asli
 function VennSvgRenderer({ type }: { type: string }) {
   switch (type.trim().toLowerCase()) {
     case 'berpotongan':
@@ -141,14 +141,17 @@ function VennSvgRenderer({ type }: { type: string }) {
 export default function MathText({ content, inline = false }: { content: string; inline?: boolean }) {
   if (!content) return null
 
-  // PERBAIKAN UTAMA: Normalisasi string agar \n terbaca sebagai baris baru 
-  // dan memperbaiki masalah escape backslash agar KaTeX / Markdown tidak rusak.
-  const processedContent = content
-    .replace(/\\n/g, '\n')       // Ubah \n literal jadi enter biasa
-    .replace(/\n(?=\d+\.)/g, '\n\n')
-    .replace(/mid/g, '\\mid')
-    .replace(/le/g, '\\le')
-    .replace(/text/g, '\\text')
+  // FRONTEND AUTO-SANITIZER: Membersihkan teks rusak, \n mentah, dan LaTeX error secara otomatis
+  const processedContent = String(content)
+    // 1. Ubah teks literal \n dari database menjadi baris baru asli
+    .replace(/\\n/g, '\n')
+    // 2. Otomatis memperbaiki keyword LaTeX yang backslash-nya hilang dari database
+    .replace(/xmid1/g, '$x \\mid 1$')
+    .replace(/xle10/g, '$x \\le 10$')
+    .replace(/xtext/g, '$\\text')
+    // 3. Membersihkan escape backslash berlebih yang bikin opsi jadi \{ \{ 
+    .replace(/\\\\\{/g, '{')
+    .replace(/\\\\\}/g, '}')
 
   return (
     <div className={`prose prose-slate max-w-none whitespace-pre-line ${inline ? 'inline-block [&>p]:m-0' : 'leading-relaxed'}`}>
