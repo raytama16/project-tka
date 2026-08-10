@@ -5,271 +5,1106 @@ import { useEffect, useState, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { InlineMath } from 'react-katex'
 
-export default function EditQuestionPage({ params }: { params: Promise<{ questionId: string }> }) {
+type QuestionType =
+    | 'multiple_choice'
+    | 'complex_multiple_choice'
+    | 'true_false_matrix'
+
+type OptionsObject = Record<string, string>
+
+type CorrectAnswerMatrix = Record<string, string>
+
+export default function EditQuestionPage({
+    params,
+}: {
+    params: Promise<{ questionId: string }>
+}) {
     const resolvedParams = use(params)
     const questionId = resolvedParams.questionId
-    
+
     const router = useRouter()
     const supabase = createClient()
 
-    const [chapterId, setChapterId] = useState('')
-    const [qText, setQText] = useState('')
-    const [qType, setQType] = useState<'multiple_choice' | 'complex_multiple_choice' | 'true_false_matrix'>('multiple_choice')
-    const [qExplanation, setQExplanation] = useState('')
-    const [loading, setLoading] = useState(true)
-    const [submitting, setSubmitting] = useState(false)
+    // ==============================
+    // STATE
+    // ==============================
 
-    const [optionsObj, setOptionsObj] = useState<Record<string, string>>({})
-    const [correctAnsMC, setCorrectAnsMC] = useState<string>('A')
-    const [correctAnsComplex, setCorrectAnsComplex] = useState<string[]>([])
-    const [correctAnsMatrix, setCorrectAnsMatrix] = useState<Record<string, string>>({})
+    const [chapterId, setChapterId] = useState<string>('')
+
+    const [qText, setQText] = useState<string>('')
+
+    const [qType, setQType] = useState<QuestionType>(
+        'multiple_choice'
+    )
+
+    const [qExplanation, setQExplanation] = useState<string>('')
+
+    const [optionsObj, setOptionsObj] = useState<OptionsObject>({})
+
+    const [correctAnsMC, setCorrectAnsMC] =
+        useState<string>('A')
+
+    const [correctAnsComplex, setCorrectAnsComplex] =
+        useState<string[]>([])
+
+    const [correctAnsMatrix, setCorrectAnsMatrix] =
+        useState<CorrectAnswerMatrix>({})
+
+    const [loading, setLoading] = useState<boolean>(true)
+
+    const [submitting, setSubmitting] =
+        useState<boolean>(false)
+
+    const [errorMessage, setErrorMessage] =
+        useState<string>('')
+
+
+    // ==============================
+    // LOAD DATA SOAL
+    // ==============================
 
     useEffect(() => {
+        let mounted = true
+
         const fetchQuestion = async () => {
-            const { data, error } = await supabase
-                .from('questions')
-                .select('*')
-                .eq('id', questionId)
-                .single()
+            try {
+                setLoading(true)
+                setErrorMessage('')
 
-            if (!error && data) {
-                setChapterId(data.chapter_id)
-                setQText(data.question_text)
-                setQType(data.question_type)
-                setQExplanation(data.explanation || '')
-                setOptionsObj(data.options || {})
+                const { data, error } = await supabase
+                    .from('questions')
+                    .select('*')
+                    .eq('id', questionId)
+                    .single()
 
-                if (data.question_type === 'multiple_choice') {
-                    setCorrectAnsMC(data.correct_answer || 'A')
-                } else if (data.question_type === 'complex_multiple_choice') {
-                    setCorrectAnsComplex(data.correct_answer || [])
-                } else if (data.question_type === 'true_false_matrix') {
-                    setCorrectAnsMatrix(data.correct_answer || {})
+                if (error) {
+                    console.error(
+                        'Error mengambil soal:',
+                        error
+                    )
+
+                    if (mounted) {
+                        setErrorMessage(
+                            'Data soal tidak ditemukan.'
+                        )
+                        setLoading(false)
+                    }
+
+                    return
+                }
+
+                if (!data) {
+                    if (mounted) {
+                        setErrorMessage(
+                            'Data soal tidak ditemukan.'
+                        )
+                        setLoading(false)
+                    }
+
+                    return
+                }
+
+                console.log(
+                    'Data soal yang berhasil diambil:',
+                    data
+                )
+
+                if (!mounted) return
+
+                // ==============================
+                // ISI DATA KE FORM
+                // ==============================
+
+                setChapterId(
+                    data.chapter_id
+                        ? String(data.chapter_id)
+                        : ''
+                )
+
+                setQText(
+                    data.question_text || ''
+                )
+
+                setQType(
+                    data.question_type ||
+                        'multiple_choice'
+                )
+
+                setQExplanation(
+                    data.explanation || ''
+                )
+
+                // ==============================
+                // OPTIONS
+                // ==============================
+
+                const loadedOptions =
+                    data.options &&
+                    typeof data.options === 'object'
+                        ? data.options
+                        : {}
+
+                setOptionsObj(loadedOptions)
+
+                // ==============================
+                // CORRECT ANSWER
+                // ==============================
+
+                if (
+                    data.question_type ===
+                    'multiple_choice'
+                ) {
+                    setCorrectAnsMC(
+                        typeof data.correct_answer ===
+                            'string'
+                            ? data.correct_answer
+                            : 'A'
+                    )
+                }
+
+                else if (
+                    data.question_type ===
+                    'complex_multiple_choice'
+                ) {
+                    setCorrectAnsComplex(
+                        Array.isArray(
+                            data.correct_answer
+                        )
+                            ? data.correct_answer
+                            : []
+                    )
+                }
+
+                else if (
+                    data.question_type ===
+                    'true_false_matrix'
+                ) {
+                    setCorrectAnsMatrix(
+                        data.correct_answer &&
+                            typeof data.correct_answer ===
+                                'object'
+                            ? data.correct_answer
+                            : {}
+                    )
+                }
+
+                setLoading(false)
+
+            } catch (err) {
+                console.error(
+                    'Unexpected error:',
+                    err
+                )
+
+                if (mounted) {
+                    setErrorMessage(
+                        'Terjadi kesalahan saat mengambil data soal.'
+                    )
+
+                    setLoading(false)
                 }
             }
-            setLoading(false)
         }
-        fetchQuestion()
-    }, [questionId, supabase])
 
-    const renderMathText = (text: string) => {
+        fetchQuestion()
+
+        return () => {
+            mounted = false
+        }
+
+    }, [questionId])
+
+
+    // ==============================
+    // RENDER MATH
+    // ==============================
+
+    const renderMathText = (
+        text: string
+    ) => {
         if (!text) return null
-        const parts = text.split(/(\$.*?\$)/g)
+
+        const parts =
+            text.split(/(\$.*?\$)/g)
+
         return (
             <span>
-                {parts.map((part, index) => {
-                    if (part.startsWith('$') && part.endsWith('$')) {
-                        const mathContent = part.slice(1, -1)
-                        return <InlineMath key={index} math={mathContent} />
+                {parts.map(
+                    (part, index) => {
+                        if (
+                            part.startsWith('$') &&
+                            part.endsWith('$')
+                        ) {
+                            const mathContent =
+                                part.slice(
+                                    1,
+                                    -1
+                                )
+
+                            return (
+                                <InlineMath
+                                    key={index}
+                                    math={
+                                        mathContent
+                                    }
+                                />
+                            )
+                        }
+
+                        return (
+                            <span key={index}>
+                                {part}
+                            </span>
+                        )
                     }
-                    return <span key={index}>{part}</span>
-                })}
+                )}
             </span>
         )
     }
 
+
+    // ==============================
+    // TAMBAH OPSI PILIHAN GANDA
+    // ==============================
+
     const addMcOption = () => {
-        const nextKey = String.fromCharCode(65 + Object.keys(optionsObj).length)
-        setOptionsObj(prev => ({ ...prev, [nextKey]: '' }))
+        const keys =
+            Object.keys(optionsObj)
+
+        const nextKey =
+            String.fromCharCode(
+                65 + keys.length
+            )
+
+        setOptionsObj(
+            prev => ({
+                ...prev,
+                [nextKey]: '',
+            })
+        )
     }
 
-    const removeMcOption = (key: string) => {
-        if (Object.keys(optionsObj).length <= 2) {
-            alert('Minimal 2 opsi!')
+
+    // ==============================
+    // HAPUS OPSI PILIHAN GANDA
+    // ==============================
+
+    const removeMcOption = (
+        key: string
+    ) => {
+        const keys =
+            Object.keys(optionsObj)
+
+        if (keys.length <= 2) {
+            alert(
+                'Minimal harus ada 2 opsi!'
+            )
             return
         }
-        const updated = { ...optionsObj }
+
+        const updated = {
+            ...optionsObj,
+        }
+
         delete updated[key]
+
         setOptionsObj(updated)
+
+        // Jika opsi yang dihapus adalah
+        // jawaban benar
+        if (correctAnsMC === key) {
+            const remainingKeys =
+                Object.keys(updated)
+
+            setCorrectAnsMC(
+                remainingKeys[0] || 'A'
+            )
+        }
+
+        // Hapus dari jawaban kompleks
+        setCorrectAnsComplex(
+            prev =>
+                prev.filter(
+                    item => item !== key
+                )
+        )
     }
+
+
+    // ==============================
+    // TAMBAH PERNYATAAN MATRIX
+    // ==============================
 
     const addMatrixStatement = () => {
-        const nextKey = `stmt_${Date.now()}`
-        setOptionsObj(prev => ({ ...prev, [nextKey]: '' }))
-        setCorrectAnsMatrix(prev => ({ ...prev, [nextKey]: 'Benar' }))
+        const nextKey =
+            `stmt_${Date.now()}`
+
+        setOptionsObj(
+            prev => ({
+                ...prev,
+                [nextKey]: '',
+            })
+        )
+
+        setCorrectAnsMatrix(
+            prev => ({
+                ...prev,
+                [nextKey]: 'Benar',
+            })
+        )
     }
 
-    const removeMatrixStatement = (key: string) => {
-        if (Object.keys(optionsObj).length <= 1) {
-            alert('Minimal 1 pernyataan!')
+
+    // ==============================
+    // HAPUS PERNYATAAN MATRIX
+    // ==============================
+
+    const removeMatrixStatement = (
+        key: string
+    ) => {
+        const keys =
+            Object.keys(optionsObj)
+
+        if (keys.length <= 1) {
+            alert(
+                'Minimal harus ada 1 pernyataan!'
+            )
             return
         }
-        const updated = { ...optionsObj }
+
+        const updated = {
+            ...optionsObj,
+        }
+
         delete updated[key]
+
         setOptionsObj(updated)
+
+        const updatedAnswers = {
+            ...correctAnsMatrix,
+        }
+
+        delete updatedAnswers[key]
+
+        setCorrectAnsMatrix(
+            updatedAnswers
+        )
     }
 
-    const handleSubmit = async (e: React.FormEvent) => {
+
+    // ==============================
+    // UPDATE SOAL
+    // ==============================
+
+    const handleSubmit = async (
+        e: React.FormEvent
+    ) => {
         e.preventDefault()
-        if (!qText.trim()) return
+
+        if (!qText.trim()) {
+            alert(
+                'Teks soal tidak boleh kosong!'
+            )
+            return
+        }
+
+        if (
+            Object.keys(optionsObj).length ===
+            0
+        ) {
+            alert(
+                'Opsi jawaban tidak boleh kosong!'
+            )
+            return
+        }
+
+        // ==============================
+        // TENTUKAN JAWABAN BENAR
+        // ==============================
 
         let finalCorrectAnswer: any = null
-        if (qType === 'multiple_choice') finalCorrectAnswer = correctAnsMC
-        else if (qType === 'complex_multiple_choice') finalCorrectAnswer = correctAnsComplex
-        else if (qType === 'true_false_matrix') finalCorrectAnswer = correctAnsMatrix
+
+        if (
+            qType === 'multiple_choice'
+        ) {
+            finalCorrectAnswer =
+                correctAnsMC
+        }
+
+        else if (
+            qType ===
+            'complex_multiple_choice'
+        ) {
+            finalCorrectAnswer =
+                correctAnsComplex
+        }
+
+        else if (
+            qType ===
+            'true_false_matrix'
+        ) {
+            finalCorrectAnswer =
+                correctAnsMatrix
+        }
+
+
+        // ==============================
+        // SUBMIT
+        // ==============================
 
         setSubmitting(true)
-        const { error } = await supabase.from('questions').update({
-            question_text: qText,
-            question_type: qType,
-            options: optionsObj,
-            correct_answer: finalCorrectAnswer,
-            explanation: qExplanation
-        }).eq('id', questionId)
+
+        const {
+            error,
+        } = await supabase
+            .from('questions')
+            .update({
+                question_text:
+                    qText.trim(),
+
+                question_type:
+                    qType,
+
+                options:
+                    optionsObj,
+
+                correct_answer:
+                    finalCorrectAnswer,
+
+                explanation:
+                    qExplanation.trim(),
+            })
+            .eq(
+                'id',
+                questionId
+            )
+
+
+        // ==============================
+        // SUCCESS
+        // ==============================
 
         if (!error) {
-            router.push(`/admin/practice/${chapterId}`)
+            alert(
+                'Soal berhasil diperbarui!'
+            )
+
+            router.push(
+                `/admin/practice/${chapterId}`
+            )
+
             router.refresh()
-        } else {
-            alert('Gagal memperbarui soal.')
+
+        }
+
+        // ==============================
+        // ERROR
+        // ==============================
+
+        else {
+            console.error(
+                'Update error:',
+                error
+            )
+
+            alert(
+                'Gagal memperbarui soal: ' +
+                error.message
+            )
+
             setSubmitting(false)
         }
     }
 
+
+    // ==============================
+    // LOADING
+    // ==============================
+
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <p className="text-blue-600 font-semibold animate-pulse">Memuat soal...</p>
-            </div>
+            <main className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+
+                <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 text-center">
+
+                    <div className="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
+
+                    <p className="text-blue-600 font-semibold">
+                        Memuat data soal...
+                    </p>
+
+                    <p className="text-xs text-gray-400 mt-2">
+                        ID Soal: {questionId}
+                    </p>
+
+                </div>
+
+            </main>
         )
     }
 
-    return (
-        <main className="min-h-screen bg-gray-50 p-4 md:p-8 flex flex-col items-center">
-            <div className="w-full max-w-2xl bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 flex flex-col gap-6">
-                <div className="flex items-center justify-between">
-                    <h1 className="text-xl font-extrabold text-gray-900">Edit Soal</h1>
-                    <button onClick={() => router.back()} className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-xl text-xs font-bold transition">
+
+    // ==============================
+    // ERROR
+    // ==============================
+
+    if (errorMessage) {
+        return (
+            <main className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+
+                <div className="bg-white rounded-3xl p-8 shadow-sm border border-red-100 text-center max-w-md w-full">
+
+                    <div className="text-4xl mb-4">
+                        ⚠️
+                    </div>
+
+                    <h2 className="text-lg font-extrabold text-gray-900 mb-2">
+                        Data Tidak Ditemukan
+                    </h2>
+
+                    <p className="text-sm text-gray-500 mb-6">
+                        {errorMessage}
+                    </p>
+
+                    <button
+                        type="button"
+                        onClick={() =>
+                            router.back()
+                        }
+                        className="px-5 py-3 bg-gray-900 text-white rounded-xl text-sm font-bold"
+                    >
                         Kembali
                     </button>
+
                 </div>
 
-                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            </main>
+        )
+    }
+
+
+    // ==============================
+    // FORM EDIT
+    // ==============================
+
+    return (
+        <main className="min-h-screen bg-gray-50 p-4 md:p-8 flex flex-col items-center">
+
+            <div className="w-full max-w-3xl bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 flex flex-col gap-6">
+
+                {/* ==============================
+                    HEADER
+                ============================== */}
+
+                <div className="flex items-center justify-between gap-4">
+
                     <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-1">Tipe Soal</label>
+                        <h1 className="text-xl font-extrabold text-gray-900">
+                            Edit Soal
+                        </h1>
+
+                        <p className="text-xs text-gray-400 mt-1">
+                            ID: {questionId}
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={() =>
+                            router.back()
+                        }
+                        className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-xl text-xs font-bold transition"
+                    >
+                        Kembali
+                    </button>
+
+                </div>
+
+
+                {/* ==============================
+                    FORM
+                ============================== */}
+
+                <form
+                    onSubmit={handleSubmit}
+                    className="flex flex-col gap-5"
+                >
+
+                    {/* ==============================
+                        TIPE SOAL
+                    ============================== */}
+
+                    <div>
+
+                        <label className="block text-xs font-bold text-gray-700 mb-1">
+                            Tipe Soal
+                        </label>
+
                         <select
                             disabled
                             value={qType}
                             className="w-full p-3 border border-gray-200 rounded-2xl text-sm font-medium bg-gray-100 text-gray-500 cursor-not-allowed"
                         >
-                            <option value="multiple_choice">Pilihan Ganda</option>
-                            <option value="complex_multiple_choice">Pilihan Ganda Kompleks</option>
-                            <option value="true_false_matrix">Matriks Benar / Salah</option>
+
+                            <option value="multiple_choice">
+                                Pilihan Ganda
+                            </option>
+
+                            <option value="complex_multiple_choice">
+                                Pilihan Ganda Kompleks
+                            </option>
+
+                            <option value="true_false_matrix">
+                                Matriks Benar / Salah
+                            </option>
+
                         </select>
+
+                        <p className="text-[11px] text-gray-400 mt-1">
+                            Tipe soal tidak dapat diubah saat edit.
+                        </p>
+
                     </div>
 
+
+                    {/* ==============================
+                        TEKS SOAL
+                    ============================== */}
+
                     <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-1">Teks Soal</label>
+
+                        <label className="block text-xs font-bold text-gray-700 mb-1">
+                            Teks Soal
+                        </label>
+
                         <textarea
                             required
-                            rows={3}
+                            rows={5}
                             value={qText}
-                            onChange={e => setQText(e.target.value)}
+                            onChange={e =>
+                                setQText(
+                                    e.target.value
+                                )
+                            }
                             className="w-full p-3 border border-gray-200 rounded-2xl text-sm focus:outline-none focus:border-blue-600 resize-none"
                         />
+
+                        {/* PREVIEW */}
+
                         {qText && (
-                            <div className="mt-2 p-3 bg-blue-50/50 border border-blue-100 rounded-xl text-xs text-blue-900">
-                                <span className="font-bold block mb-1">Pratinjau:</span>
-                                {renderMathText(qText)}
+                            <div className="mt-2 p-4 bg-blue-50/50 border border-blue-100 rounded-xl text-sm text-blue-900">
+
+                                <span className="font-bold block mb-2">
+                                    Pratinjau Soal:
+                                </span>
+
+                                <div className="whitespace-pre-wrap">
+                                    {renderMathText(
+                                        qText
+                                    )}
+                                </div>
+
                             </div>
                         )}
+
                     </div>
 
-                    {/* Opsi Pilihan Ganda / Kompleks */}
-                    {(qType === 'multiple_choice' || qType === 'complex_multiple_choice') && (
+
+                    {/* ==============================
+                        PILIHAN GANDA
+                    ============================== */}
+
+                    {(qType ===
+                        'multiple_choice' ||
+                        qType ===
+                            'complex_multiple_choice') && (
+
                         <div className="flex flex-col gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-200">
+
                             <div className="flex items-center justify-between">
-                                <span className="text-xs font-bold text-gray-700 uppercase">Opsi Jawaban</span>
-                                <button type="button" onClick={addMcOption} className="px-3 py-1 bg-blue-600 text-white rounded-lg text-xs font-bold">
+
+                                <span className="text-xs font-bold text-gray-700 uppercase">
+                                    Opsi Jawaban
+                                </span>
+
+                                <button
+                                    type="button"
+                                    onClick={
+                                        addMcOption
+                                    }
+                                    className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold"
+                                >
                                     + Tambah Opsi
                                 </button>
+
                             </div>
-                            {Object.entries(optionsObj).map(([key, val]) => (
-                                <div key={key} className="flex items-center gap-3">
-                                    <span className="w-8 h-8 rounded-lg bg-white border flex items-center justify-center text-xs font-bold">{key}</span>
-                                    <input
-                                        type="text"
-                                        required
-                                        value={val}
-                                        onChange={e => setOptionsObj({ ...optionsObj, [key]: e.target.value })}
-                                        className="flex-1 p-2.5 bg-white border rounded-xl text-xs focus:outline-none"
-                                    />
-                                    {qType === 'multiple_choice' ? (
-                                        <label className="flex items-center gap-1 text-xs font-bold text-green-700 cursor-pointer bg-green-50 px-3 py-2 rounded-xl border">
-                                            <input type="radio" name="mc" checked={correctAnsMC === key} onChange={() => setCorrectAnsMC(key)} /> Kunci
-                                        </label>
-                                    ) : (
-                                        <label className="flex items-center gap-1 text-xs font-bold text-purple-700 cursor-pointer bg-purple-50 px-3 py-2 rounded-xl border">
-                                            <input
-                                                type="checkbox"
-                                                checked={correctAnsComplex.includes(key)}
-                                                onChange={() => {
-                                                    if (correctAnsComplex.includes(key)) setCorrectAnsComplex(correctAnsComplex.filter(k => k !== key))
-                                                    else setCorrectAnsComplex([...correctAnsComplex, key])
-                                                }}
-                                            /> Benar
-                                        </label>
-                                    )}
-                                    {Object.keys(optionsObj).length > 2 && (
-                                        <button type="button" onClick={() => removeMcOption(key)} className="p-2 text-red-500 text-xs font-bold">Hapus</button>
-                                    )}
-                                </div>
-                            ))}
+
+
+                            {/* OPTIONS */}
+
+                            {Object.entries(
+                                optionsObj
+                            ).map(
+                                (
+                                    [
+                                        key,
+                                        val,
+                                    ]
+                                ) => (
+
+                                    <div
+                                        key={key}
+                                        className="flex items-center gap-3"
+                                    >
+
+                                        {/* KEY */}
+
+                                        <span className="w-9 h-9 shrink-0 rounded-lg bg-white border flex items-center justify-center text-xs font-bold">
+                                            {key}
+                                        </span>
+
+
+                                        {/* VALUE */}
+
+                                        <input
+                                            type="text"
+                                            required
+                                            value={
+                                                val
+                                            }
+                                            onChange={e =>
+                                                setOptionsObj(
+                                                    prev => ({
+                                                        ...prev,
+                                                        [key]:
+                                                            e
+                                                                .target
+                                                                .value,
+                                                    })
+                                                )
+                                            }
+                                            className="flex-1 min-w-0 p-2.5 bg-white border rounded-xl text-xs focus:outline-none focus:border-blue-500"
+                                        />
+
+
+                                        {/* SINGLE ANSWER */}
+
+                                        {qType ===
+                                            'multiple_choice' && (
+
+                                            <label className="flex shrink-0 items-center gap-1 text-xs font-bold text-green-700 cursor-pointer bg-green-50 px-3 py-2 rounded-xl border border-green-100">
+
+                                                <input
+                                                    type="radio"
+                                                    name="mc"
+                                                    checked={
+                                                        correctAnsMC ===
+                                                        key
+                                                    }
+                                                    onChange={() =>
+                                                        setCorrectAnsMC(
+                                                            key
+                                                        )
+                                                    }
+                                                />
+
+                                                Kunci
+
+                                            </label>
+                                        )}
+
+
+                                        {/* COMPLEX ANSWER */}
+
+                                        {qType ===
+                                            'complex_multiple_choice' && (
+
+                                            <label className="flex shrink-0 items-center gap-1 text-xs font-bold text-purple-700 cursor-pointer bg-purple-50 px-3 py-2 rounded-xl border border-purple-100">
+
+                                                <input
+                                                    type="checkbox"
+                                                    checked={correctAnsComplex.includes(
+                                                        key
+                                                    )}
+                                                    onChange={() => {
+
+                                                        if (
+                                                            correctAnsComplex.includes(
+                                                                key
+                                                            )
+                                                        ) {
+                                                            setCorrectAnsComplex(
+                                                                prev =>
+                                                                    prev.filter(
+                                                                        k =>
+                                                                            k !==
+                                                                            key
+                                                                    )
+                                                            )
+                                                        }
+
+                                                        else {
+                                                            setCorrectAnsComplex(
+                                                                prev => [
+                                                                    ...prev,
+                                                                    key,
+                                                                ]
+                                                            )
+                                                        }
+
+                                                    }}
+                                                />
+
+                                                Benar
+
+                                            </label>
+                                        )}
+
+
+                                        {/* DELETE */}
+
+                                        {Object.keys(
+                                            optionsObj
+                                        ).length >
+                                            2 && (
+
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    removeMcOption(
+                                                        key
+                                                    )
+                                                }
+                                                className="text-red-500 hover:text-red-700 text-xs font-bold"
+                                            >
+                                                Hapus
+                                            </button>
+                                        )}
+
+                                    </div>
+                                )
+                            )}
+
                         </div>
                     )}
 
-                    {/* Opsi Matriks */}
-                    {qType === 'true_false_matrix' && (
+
+                    {/* ==============================
+                        MATRIX
+                    ============================== */}
+
+                    {qType ===
+                        'true_false_matrix' && (
+
                         <div className="flex flex-col gap-3 p-4 bg-blue-50/50 rounded-2xl border border-blue-100">
+
                             <div className="flex items-center justify-between">
-                                <span className="text-xs font-bold text-blue-900 uppercase">Pernyataan Matriks</span>
-                                <button type="button" onClick={addMatrixStatement} className="px-3 py-1 bg-blue-600 text-white rounded-lg text-xs font-bold">
+
+                                <span className="text-xs font-bold text-blue-900 uppercase">
+                                    Pernyataan Matriks
+                                </span>
+
+                                <button
+                                    type="button"
+                                    onClick={
+                                        addMatrixStatement
+                                    }
+                                    className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold"
+                                >
                                     + Tambah Pernyataan
                                 </button>
+
                             </div>
-                            {Object.entries(optionsObj).map(([stKey, stText]) => (
-                                <div key={stKey} className="flex gap-3 p-3 bg-white border rounded-xl items-center">
-                                    <input
-                                        type="text"
-                                        required
-                                        value={stText}
-                                        onChange={e => setOptionsObj({ ...optionsObj, [stKey]: e.target.value })}
-                                        className="flex-1 p-2 bg-gray-50 border rounded-lg text-xs"
-                                    />
-                                    <select
-                                        value={correctAnsMatrix[stKey] || 'Benar'}
-                                        onChange={e => setCorrectAnsMatrix({ ...correctAnsMatrix, [stKey]: e.target.value })}
-                                        className="p-2 bg-gray-50 border rounded-lg text-xs font-bold"
+
+
+                            {Object.entries(
+                                optionsObj
+                            ).map(
+                                (
+                                    [
+                                        stKey,
+                                        stText,
+                                    ]
+                                ) => (
+
+                                    <div
+                                        key={stKey}
+                                        className="flex gap-3 p-3 bg-white border rounded-xl items-center"
                                     >
-                                        <option value="Benar">Benar</option>
-                                        <option value="Salah">Salah</option>
-                                    </select>
-                                    {Object.keys(optionsObj).length > 1 && (
-                                        <button type="button" onClick={() => removeMatrixStatement(stKey)} className="text-red-500 text-xs font-bold">Hapus</button>
-                                    )}
-                                </div>
-                            ))}
+
+                                        {/* STATEMENT */}
+
+                                        <input
+                                            type="text"
+                                            required
+                                            value={
+                                                stText
+                                            }
+                                            onChange={e =>
+                                                setOptionsObj(
+                                                    prev => ({
+                                                        ...prev,
+                                                        [stKey]:
+                                                            e
+                                                                .target
+                                                                .value,
+                                                    })
+                                                )
+                                            }
+                                            className="flex-1 p-2 bg-gray-50 border rounded-lg text-xs focus:outline-none focus:border-blue-500"
+                                        />
+
+
+                                        {/* TRUE / FALSE */}
+
+                                        <select
+                                            value={
+                                                correctAnsMatrix[
+                                                    stKey
+                                                ] ||
+                                                'Benar'
+                                            }
+                                            onChange={e =>
+                                                setCorrectAnsMatrix(
+                                                    prev => ({
+                                                        ...prev,
+                                                        [stKey]:
+                                                            e
+                                                                .target
+                                                                .value,
+                                                    })
+                                                )
+                                            }
+                                            className="p-2 bg-gray-50 border rounded-lg text-xs font-bold"
+                                        >
+
+                                            <option value="Benar">
+                                                Benar
+                                            </option>
+
+                                            <option value="Salah">
+                                                Salah
+                                            </option>
+
+                                        </select>
+
+
+                                        {/* DELETE */}
+
+                                        {Object.keys(
+                                            optionsObj
+                                        ).length >
+                                            1 && (
+
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    removeMatrixStatement(
+                                                        stKey
+                                                    )
+                                                }
+                                                className="text-red-500 hover:text-red-700 text-xs font-bold"
+                                            >
+                                                Hapus
+                                            </button>
+                                        )}
+
+                                    </div>
+                                )
+                            )}
+
                         </div>
                     )}
 
+
+                    {/* ==============================
+                        PEMBAHASAN
+                    ============================== */}
+
                     <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-1">Pembahasan (Opsional)</label>
+
+                        <label className="block text-xs font-bold text-gray-700 mb-1">
+                            Pembahasan
+                            <span className="font-normal text-gray-400">
+                                {' '}
+                                (Opsional)
+                            </span>
+                        </label>
+
                         <textarea
-                            rows={3}
-                            value={qExplanation}
-                            onChange={e => setQExplanation(e.target.value)}
-                            className="w-full p-3 border border-gray-200 rounded-2xl text-sm focus:outline-none resize-none"
+                            rows={5}
+                            value={
+                                qExplanation
+                            }
+                            onChange={e =>
+                                setQExplanation(
+                                    e.target.value
+                                )
+                            }
+                            className="w-full p-3 border border-gray-200 rounded-2xl text-sm focus:outline-none focus:border-blue-600 resize-none"
                         />
+
+                        {/* PREVIEW PEMBAHASAN */}
+
+                        {qExplanation && (
+                            <div className="mt-2 p-4 bg-green-50/50 border border-green-100 rounded-xl text-sm text-green-900">
+
+                                <span className="font-bold block mb-2">
+                                    Pratinjau Pembahasan:
+                                </span>
+
+                                <div className="whitespace-pre-wrap">
+                                    {renderMathText(
+                                        qExplanation
+                                    )}
+                                </div>
+
+                            </div>
+                        )}
+
                     </div>
 
+
+                    {/* ==============================
+                        ACTION
+                    ============================== */}
+
                     <div className="flex gap-3 justify-end pt-2">
-                        <button type="button" onClick={() => router.back()} className="px-4 py-2.5 bg-gray-100 rounded-xl text-xs font-bold">Batal</button>
-                        <button type="submit" disabled={submitting} className="px-6 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-bold shadow-sm">
-                            {submitting ? 'Menyimpan...' : 'Simpan Perubahan'}
+
+                        <button
+                            type="button"
+                            onClick={() =>
+                                router.back()
+                            }
+                            disabled={
+                                submitting
+                            }
+                            className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs font-bold disabled:opacity-50"
+                        >
+                            Batal
                         </button>
+
+
+                        <button
+                            type="submit"
+                            disabled={
+                                submitting
+                            }
+                            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-sm disabled:opacity-50"
+                        >
+
+                            {submitting
+                                ? 'Menyimpan...'
+                                : 'Simpan Perubahan'}
+
+                        </button>
+
                     </div>
+
                 </form>
+
             </div>
+
         </main>
     )
 }
