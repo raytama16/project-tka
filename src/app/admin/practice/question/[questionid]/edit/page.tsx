@@ -1,8 +1,8 @@
 'use client'
 
 import { createClient } from '@/utils/supabase/client'
-import { useEffect, useState, use } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
 import { InlineMath } from 'react-katex'
 
 type QuestionType =
@@ -12,34 +12,39 @@ type QuestionType =
 
 type OptionsObject = Record<string, string>
 
-type CorrectAnswerMatrix = Record<string, string>
+type MatrixAnswer = Record<string, string>
 
-export default function EditQuestionPage({
-    params,
-}: {
-    params: Promise<{ questionId: string }>
-}) {
-    const resolvedParams = use(params)
-    const questionId = resolvedParams.questionId
-
+export default function EditQuestionPage() {
     const router = useRouter()
+    const params = useParams()
+
+    /*
+     * Route:
+     *
+     * /question/[questionId]/edit
+     *
+     * Maka params.questionId berisi UUID soal.
+     */
+    const questionId = params.questionId as string
+
     const supabase = createClient()
 
-    // ==============================
+    // =====================================================
     // STATE
-    // ==============================
+    // =====================================================
 
     const [chapterId, setChapterId] = useState<string>('')
 
     const [qText, setQText] = useState<string>('')
 
-    const [qType, setQType] = useState<QuestionType>(
-        'multiple_choice'
-    )
+    const [qType, setQType] =
+        useState<QuestionType>('multiple_choice')
 
-    const [qExplanation, setQExplanation] = useState<string>('')
+    const [qExplanation, setQExplanation] =
+        useState<string>('')
 
-    const [optionsObj, setOptionsObj] = useState<OptionsObject>({})
+    const [optionsObj, setOptionsObj] =
+        useState<OptionsObject>({})
 
     const [correctAnsMC, setCorrectAnsMC] =
         useState<string>('A')
@@ -48,9 +53,10 @@ export default function EditQuestionPage({
         useState<string[]>([])
 
     const [correctAnsMatrix, setCorrectAnsMatrix] =
-        useState<CorrectAnswerMatrix>({})
+        useState<MatrixAnswer>({})
 
-    const [loading, setLoading] = useState<boolean>(true)
+    const [loading, setLoading] =
+        useState<boolean>(true)
 
     const [submitting, setSubmitting] =
         useState<boolean>(false)
@@ -59,66 +65,102 @@ export default function EditQuestionPage({
         useState<string>('')
 
 
-    // ==============================
-    // LOAD DATA SOAL
-    // ==============================
+    // =====================================================
+    // FETCH DATA SOAL
+    // =====================================================
 
     useEffect(() => {
-        let mounted = true
-
         const fetchQuestion = async () => {
             try {
                 setLoading(true)
                 setErrorMessage('')
 
-                const { data, error } = await supabase
-                    .from('questions')
-                    .select('*')
-                    .eq('id', questionId)
-                    .single()
+                console.log('================================')
+                console.log('EDIT QUESTION')
+                console.log('PARAMS:', params)
+                console.log('QUESTION ID:', questionId)
+                console.log('================================')
 
-                if (error) {
+                // ---------------------------------------------
+                // Pastikan questionId ada
+                // ---------------------------------------------
+
+                if (!questionId) {
                     console.error(
-                        'Error mengambil soal:',
-                        error
+                        'QUESTION ID UNDEFINED'
                     )
-                    console.log('============================')
-                    console.log('QUESTION ID:', questionId)
-                    console.log('DATA:', data)
-                    console.log('ERROR:', error)
-                    console.log('============================')
 
-                    if (mounted) {
-                        setErrorMessage(
-                            'Data soal tidak ditemukan.'
-                        )
-                        setLoading(false)
-                    }
+                    setErrorMessage(
+                        'Question ID tidak ditemukan dari URL.'
+                    )
 
+                    setLoading(false)
                     return
                 }
 
-                if (!data) {
-                    if (mounted) {
-                        setErrorMessage(
-                            'Data soal tidak ditemukan.'
-                        )
-                        setLoading(false)
-                    }
+                // ---------------------------------------------
+                // Ambil data dari Supabase
+                // ---------------------------------------------
 
+                const {
+                    data,
+                    error,
+                } = await supabase
+                    .from('questions')
+                    .select('*')
+                    .eq('id', questionId)
+                    .maybeSingle()
+
+                console.log('================================')
+                console.log('HASIL QUERY')
+                console.log('DATA:', data)
+                console.log('ERROR:', error)
+                console.log('================================')
+
+                // ---------------------------------------------
+                // Supabase error
+                // ---------------------------------------------
+
+                if (error) {
+                    console.error(
+                        'SUPABASE ERROR:',
+                        error
+                    )
+
+                    setErrorMessage(
+                        error.message ||
+                        'Gagal mengambil data soal.'
+                    )
+
+                    setLoading(false)
+                    return
+                }
+
+                // ---------------------------------------------
+                // Data tidak ditemukan
+                // ---------------------------------------------
+
+                if (!data) {
+                    console.error(
+                        'DATA SOAL TIDAK DITEMUKAN'
+                    )
+
+                    setErrorMessage(
+                        `Soal dengan ID ${questionId} tidak ditemukan.`
+                    )
+
+                    setLoading(false)
                     return
                 }
 
                 console.log(
-                    'Data soal yang berhasil diambil:',
+                    'DATA SOAL BERHASIL DITEMUKAN:',
                     data
                 )
 
-                if (!mounted) return
-
-                // ==============================
-                // ISI DATA KE FORM
-                // ==============================
+                // =================================================
+                // ISI DATA DASAR KE FORM
+                // =================================================
 
                 setChapterId(
                     data.chapter_id
@@ -132,37 +174,98 @@ export default function EditQuestionPage({
 
                 setQType(
                     data.question_type ||
-                        'multiple_choice'
+                    'multiple_choice'
                 )
 
                 setQExplanation(
                     data.explanation || ''
                 )
 
-                // ==============================
-                // OPTIONS
-                // ==============================
 
-                const loadedOptions =
+                // =================================================
+                // PARSE OPTIONS
+                // =================================================
+                //
+                // Data kamu saat ini terlihat seperti:
+                //
+                // "options": "{\"A\":\"...\",\"B\":\"...\"}"
+                //
+                // Jadi harus JSON.parse terlebih dahulu.
+                // =================================================
+
+                let parsedOptions: OptionsObject = {}
+
+                if (
+                    typeof data.options === 'string'
+                ) {
+                    try {
+                        parsedOptions =
+                            JSON.parse(
+                                data.options
+                            )
+                    } catch (error) {
+                        console.error(
+                            'Gagal parse options:',
+                            error
+                        )
+
+                        parsedOptions = {}
+                    }
+                } else if (
                     data.options &&
                     typeof data.options === 'object'
-                        ? data.options
-                        : {}
+                ) {
+                    parsedOptions =
+                        data.options as OptionsObject
+                }
 
-                setOptionsObj(loadedOptions)
+                setOptionsObj(
+                    parsedOptions
+                )
 
-                // ==============================
-                // CORRECT ANSWER
-                // ==============================
+
+                // =================================================
+                // PARSE CORRECT ANSWER
+                // =================================================
+                //
+                // Data kamu:
+                //
+                // "correct_answer": "[\"A\", \"B\"]"
+                //
+                // Maka perlu JSON.parse.
+                // =================================================
+
+                let parsedCorrectAnswer: any =
+                    data.correct_answer
+
+                if (
+                    typeof parsedCorrectAnswer ===
+                    'string'
+                ) {
+                    try {
+                        parsedCorrectAnswer =
+                            JSON.parse(
+                                parsedCorrectAnswer
+                            )
+                    } catch {
+                        // Jika bukan JSON,
+                        // biarkan sebagai string.
+                    }
+                }
+
+
+                // =================================================
+                // SET JAWABAN BERDASARKAN TIPE SOAL
+                // =================================================
 
                 if (
                     data.question_type ===
                     'multiple_choice'
                 ) {
                     setCorrectAnsMC(
-                        typeof data.correct_answer ===
-                            'string'
-                            ? data.correct_answer
+                        typeof parsedCorrectAnswer ===
+                        'string'
+                            ? parsedCorrectAnswer
                             : 'A'
                     )
                 }
@@ -173,9 +276,9 @@ export default function EditQuestionPage({
                 ) {
                     setCorrectAnsComplex(
                         Array.isArray(
-                            data.correct_answer
+                            parsedCorrectAnswer
                         )
-                            ? data.correct_answer
+                            ? parsedCorrectAnswer
                             : []
                     )
                 }
@@ -185,44 +288,46 @@ export default function EditQuestionPage({
                     'true_false_matrix'
                 ) {
                     setCorrectAnsMatrix(
-                        data.correct_answer &&
-                            typeof data.correct_answer ===
-                                'object'
-                            ? data.correct_answer
+                        parsedCorrectAnswer &&
+                        typeof parsedCorrectAnswer ===
+                        'object'
+                            ? parsedCorrectAnswer
                             : {}
                     )
                 }
 
+
+                // =================================================
+                // SELESAI
+                // =================================================
+
                 setLoading(false)
 
-            } catch (err) {
+            } catch (error) {
                 console.error(
-                    'Unexpected error:',
-                    err
+                    'FETCH QUESTION ERROR:',
+                    error
                 )
 
-                if (mounted) {
-                    setErrorMessage(
-                        'Terjadi kesalahan saat mengambil data soal.'
-                    )
+                setErrorMessage(
+                    'Terjadi kesalahan saat mengambil data soal.'
+                )
 
-                    setLoading(false)
-                }
+                setLoading(false)
             }
         }
 
         fetchQuestion()
 
-        return () => {
-            mounted = false
-        }
-
+        // Hanya jalankan ulang ketika ID berubah.
+        // Tidak memasukkan supabase karena createClient()
+        // dibuat di dalam component.
     }, [questionId])
 
 
-    // ==============================
-    // RENDER MATH
-    // ==============================
+    // =====================================================
+    // RENDER TEXT + LATEX
+    // =====================================================
 
     const renderMathText = (
         text: string
@@ -235,7 +340,10 @@ export default function EditQuestionPage({
         return (
             <span>
                 {parts.map(
-                    (part, index) => {
+                    (
+                        part,
+                        index
+                    ) => {
                         if (
                             part.startsWith('$') &&
                             part.endsWith('$')
@@ -249,9 +357,7 @@ export default function EditQuestionPage({
                             return (
                                 <InlineMath
                                     key={index}
-                                    math={
-                                        mathContent
-                                    }
+                                    math={mathContent}
                                 />
                             )
                         }
@@ -268,18 +374,41 @@ export default function EditQuestionPage({
     }
 
 
-    // ==============================
-    // TAMBAH OPSI PILIHAN GANDA
-    // ==============================
+    // =====================================================
+    // TAMBAH OPSI
+    // =====================================================
 
     const addMcOption = () => {
-        const keys =
+        const existingKeys =
             Object.keys(optionsObj)
 
-        const nextKey =
-            String.fromCharCode(
-                65 + keys.length
-            )
+        /*
+         * Cari huruf berikutnya.
+         *
+         * A, B, C, D, E, dst.
+         */
+
+        let nextKey = 'A'
+
+        for (
+            let i = 0;
+            i < 26;
+            i++
+        ) {
+            const key =
+                String.fromCharCode(
+                    65 + i
+                )
+
+            if (
+                !existingKeys.includes(
+                    key
+                )
+            ) {
+                nextKey = key
+                break
+            }
+        }
 
         setOptionsObj(
             prev => ({
@@ -290,9 +419,9 @@ export default function EditQuestionPage({
     }
 
 
-    // ==============================
-    // HAPUS OPSI PILIHAN GANDA
-    // ==============================
+    // =====================================================
+    // HAPUS OPSI
+    // =====================================================
 
     const removeMcOption = (
         key: string
@@ -313,32 +442,46 @@ export default function EditQuestionPage({
 
         delete updated[key]
 
-        setOptionsObj(updated)
+        setOptionsObj(
+            updated
+        )
 
-        // Jika opsi yang dihapus adalah
-        // jawaban benar
-        if (correctAnsMC === key) {
+
+        // ---------------------------------------------
+        // Jika jawaban MC yang dihapus
+        // ---------------------------------------------
+
+        if (
+            correctAnsMC === key
+        ) {
             const remainingKeys =
-                Object.keys(updated)
+                Object.keys(
+                    updated
+                )
 
             setCorrectAnsMC(
                 remainingKeys[0] || 'A'
             )
         }
 
+
+        // ---------------------------------------------
         // Hapus dari jawaban kompleks
+        // ---------------------------------------------
+
         setCorrectAnsComplex(
             prev =>
                 prev.filter(
-                    item => item !== key
+                    item =>
+                        item !== key
                 )
         )
     }
 
 
-    // ==============================
+    // =====================================================
     // TAMBAH PERNYATAAN MATRIX
-    // ==============================
+    // =====================================================
 
     const addMatrixStatement = () => {
         const nextKey =
@@ -360,9 +503,9 @@ export default function EditQuestionPage({
     }
 
 
-    // ==============================
+    // =====================================================
     // HAPUS PERNYATAAN MATRIX
-    // ==============================
+    // =====================================================
 
     const removeMatrixStatement = (
         key: string
@@ -383,7 +526,10 @@ export default function EditQuestionPage({
 
         delete updated[key]
 
-        setOptionsObj(updated)
+        setOptionsObj(
+            updated
+        )
+
 
         const updatedAnswers = {
             ...correctAnsMatrix,
@@ -397,14 +543,30 @@ export default function EditQuestionPage({
     }
 
 
-    // ==============================
-    // UPDATE SOAL
-    // ==============================
+    // =====================================================
+    // HANDLE SUBMIT
+    // =====================================================
 
     const handleSubmit = async (
         e: React.FormEvent
     ) => {
         e.preventDefault()
+
+        // ---------------------------------------------
+        // Validasi ID
+        // ---------------------------------------------
+
+        if (!questionId) {
+            alert(
+                'Question ID tidak ditemukan.'
+            )
+            return
+        }
+
+
+        // ---------------------------------------------
+        // Validasi teks soal
+        // ---------------------------------------------
 
         if (!qText.trim()) {
             alert(
@@ -413,9 +575,14 @@ export default function EditQuestionPage({
             return
         }
 
+
+        // ---------------------------------------------
+        // Validasi opsi
+        // ---------------------------------------------
+
         if (
-            Object.keys(optionsObj).length ===
-            0
+            Object.keys(optionsObj)
+                .length === 0
         ) {
             alert(
                 'Opsi jawaban tidak boleh kosong!'
@@ -423,14 +590,16 @@ export default function EditQuestionPage({
             return
         }
 
-        // ==============================
-        // TENTUKAN JAWABAN BENAR
-        // ==============================
+
+        // ---------------------------------------------
+        // Tentukan correct_answer
+        // ---------------------------------------------
 
         let finalCorrectAnswer: any = null
 
         if (
-            qType === 'multiple_choice'
+            qType ===
+            'multiple_choice'
         ) {
             finalCorrectAnswer =
                 correctAnsMC
@@ -453,11 +622,40 @@ export default function EditQuestionPage({
         }
 
 
-        // ==============================
-        // SUBMIT
-        // ==============================
+        console.log(
+            '================================'
+        )
+
+        console.log(
+            'UPDATE QUESTION'
+        )
+
+        console.log(
+            'ID:',
+            questionId
+        )
+
+        console.log(
+            'OPTIONS:',
+            optionsObj
+        )
+
+        console.log(
+            'CORRECT ANSWER:',
+            finalCorrectAnswer
+        )
+
+        console.log(
+            '================================'
+        )
+
 
         setSubmitting(true)
+
+
+        // =================================================
+        // UPDATE DATABASE
+        // =================================================
 
         const {
             error,
@@ -485,46 +683,54 @@ export default function EditQuestionPage({
             )
 
 
-        // ==============================
-        // SUCCESS
-        // ==============================
-
-        if (!error) {
-            alert(
-                'Soal berhasil diperbarui!'
-            )
-
-            router.push(
-                `/admin/practice/${chapterId}`
-            )
-
-            router.refresh()
-
-        }
-
-        // ==============================
+        // =================================================
         // ERROR
-        // ==============================
+        // =================================================
 
-        else {
+        if (error) {
             console.error(
-                'Update error:',
+                'UPDATE ERROR:',
                 error
             )
 
             alert(
-                'Gagal memperbarui soal: ' +
-                error.message
+                `Gagal memperbarui soal:\n${error.message}`
             )
 
             setSubmitting(false)
+
+            return
         }
+
+
+        // =================================================
+        // SUCCESS
+        // =================================================
+
+        alert(
+            'Soal berhasil diperbarui!'
+        )
+
+
+        /*
+         * Kembali ke halaman chapter.
+         */
+
+        if (chapterId) {
+            router.push(
+                `/admin/practice/${chapterId}`
+            )
+        } else {
+            router.back()
+        }
+
+        router.refresh()
     }
 
 
-    // ==============================
-    // LOADING
-    // ==============================
+    // =====================================================
+    // LOADING SCREEN
+    // =====================================================
 
     if (loading) {
         return (
@@ -538,8 +744,8 @@ export default function EditQuestionPage({
                         Memuat data soal...
                     </p>
 
-                    <p className="text-xs text-gray-400 mt-2">
-                        ID Soal: {questionId}
+                    <p className="text-xs text-gray-400 mt-2 break-all">
+                        ID: {questionId || 'undefined'}
                     </p>
 
                 </div>
@@ -549,34 +755,55 @@ export default function EditQuestionPage({
     }
 
 
-    // ==============================
-    // ERROR
-    // ==============================
+    // =====================================================
+    // ERROR SCREEN
+    // =====================================================
 
     if (errorMessage) {
         return (
             <main className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
 
-                <div className="bg-white rounded-3xl p-8 shadow-sm border border-red-100 text-center max-w-md w-full">
+                <div className="w-full max-w-lg bg-white rounded-3xl p-8 shadow-sm border border-red-100">
 
-                    <div className="text-4xl mb-4">
-                        ⚠️
+                    <div className="text-center">
+
+                        <div className="text-5xl mb-4">
+                            ⚠️
+                        </div>
+
+                        <h1 className="text-xl font-extrabold text-gray-900">
+                            Gagal Memuat Soal
+                        </h1>
+
+                        <p className="text-sm text-gray-500 mt-2">
+                            {errorMessage}
+                        </p>
+
                     </div>
 
-                    <h2 className="text-lg font-extrabold text-gray-900 mb-2">
-                        Data Tidak Ditemukan
-                    </h2>
 
-                    <p className="text-sm text-gray-500 mb-6">
-                        {errorMessage}
-                    </p>
+                    {/* DEBUG */}
+
+                    <div className="mt-6 p-4 bg-gray-900 rounded-2xl">
+
+                        <p className="text-[11px] font-bold text-gray-400 uppercase">
+                            Question ID
+                        </p>
+
+                        <p className="mt-1 text-xs text-green-400 break-all">
+                            {questionId ||
+                                'undefined'}
+                        </p>
+
+                    </div>
+
 
                     <button
                         type="button"
                         onClick={() =>
                             router.back()
                         }
-                        className="px-5 py-3 bg-gray-900 text-white rounded-xl text-sm font-bold"
+                        className="w-full mt-5 px-5 py-3 bg-gray-900 hover:bg-gray-800 text-white rounded-xl text-sm font-bold transition"
                     >
                         Kembali
                     </button>
@@ -588,37 +815,40 @@ export default function EditQuestionPage({
     }
 
 
-    // ==============================
+    // =====================================================
     // FORM EDIT
-    // ==============================
+    // =====================================================
 
     return (
         <main className="min-h-screen bg-gray-50 p-4 md:p-8 flex flex-col items-center">
 
-            <div className="w-full max-w-3xl bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 flex flex-col gap-6">
+            <div className="w-full max-w-3xl bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100">
 
-                {/* ==============================
+                {/* =================================================
                     HEADER
-                ============================== */}
+                ================================================= */}
 
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center justify-between gap-4 mb-6">
 
                     <div>
-                        <h1 className="text-xl font-extrabold text-gray-900">
+
+                        <h1 className="text-xl md:text-2xl font-extrabold text-gray-900">
                             Edit Soal
                         </h1>
 
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="text-xs text-gray-400 mt-1 break-all">
                             ID: {questionId}
                         </p>
+
                     </div>
+
 
                     <button
                         type="button"
                         onClick={() =>
                             router.back()
                         }
-                        className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-xl text-xs font-bold transition"
+                        className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-bold transition"
                     >
                         Kembali
                     </button>
@@ -626,22 +856,22 @@ export default function EditQuestionPage({
                 </div>
 
 
-                {/* ==============================
+                {/* =================================================
                     FORM
-                ============================== */}
+                ================================================= */}
 
                 <form
                     onSubmit={handleSubmit}
                     className="flex flex-col gap-5"
                 >
 
-                    {/* ==============================
+                    {/* =================================================
                         TIPE SOAL
-                    ============================== */}
+                    ================================================= */}
 
                     <div>
 
-                        <label className="block text-xs font-bold text-gray-700 mb-1">
+                        <label className="block text-xs font-bold text-gray-700 mb-2">
                             Tipe Soal
                         </label>
 
@@ -666,19 +896,19 @@ export default function EditQuestionPage({
                         </select>
 
                         <p className="text-[11px] text-gray-400 mt-1">
-                            Tipe soal tidak dapat diubah saat edit.
+                            Tipe soal tidak diubah ketika melakukan edit.
                         </p>
 
                     </div>
 
 
-                    {/* ==============================
+                    {/* =================================================
                         TEKS SOAL
-                    ============================== */}
+                    ================================================= */}
 
                     <div>
 
-                        <label className="block text-xs font-bold text-gray-700 mb-1">
+                        <label className="block text-xs font-bold text-gray-700 mb-2">
                             Teks Soal
                         </label>
 
@@ -700,7 +930,7 @@ export default function EditQuestionPage({
                             <div className="mt-2 p-4 bg-blue-50/50 border border-blue-100 rounded-xl text-sm text-blue-900">
 
                                 <span className="font-bold block mb-2">
-                                    Pratinjau Soal:
+                                    Pratinjau:
                                 </span>
 
                                 <div className="whitespace-pre-wrap">
@@ -715,9 +945,9 @@ export default function EditQuestionPage({
                     </div>
 
 
-                    {/* ==============================
-                        PILIHAN GANDA
-                    ============================== */}
+                    {/* =================================================
+                        PILIHAN GANDA / KOMPLEKS
+                    ================================================= */}
 
                     {(qType ===
                         'multiple_choice' ||
@@ -726,7 +956,9 @@ export default function EditQuestionPage({
 
                         <div className="flex flex-col gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-200">
 
-                            <div className="flex items-center justify-between">
+                            {/* HEADER */}
+
+                            <div className="flex items-center justify-between gap-3">
 
                                 <span className="text-xs font-bold text-gray-700 uppercase">
                                     Opsi Jawaban
@@ -737,7 +969,7 @@ export default function EditQuestionPage({
                                     onClick={
                                         addMcOption
                                     }
-                                    className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold"
+                                    className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition"
                                 >
                                     + Tambah Opsi
                                 </button>
@@ -753,7 +985,7 @@ export default function EditQuestionPage({
                                 (
                                     [
                                         key,
-                                        val,
+                                        value,
                                     ]
                                 ) => (
 
@@ -762,20 +994,20 @@ export default function EditQuestionPage({
                                         className="flex items-center gap-3"
                                     >
 
-                                        {/* KEY */}
+                                        {/* LABEL */}
 
-                                        <span className="w-9 h-9 shrink-0 rounded-lg bg-white border flex items-center justify-center text-xs font-bold">
+                                        <span className="w-9 h-9 shrink-0 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-xs font-bold text-gray-700">
                                             {key}
                                         </span>
 
 
-                                        {/* VALUE */}
+                                        {/* TEXT */}
 
                                         <input
                                             type="text"
                                             required
                                             value={
-                                                val
+                                                value
                                             }
                                             onChange={e =>
                                                 setOptionsObj(
@@ -788,11 +1020,11 @@ export default function EditQuestionPage({
                                                     })
                                                 )
                                             }
-                                            className="flex-1 min-w-0 p-2.5 bg-white border rounded-xl text-xs focus:outline-none focus:border-blue-500"
+                                            className="flex-1 min-w-0 p-2.5 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-blue-500"
                                         />
 
 
-                                        {/* SINGLE ANSWER */}
+                                        {/* SINGLE CHOICE */}
 
                                         {qType ===
                                             'multiple_choice' && (
@@ -801,7 +1033,7 @@ export default function EditQuestionPage({
 
                                                 <input
                                                     type="radio"
-                                                    name="mc"
+                                                    name="mc-answer"
                                                     checked={
                                                         correctAnsMC ===
                                                         key
@@ -819,7 +1051,7 @@ export default function EditQuestionPage({
                                         )}
 
 
-                                        {/* COMPLEX ANSWER */}
+                                        {/* COMPLEX CHOICE */}
 
                                         {qType ===
                                             'complex_multiple_choice' && (
@@ -833,29 +1065,27 @@ export default function EditQuestionPage({
                                                     )}
                                                     onChange={() => {
 
-                                                        if (
-                                                            correctAnsComplex.includes(
-                                                                key
-                                                            )
-                                                        ) {
-                                                            setCorrectAnsComplex(
-                                                                prev =>
-                                                                    prev.filter(
-                                                                        k =>
-                                                                            k !==
+                                                        setCorrectAnsComplex(
+                                                            prev => {
+
+                                                                if (
+                                                                    prev.includes(
+                                                                        key
+                                                                    )
+                                                                ) {
+                                                                    return prev.filter(
+                                                                        item =>
+                                                                            item !==
                                                                             key
                                                                     )
-                                                            )
-                                                        }
+                                                                }
 
-                                                        else {
-                                                            setCorrectAnsComplex(
-                                                                prev => [
+                                                                return [
                                                                     ...prev,
                                                                     key,
                                                                 ]
-                                                            )
-                                                        }
+                                                            }
+                                                        )
 
                                                     }}
                                                 />
@@ -866,7 +1096,7 @@ export default function EditQuestionPage({
                                         )}
 
 
-                                        {/* DELETE */}
+                                        {/* HAPUS */}
 
                                         {Object.keys(
                                             optionsObj
@@ -880,13 +1110,14 @@ export default function EditQuestionPage({
                                                         key
                                                     )
                                                 }
-                                                className="text-red-500 hover:text-red-700 text-xs font-bold"
+                                                className="shrink-0 text-red-500 hover:text-red-700 text-xs font-bold"
                                             >
                                                 Hapus
                                             </button>
                                         )}
 
                                     </div>
+
                                 )
                             )}
 
@@ -894,16 +1125,16 @@ export default function EditQuestionPage({
                     )}
 
 
-                    {/* ==============================
-                        MATRIX
-                    ============================== */}
+                    {/* =================================================
+                        MATRIX BENAR / SALAH
+                    ================================================= */}
 
                     {qType ===
                         'true_false_matrix' && (
 
                         <div className="flex flex-col gap-3 p-4 bg-blue-50/50 rounded-2xl border border-blue-100">
 
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between gap-3">
 
                                 <span className="text-xs font-bold text-blue-900 uppercase">
                                     Pernyataan Matriks
@@ -914,7 +1145,7 @@ export default function EditQuestionPage({
                                     onClick={
                                         addMatrixStatement
                                     }
-                                    className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold"
+                                    className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition"
                                 >
                                     + Tambah Pernyataan
                                 </button>
@@ -934,10 +1165,10 @@ export default function EditQuestionPage({
 
                                     <div
                                         key={stKey}
-                                        className="flex gap-3 p-3 bg-white border rounded-xl items-center"
+                                        className="flex gap-3 p-3 bg-white border border-gray-200 rounded-xl items-center"
                                     >
 
-                                        {/* STATEMENT */}
+                                        {/* TEXT */}
 
                                         <input
                                             type="text"
@@ -956,11 +1187,11 @@ export default function EditQuestionPage({
                                                     })
                                                 )
                                             }
-                                            className="flex-1 p-2 bg-gray-50 border rounded-lg text-xs focus:outline-none focus:border-blue-500"
+                                            className="flex-1 min-w-0 p-2 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-blue-500"
                                         />
 
 
-                                        {/* TRUE / FALSE */}
+                                        {/* BENAR / SALAH */}
 
                                         <select
                                             value={
@@ -980,7 +1211,7 @@ export default function EditQuestionPage({
                                                     })
                                                 )
                                             }
-                                            className="p-2 bg-gray-50 border rounded-lg text-xs font-bold"
+                                            className="p-2 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold"
                                         >
 
                                             <option value="Benar">
@@ -994,7 +1225,7 @@ export default function EditQuestionPage({
                                         </select>
 
 
-                                        {/* DELETE */}
+                                        {/* HAPUS */}
 
                                         {Object.keys(
                                             optionsObj
@@ -1008,13 +1239,14 @@ export default function EditQuestionPage({
                                                         stKey
                                                     )
                                                 }
-                                                className="text-red-500 hover:text-red-700 text-xs font-bold"
+                                                className="shrink-0 text-red-500 hover:text-red-700 text-xs font-bold"
                                             >
                                                 Hapus
                                             </button>
                                         )}
 
                                     </div>
+
                                 )
                             )}
 
@@ -1022,13 +1254,13 @@ export default function EditQuestionPage({
                     )}
 
 
-                    {/* ==============================
+                    {/* =================================================
                         PEMBAHASAN
-                    ============================== */}
+                    ================================================= */}
 
                     <div>
 
-                        <label className="block text-xs font-bold text-gray-700 mb-1">
+                        <label className="block text-xs font-bold text-gray-700 mb-2">
                             Pembahasan
                             <span className="font-normal text-gray-400">
                                 {' '}
@@ -1049,8 +1281,6 @@ export default function EditQuestionPage({
                             className="w-full p-3 border border-gray-200 rounded-2xl text-sm focus:outline-none focus:border-blue-600 resize-none"
                         />
 
-                        {/* PREVIEW PEMBAHASAN */}
-
                         {qExplanation && (
                             <div className="mt-2 p-4 bg-green-50/50 border border-green-100 rounded-xl text-sm text-green-900">
 
@@ -1070,21 +1300,21 @@ export default function EditQuestionPage({
                     </div>
 
 
-                    {/* ==============================
-                        ACTION
-                    ============================== */}
+                    {/* =================================================
+                        BUTTON
+                    ================================================= */}
 
                     <div className="flex gap-3 justify-end pt-2">
 
                         <button
                             type="button"
-                            onClick={() =>
-                                router.back()
-                            }
                             disabled={
                                 submitting
                             }
-                            className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs font-bold disabled:opacity-50"
+                            onClick={() =>
+                                router.back()
+                            }
+                            className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-bold transition disabled:opacity-50"
                         >
                             Batal
                         </button>
@@ -1095,13 +1325,11 @@ export default function EditQuestionPage({
                             disabled={
                                 submitting
                             }
-                            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-sm disabled:opacity-50"
+                            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-sm transition disabled:opacity-50"
                         >
-
                             {submitting
                                 ? 'Menyimpan...'
                                 : 'Simpan Perubahan'}
-
                         </button>
 
                     </div>
