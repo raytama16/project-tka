@@ -25,7 +25,7 @@ export default function EditQuestionPage() {
      *
      * Maka params.questionId berisi UUID soal.
      */
-    const questionId = params.questionId as string
+    const questionId = params.questionid as string
 
     const supabase = createClient()
 
