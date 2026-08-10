@@ -15,30 +15,45 @@ type OptionsObject = Record<string, string>
 type MatrixAnswer = Record<string, string>
 
 export default function EditQuestionPage() {
+
     const router = useRouter()
+
     const params = useParams()
 
     /*
-     * Route:
+     * PENTING:
      *
-     * /question/[questionId]/edit
+     * Folder kamu:
      *
-     * Maka params.questionId berisi UUID soal.
+     * [questionid]
+     *
+     * Jadi harus:
+     *
+     * params.questionid
+     *
+     * BUKAN params.questionId
      */
-    const questionId = params.questionid as string
+
+    const questionid =
+        params.questionid as string
 
     const supabase = createClient()
+
 
     // =====================================================
     // STATE
     // =====================================================
 
-    const [chapterId, setChapterId] = useState<string>('')
+    const [chapterId, setChapterId] =
+        useState<string>('')
 
-    const [qText, setQText] = useState<string>('')
+    const [qText, setQText] =
+        useState<string>('')
 
     const [qType, setQType] =
-        useState<QuestionType>('multiple_choice')
+        useState<QuestionType>(
+            'multiple_choice'
+        )
 
     const [qExplanation, setQExplanation] =
         useState<string>('')
@@ -66,26 +81,64 @@ export default function EditQuestionPage() {
 
 
     // =====================================================
-    // FETCH DATA SOAL
+    // DEBUG
+    // =====================================================
+
+    console.log(
+        'PARAMS:',
+        params
+    )
+
+    console.log(
+        'QUESTION ID:',
+        questionid
+    )
+
+
+    // =====================================================
+    // FETCH QUESTION
     // =====================================================
 
     useEffect(() => {
+
         const fetchQuestion = async () => {
+
             try {
+
                 setLoading(true)
+
                 setErrorMessage('')
 
-                console.log('================================')
-                console.log('EDIT QUESTION')
-                console.log('PARAMS:', params)
-                console.log('QUESTION ID:', questionId)
-                console.log('================================')
 
-                // ---------------------------------------------
-                // Pastikan questionId ada
-                // ---------------------------------------------
+                console.log(
+                    '===================================='
+                )
 
-                if (!questionId) {
+                console.log(
+                    'EDIT QUESTION'
+                )
+
+                console.log(
+                    'PARAMS:',
+                    params
+                )
+
+                console.log(
+                    'QUESTION ID:',
+                    questionid
+                )
+
+                console.log(
+                    '===================================='
+                )
+
+
+                // =================================================
+                // CEK QUESTION ID
+                // =================================================
+
+                if (!questionid) {
+
                     console.error(
                         'QUESTION ID UNDEFINED'
                     )
@@ -95,33 +148,45 @@ export default function EditQuestionPage() {
                     )
 
                     setLoading(false)
+
                     return
                 }
 
-                // ---------------------------------------------
-                // Ambil data dari Supabase
-                // ---------------------------------------------
+
+                // =================================================
+                // QUERY SUPABASE
+                // =================================================
 
                 const {
                     data,
-                    error,
+                    error
                 } = await supabase
                     .from('questions')
                     .select('*')
-                    .eq('id', questionId)
+                    .eq(
+                        'id',
+                        questionid
+                    )
                     .maybeSingle()
 
-                console.log('================================')
-                console.log('HASIL QUERY')
-                console.log('DATA:', data)
-                console.log('ERROR:', error)
-                console.log('================================')
 
-                // ---------------------------------------------
-                // Supabase error
-                // ---------------------------------------------
+                console.log(
+                    'DATA:',
+                    data
+                )
+
+                console.log(
+                    'ERROR:',
+                    error
+                )
+
+
+                // =================================================
+                // SUPABASE ERROR
+                // =================================================
 
                 if (error) {
+
                     console.error(
                         'SUPABASE ERROR:',
                         error
@@ -133,39 +198,47 @@ export default function EditQuestionPage() {
                     )
 
                     setLoading(false)
+
                     return
                 }
 
-                // ---------------------------------------------
-                // Data tidak ditemukan
-                // ---------------------------------------------
+
+                // =================================================
+                // DATA TIDAK DITEMUKAN
+                // =================================================
 
                 if (!data) {
+
                     console.error(
-                        'DATA SOAL TIDAK DITEMUKAN'
+                        'DATA TIDAK DITEMUKAN'
                     )
 
                     setErrorMessage(
-                        `Soal dengan ID ${questionId} tidak ditemukan.`
+                        'Data soal tidak ditemukan.'
                     )
 
                     setLoading(false)
+
                     return
                 }
 
+
+                // =================================================
+                // DATA DITEMUKAN
+                // =================================================
+
                 console.log(
-                    'DATA SOAL BERHASIL DITEMUKAN:',
+                    'DATA SOAL DITEMUKAN:',
                     data
                 )
 
+
                 // =================================================
-                // ISI DATA DASAR KE FORM
+                // DATA DASAR
                 // =================================================
 
                 setChapterId(
-                    data.chapter_id
-                        ? String(data.chapter_id)
-                        : ''
+                    data.chapter_id || ''
                 )
 
                 setQText(
@@ -185,39 +258,43 @@ export default function EditQuestionPage() {
                 // =================================================
                 // PARSE OPTIONS
                 // =================================================
-                //
-                // Data kamu saat ini terlihat seperti:
-                //
-                // "options": "{\"A\":\"...\",\"B\":\"...\"}"
-                //
-                // Jadi harus JSON.parse terlebih dahulu.
-                // =================================================
 
                 let parsedOptions: OptionsObject = {}
 
+
                 if (
-                    typeof data.options === 'string'
+                    typeof data.options ===
+                    'string'
                 ) {
+
                     try {
+
                         parsedOptions =
                             JSON.parse(
                                 data.options
                             )
+
                     } catch (error) {
+
                         console.error(
-                            'Gagal parse options:',
+                            'OPTIONS JSON ERROR:',
                             error
                         )
 
                         parsedOptions = {}
+
                     }
+
                 } else if (
                     data.options &&
-                    typeof data.options === 'object'
+                    typeof data.options ===
+                    'object'
                 ) {
+
                     parsedOptions =
                         data.options as OptionsObject
                 }
+
 
                 setOptionsObj(
                     parsedOptions
@@ -227,73 +304,95 @@ export default function EditQuestionPage() {
                 // =================================================
                 // PARSE CORRECT ANSWER
                 // =================================================
-                //
-                // Data kamu:
-                //
-                // "correct_answer": "[\"A\", \"B\"]"
-                //
-                // Maka perlu JSON.parse.
-                // =================================================
 
                 let parsedCorrectAnswer: any =
                     data.correct_answer
+
 
                 if (
                     typeof parsedCorrectAnswer ===
                     'string'
                 ) {
+
                     try {
+
                         parsedCorrectAnswer =
                             JSON.parse(
                                 parsedCorrectAnswer
                             )
+
                     } catch {
-                        // Jika bukan JSON,
-                        // biarkan sebagai string.
+
+                        /*
+                         * Jika bukan JSON,
+                         * biarkan sebagai string.
+                         */
+
                     }
+
                 }
 
 
                 // =================================================
-                // SET JAWABAN BERDASARKAN TIPE SOAL
+                // SET CORRECT ANSWER
                 // =================================================
 
                 if (
                     data.question_type ===
                     'multiple_choice'
                 ) {
+
                     setCorrectAnsMC(
+
                         typeof parsedCorrectAnswer ===
                         'string'
+
                             ? parsedCorrectAnswer
+
                             : 'A'
+
                     )
+
                 }
 
-                else if (
+
+                if (
                     data.question_type ===
                     'complex_multiple_choice'
                 ) {
+
                     setCorrectAnsComplex(
+
                         Array.isArray(
                             parsedCorrectAnswer
                         )
+
                             ? parsedCorrectAnswer
+
                             : []
+
                     )
+
                 }
 
-                else if (
+
+                if (
                     data.question_type ===
                     'true_false_matrix'
                 ) {
+
                     setCorrectAnsMatrix(
+
                         parsedCorrectAnswer &&
                         typeof parsedCorrectAnswer ===
                         'object'
+
                             ? parsedCorrectAnswer
+
                             : {}
+
                     )
+
                 }
 
 
@@ -304,6 +403,7 @@ export default function EditQuestionPage() {
                 setLoading(false)
 
             } catch (error) {
+
                 console.error(
                     'FETCH QUESTION ERROR:',
                     error
@@ -314,61 +414,76 @@ export default function EditQuestionPage() {
                 )
 
                 setLoading(false)
+
             }
+
         }
+
 
         fetchQuestion()
 
-        // Hanya jalankan ulang ketika ID berubah.
-        // Tidak memasukkan supabase karena createClient()
-        // dibuat di dalam component.
-    }, [questionId])
+    }, [questionid])
 
 
     // =====================================================
-    // RENDER TEXT + LATEX
+    // RENDER LATEX
     // =====================================================
 
     const renderMathText = (
         text: string
     ) => {
-        if (!text) return null
+
+        if (!text) {
+            return null
+        }
+
 
         const parts =
-            text.split(/(\$.*?\$)/g)
+            text.split(
+                /(\$.*?\$)/g
+            )
+
 
         return (
             <span>
+
                 {parts.map(
                     (
                         part,
                         index
                     ) => {
+
                         if (
                             part.startsWith('$') &&
                             part.endsWith('$')
                         ) {
-                            const mathContent =
-                                part.slice(
-                                    1,
-                                    -1
-                                )
 
                             return (
                                 <InlineMath
                                     key={index}
-                                    math={mathContent}
+                                    math={
+                                        part.slice(
+                                            1,
+                                            -1
+                                        )
+                                    }
                                 />
                             )
+
                         }
 
+
                         return (
-                            <span key={index}>
+                            <span
+                                key={index}
+                            >
                                 {part}
                             </span>
                         )
+
                     }
                 )}
+
             </span>
         )
     }
@@ -378,42 +493,47 @@ export default function EditQuestionPage() {
     // TAMBAH OPSI
     // =====================================================
 
-    const addMcOption = () => {
-        const existingKeys =
-            Object.keys(optionsObj)
+    const addOption = () => {
 
-        /*
-         * Cari huruf berikutnya.
-         *
-         * A, B, C, D, E, dst.
-         */
+        const existingKeys =
+            Object.keys(
+                optionsObj
+            )
+
 
         let nextKey = 'A'
+
 
         for (
             let i = 0;
             i < 26;
             i++
         ) {
+
             const key =
                 String.fromCharCode(
                     65 + i
                 )
+
 
             if (
                 !existingKeys.includes(
                     key
                 )
             ) {
+
                 nextKey = key
+
                 break
             }
+
         }
+
 
         setOptionsObj(
             prev => ({
                 ...prev,
-                [nextKey]: '',
+                [nextKey]: ''
             })
         )
     }
@@ -423,24 +543,35 @@ export default function EditQuestionPage() {
     // HAPUS OPSI
     // =====================================================
 
-    const removeMcOption = (
+    const removeOption = (
         key: string
     ) => {
-        const keys =
-            Object.keys(optionsObj)
 
-        if (keys.length <= 2) {
-            alert(
-                'Minimal harus ada 2 opsi!'
+        const keys =
+            Object.keys(
+                optionsObj
             )
+
+
+        if (
+            keys.length <= 2
+        ) {
+
+            alert(
+                'Minimal harus ada 2 opsi.'
+            )
+
             return
         }
 
+
         const updated = {
-            ...optionsObj,
+            ...optionsObj
         }
 
+
         delete updated[key]
+
 
         setOptionsObj(
             updated
@@ -448,19 +579,21 @@ export default function EditQuestionPage() {
 
 
         // ---------------------------------------------
-        // Jika jawaban MC yang dihapus
+        // Kalau jawaban MC yang dihapus
         // ---------------------------------------------
 
         if (
             correctAnsMC === key
         ) {
-            const remainingKeys =
+
+            const remaining =
                 Object.keys(
                     updated
                 )
 
+
             setCorrectAnsMC(
-                remainingKeys[0] || 'A'
+                remaining[0] || 'A'
             )
         }
 
@@ -476,55 +609,71 @@ export default function EditQuestionPage() {
                         item !== key
                 )
         )
+
     }
 
 
     // =====================================================
-    // TAMBAH PERNYATAAN MATRIX
+    // TAMBAH MATRIX
     // =====================================================
 
     const addMatrixStatement = () => {
-        const nextKey =
+
+        const key =
             `stmt_${Date.now()}`
+
 
         setOptionsObj(
             prev => ({
                 ...prev,
-                [nextKey]: '',
+                [key]: ''
             })
         )
+
 
         setCorrectAnsMatrix(
             prev => ({
                 ...prev,
-                [nextKey]: 'Benar',
+                [key]: 'Benar'
             })
         )
+
     }
 
 
     // =====================================================
-    // HAPUS PERNYATAAN MATRIX
+    // HAPUS MATRIX
     // =====================================================
 
     const removeMatrixStatement = (
         key: string
     ) => {
-        const keys =
-            Object.keys(optionsObj)
 
-        if (keys.length <= 1) {
-            alert(
-                'Minimal harus ada 1 pernyataan!'
+        const keys =
+            Object.keys(
+                optionsObj
             )
+
+
+        if (
+            keys.length <= 1
+        ) {
+
+            alert(
+                'Minimal harus ada 1 pernyataan.'
+            )
+
             return
         }
 
+
         const updated = {
-            ...optionsObj,
+            ...optionsObj
         }
 
+
         delete updated[key]
+
 
         setOptionsObj(
             updated
@@ -532,98 +681,98 @@ export default function EditQuestionPage() {
 
 
         const updatedAnswers = {
-            ...correctAnsMatrix,
+            ...correctAnsMatrix
         }
 
+
         delete updatedAnswers[key]
+
 
         setCorrectAnsMatrix(
             updatedAnswers
         )
+
     }
 
 
     // =====================================================
-    // HANDLE SUBMIT
+    // SUBMIT
     // =====================================================
 
     const handleSubmit = async (
         e: React.FormEvent
     ) => {
+
         e.preventDefault()
 
-        // ---------------------------------------------
-        // Validasi ID
-        // ---------------------------------------------
 
-        if (!questionId) {
+        if (!questionid) {
+
             alert(
                 'Question ID tidak ditemukan.'
             )
+
             return
         }
 
-
-        // ---------------------------------------------
-        // Validasi teks soal
-        // ---------------------------------------------
 
         if (!qText.trim()) {
+
             alert(
-                'Teks soal tidak boleh kosong!'
+                'Teks soal tidak boleh kosong.'
             )
+
             return
         }
 
-
-        // ---------------------------------------------
-        // Validasi opsi
-        // ---------------------------------------------
 
         if (
-            Object.keys(optionsObj)
-                .length === 0
+            Object.keys(
+                optionsObj
+            ).length === 0
         ) {
+
             alert(
-                'Opsi jawaban tidak boleh kosong!'
+                'Opsi jawaban tidak boleh kosong.'
             )
+
             return
         }
 
 
-        // ---------------------------------------------
-        // Tentukan correct_answer
-        // ---------------------------------------------
+        // =================================================
+        // TENTUKAN JAWABAN
+        // =================================================
 
-        let finalCorrectAnswer: any = null
+        let finalCorrectAnswer: any
+
 
         if (
             qType ===
             'multiple_choice'
         ) {
+
             finalCorrectAnswer =
                 correctAnsMC
-        }
 
-        else if (
+        } else if (
             qType ===
             'complex_multiple_choice'
         ) {
+
             finalCorrectAnswer =
                 correctAnsComplex
-        }
 
-        else if (
-            qType ===
-            'true_false_matrix'
-        ) {
+        } else {
+
             finalCorrectAnswer =
                 correctAnsMatrix
+
         }
 
 
         console.log(
-            '================================'
+            '===================================='
         )
 
         console.log(
@@ -632,36 +781,12 @@ export default function EditQuestionPage() {
 
         console.log(
             'ID:',
-            questionId
+            questionid
         )
 
         console.log(
-            'OPTIONS:',
-            optionsObj
-        )
-
-        console.log(
-            'CORRECT ANSWER:',
-            finalCorrectAnswer
-        )
-
-        console.log(
-            '================================'
-        )
-
-
-        setSubmitting(true)
-
-
-        // =================================================
-        // UPDATE DATABASE
-        // =================================================
-
-        const {
-            error,
-        } = await supabase
-            .from('questions')
-            .update({
+            'DATA:',
+            {
                 question_text:
                     qText.trim(),
 
@@ -675,11 +800,47 @@ export default function EditQuestionPage() {
                     finalCorrectAnswer,
 
                 explanation:
-                    qExplanation.trim(),
+                    qExplanation.trim()
+            }
+        )
+
+        console.log(
+            '===================================='
+        )
+
+
+        setSubmitting(true)
+
+
+        // =================================================
+        // UPDATE SUPABASE
+        // =================================================
+
+        const {
+            error
+        } = await supabase
+            .from('questions')
+            .update({
+
+                question_text:
+                    qText.trim(),
+
+                question_type:
+                    qType,
+
+                options:
+                    optionsObj,
+
+                correct_answer:
+                    finalCorrectAnswer,
+
+                explanation:
+                    qExplanation.trim()
+
             })
             .eq(
                 'id',
-                questionId
+                questionid
             )
 
 
@@ -688,6 +849,7 @@ export default function EditQuestionPage() {
         // =================================================
 
         if (error) {
+
             console.error(
                 'UPDATE ERROR:',
                 error
@@ -712,40 +874,35 @@ export default function EditQuestionPage() {
         )
 
 
-        /*
-         * Kembali ke halaman chapter.
-         */
+        router.back()
 
-        if (chapterId) {
-            router.push(
-                `/admin/practice/${chapterId}`
-            )
-        } else {
-            router.back()
-        }
-
-        router.refresh()
     }
 
 
     // =====================================================
-    // LOADING SCREEN
+    // LOADING
     // =====================================================
 
     if (loading) {
+
         return (
             <main className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
 
-                <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 text-center">
+                <div className="w-full max-w-md bg-white rounded-3xl border border-gray-100 shadow-sm p-8 text-center">
 
-                    <div className="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
+                    <div className="w-10 h-10 mx-auto mb-5 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin" />
 
-                    <p className="text-blue-600 font-semibold">
-                        Memuat data soal...
+                    <h2 className="text-lg font-extrabold text-gray-900">
+                        Memuat Soal...
+                    </h2>
+
+                    <p className="text-xs text-gray-500 mt-2">
+                        Question ID
                     </p>
 
-                    <p className="text-xs text-gray-400 mt-2 break-all">
-                        ID: {questionId || 'undefined'}
+                    <p className="text-xs text-blue-600 mt-1 break-all">
+                        {questionid ||
+                            'undefined'}
                     </p>
 
                 </div>
@@ -756,18 +913,19 @@ export default function EditQuestionPage() {
 
 
     // =====================================================
-    // ERROR SCREEN
+    // ERROR
     // =====================================================
 
     if (errorMessage) {
+
         return (
             <main className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
 
-                <div className="w-full max-w-lg bg-white rounded-3xl p-8 shadow-sm border border-red-100">
+                <div className="w-full max-w-md bg-white rounded-3xl border border-red-100 shadow-sm p-8">
 
                     <div className="text-center">
 
-                        <div className="text-5xl mb-4">
+                        <div className="text-5xl mb-5">
                             ⚠️
                         </div>
 
@@ -782,16 +940,14 @@ export default function EditQuestionPage() {
                     </div>
 
 
-                    {/* DEBUG */}
-
                     <div className="mt-6 p-4 bg-gray-900 rounded-2xl">
 
-                        <p className="text-[11px] font-bold text-gray-400 uppercase">
-                            Question ID
+                        <p className="text-[10px] font-bold text-gray-400">
+                            QUESTION ID
                         </p>
 
                         <p className="mt-1 text-xs text-green-400 break-all">
-                            {questionId ||
+                            {questionid ||
                                 'undefined'}
                         </p>
 
@@ -803,7 +959,7 @@ export default function EditQuestionPage() {
                         onClick={() =>
                             router.back()
                         }
-                        className="w-full mt-5 px-5 py-3 bg-gray-900 hover:bg-gray-800 text-white rounded-xl text-sm font-bold transition"
+                        className="w-full mt-5 py-3 bg-gray-900 hover:bg-gray-800 text-white rounded-xl text-sm font-bold transition"
                     >
                         Kembali
                     </button>
@@ -816,525 +972,530 @@ export default function EditQuestionPage() {
 
 
     // =====================================================
-    // FORM EDIT
+    // FORM
     // =====================================================
 
     return (
-        <main className="min-h-screen bg-gray-50 p-4 md:p-8 flex flex-col items-center">
 
-            <div className="w-full max-w-3xl bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100">
+        <main className="min-h-screen bg-gray-50 p-4 md:p-8">
 
-                {/* =================================================
-                    HEADER
-                ================================================= */}
+            <div className="w-full max-w-3xl mx-auto">
 
-                <div className="flex items-center justify-between gap-4 mb-6">
-
-                    <div>
-
-                        <h1 className="text-xl md:text-2xl font-extrabold text-gray-900">
-                            Edit Soal
-                        </h1>
-
-                        <p className="text-xs text-gray-400 mt-1 break-all">
-                            ID: {questionId}
-                        </p>
-
-                    </div>
-
-
-                    <button
-                        type="button"
-                        onClick={() =>
-                            router.back()
-                        }
-                        className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-bold transition"
-                    >
-                        Kembali
-                    </button>
-
-                </div>
-
-
-                {/* =================================================
-                    FORM
-                ================================================= */}
-
-                <form
-                    onSubmit={handleSubmit}
-                    className="flex flex-col gap-5"
-                >
-
-                    {/* =================================================
-                        TIPE SOAL
-                    ================================================= */}
-
-                    <div>
-
-                        <label className="block text-xs font-bold text-gray-700 mb-2">
-                            Tipe Soal
-                        </label>
-
-                        <select
-                            disabled
-                            value={qType}
-                            className="w-full p-3 border border-gray-200 rounded-2xl text-sm font-medium bg-gray-100 text-gray-500 cursor-not-allowed"
-                        >
-
-                            <option value="multiple_choice">
-                                Pilihan Ganda
-                            </option>
-
-                            <option value="complex_multiple_choice">
-                                Pilihan Ganda Kompleks
-                            </option>
-
-                            <option value="true_false_matrix">
-                                Matriks Benar / Salah
-                            </option>
-
-                        </select>
-
-                        <p className="text-[11px] text-gray-400 mt-1">
-                            Tipe soal tidak diubah ketika melakukan edit.
-                        </p>
-
-                    </div>
+                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 md:p-8">
 
 
                     {/* =================================================
-                        TEKS SOAL
+                        HEADER
                     ================================================= */}
 
-                    <div>
+                    <div className="flex items-start justify-between gap-4 mb-7">
 
-                        <label className="block text-xs font-bold text-gray-700 mb-2">
-                            Teks Soal
-                        </label>
+                        <div>
 
-                        <textarea
-                            required
-                            rows={5}
-                            value={qText}
-                            onChange={e =>
-                                setQText(
-                                    e.target.value
-                                )
-                            }
-                            className="w-full p-3 border border-gray-200 rounded-2xl text-sm focus:outline-none focus:border-blue-600 resize-none"
-                        />
+                            <h1 className="text-2xl font-extrabold text-gray-900">
+                                Edit Soal
+                            </h1>
 
-                        {/* PREVIEW */}
-
-                        {qText && (
-                            <div className="mt-2 p-4 bg-blue-50/50 border border-blue-100 rounded-xl text-sm text-blue-900">
-
-                                <span className="font-bold block mb-2">
-                                    Pratinjau:
-                                </span>
-
-                                <div className="whitespace-pre-wrap">
-                                    {renderMathText(
-                                        qText
-                                    )}
-                                </div>
-
-                            </div>
-                        )}
-
-                    </div>
-
-
-                    {/* =================================================
-                        PILIHAN GANDA / KOMPLEKS
-                    ================================================= */}
-
-                    {(qType ===
-                        'multiple_choice' ||
-                        qType ===
-                            'complex_multiple_choice') && (
-
-                        <div className="flex flex-col gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-200">
-
-                            {/* HEADER */}
-
-                            <div className="flex items-center justify-between gap-3">
-
-                                <span className="text-xs font-bold text-gray-700 uppercase">
-                                    Opsi Jawaban
-                                </span>
-
-                                <button
-                                    type="button"
-                                    onClick={
-                                        addMcOption
-                                    }
-                                    className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition"
-                                >
-                                    + Tambah Opsi
-                                </button>
-
-                            </div>
-
-
-                            {/* OPTIONS */}
-
-                            {Object.entries(
-                                optionsObj
-                            ).map(
-                                (
-                                    [
-                                        key,
-                                        value,
-                                    ]
-                                ) => (
-
-                                    <div
-                                        key={key}
-                                        className="flex items-center gap-3"
-                                    >
-
-                                        {/* LABEL */}
-
-                                        <span className="w-9 h-9 shrink-0 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-xs font-bold text-gray-700">
-                                            {key}
-                                        </span>
-
-
-                                        {/* TEXT */}
-
-                                        <input
-                                            type="text"
-                                            required
-                                            value={
-                                                value
-                                            }
-                                            onChange={e =>
-                                                setOptionsObj(
-                                                    prev => ({
-                                                        ...prev,
-                                                        [key]:
-                                                            e
-                                                                .target
-                                                                .value,
-                                                    })
-                                                )
-                                            }
-                                            className="flex-1 min-w-0 p-2.5 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-blue-500"
-                                        />
-
-
-                                        {/* SINGLE CHOICE */}
-
-                                        {qType ===
-                                            'multiple_choice' && (
-
-                                            <label className="flex shrink-0 items-center gap-1 text-xs font-bold text-green-700 cursor-pointer bg-green-50 px-3 py-2 rounded-xl border border-green-100">
-
-                                                <input
-                                                    type="radio"
-                                                    name="mc-answer"
-                                                    checked={
-                                                        correctAnsMC ===
-                                                        key
-                                                    }
-                                                    onChange={() =>
-                                                        setCorrectAnsMC(
-                                                            key
-                                                        )
-                                                    }
-                                                />
-
-                                                Kunci
-
-                                            </label>
-                                        )}
-
-
-                                        {/* COMPLEX CHOICE */}
-
-                                        {qType ===
-                                            'complex_multiple_choice' && (
-
-                                            <label className="flex shrink-0 items-center gap-1 text-xs font-bold text-purple-700 cursor-pointer bg-purple-50 px-3 py-2 rounded-xl border border-purple-100">
-
-                                                <input
-                                                    type="checkbox"
-                                                    checked={correctAnsComplex.includes(
-                                                        key
-                                                    )}
-                                                    onChange={() => {
-
-                                                        setCorrectAnsComplex(
-                                                            prev => {
-
-                                                                if (
-                                                                    prev.includes(
-                                                                        key
-                                                                    )
-                                                                ) {
-                                                                    return prev.filter(
-                                                                        item =>
-                                                                            item !==
-                                                                            key
-                                                                    )
-                                                                }
-
-                                                                return [
-                                                                    ...prev,
-                                                                    key,
-                                                                ]
-                                                            }
-                                                        )
-
-                                                    }}
-                                                />
-
-                                                Benar
-
-                                            </label>
-                                        )}
-
-
-                                        {/* HAPUS */}
-
-                                        {Object.keys(
-                                            optionsObj
-                                        ).length >
-                                            2 && (
-
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    removeMcOption(
-                                                        key
-                                                    )
-                                                }
-                                                className="shrink-0 text-red-500 hover:text-red-700 text-xs font-bold"
-                                            >
-                                                Hapus
-                                            </button>
-                                        )}
-
-                                    </div>
-
-                                )
-                            )}
+                            <p className="text-xs text-gray-400 mt-1 break-all">
+                                ID: {questionid}
+                            </p>
 
                         </div>
-                    )}
 
-
-                    {/* =================================================
-                        MATRIX BENAR / SALAH
-                    ================================================= */}
-
-                    {qType ===
-                        'true_false_matrix' && (
-
-                        <div className="flex flex-col gap-3 p-4 bg-blue-50/50 rounded-2xl border border-blue-100">
-
-                            <div className="flex items-center justify-between gap-3">
-
-                                <span className="text-xs font-bold text-blue-900 uppercase">
-                                    Pernyataan Matriks
-                                </span>
-
-                                <button
-                                    type="button"
-                                    onClick={
-                                        addMatrixStatement
-                                    }
-                                    className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition"
-                                >
-                                    + Tambah Pernyataan
-                                </button>
-
-                            </div>
-
-
-                            {Object.entries(
-                                optionsObj
-                            ).map(
-                                (
-                                    [
-                                        stKey,
-                                        stText,
-                                    ]
-                                ) => (
-
-                                    <div
-                                        key={stKey}
-                                        className="flex gap-3 p-3 bg-white border border-gray-200 rounded-xl items-center"
-                                    >
-
-                                        {/* TEXT */}
-
-                                        <input
-                                            type="text"
-                                            required
-                                            value={
-                                                stText
-                                            }
-                                            onChange={e =>
-                                                setOptionsObj(
-                                                    prev => ({
-                                                        ...prev,
-                                                        [stKey]:
-                                                            e
-                                                                .target
-                                                                .value,
-                                                    })
-                                                )
-                                            }
-                                            className="flex-1 min-w-0 p-2 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-blue-500"
-                                        />
-
-
-                                        {/* BENAR / SALAH */}
-
-                                        <select
-                                            value={
-                                                correctAnsMatrix[
-                                                    stKey
-                                                ] ||
-                                                'Benar'
-                                            }
-                                            onChange={e =>
-                                                setCorrectAnsMatrix(
-                                                    prev => ({
-                                                        ...prev,
-                                                        [stKey]:
-                                                            e
-                                                                .target
-                                                                .value,
-                                                    })
-                                                )
-                                            }
-                                            className="p-2 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold"
-                                        >
-
-                                            <option value="Benar">
-                                                Benar
-                                            </option>
-
-                                            <option value="Salah">
-                                                Salah
-                                            </option>
-
-                                        </select>
-
-
-                                        {/* HAPUS */}
-
-                                        {Object.keys(
-                                            optionsObj
-                                        ).length >
-                                            1 && (
-
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    removeMatrixStatement(
-                                                        stKey
-                                                    )
-                                                }
-                                                className="shrink-0 text-red-500 hover:text-red-700 text-xs font-bold"
-                                            >
-                                                Hapus
-                                            </button>
-                                        )}
-
-                                    </div>
-
-                                )
-                            )}
-
-                        </div>
-                    )}
-
-
-                    {/* =================================================
-                        PEMBAHASAN
-                    ================================================= */}
-
-                    <div>
-
-                        <label className="block text-xs font-bold text-gray-700 mb-2">
-                            Pembahasan
-                            <span className="font-normal text-gray-400">
-                                {' '}
-                                (Opsional)
-                            </span>
-                        </label>
-
-                        <textarea
-                            rows={5}
-                            value={
-                                qExplanation
-                            }
-                            onChange={e =>
-                                setQExplanation(
-                                    e.target.value
-                                )
-                            }
-                            className="w-full p-3 border border-gray-200 rounded-2xl text-sm focus:outline-none focus:border-blue-600 resize-none"
-                        />
-
-                        {qExplanation && (
-                            <div className="mt-2 p-4 bg-green-50/50 border border-green-100 rounded-xl text-sm text-green-900">
-
-                                <span className="font-bold block mb-2">
-                                    Pratinjau Pembahasan:
-                                </span>
-
-                                <div className="whitespace-pre-wrap">
-                                    {renderMathText(
-                                        qExplanation
-                                    )}
-                                </div>
-
-                            </div>
-                        )}
-
-                    </div>
-
-
-                    {/* =================================================
-                        BUTTON
-                    ================================================= */}
-
-                    <div className="flex gap-3 justify-end pt-2">
 
                         <button
                             type="button"
-                            disabled={
-                                submitting
-                            }
                             onClick={() =>
                                 router.back()
                             }
-                            className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-bold transition disabled:opacity-50"
+                            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-bold transition"
                         >
-                            Batal
-                        </button>
-
-
-                        <button
-                            type="submit"
-                            disabled={
-                                submitting
-                            }
-                            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-sm transition disabled:opacity-50"
-                        >
-                            {submitting
-                                ? 'Menyimpan...'
-                                : 'Simpan Perubahan'}
+                            Kembali
                         </button>
 
                     </div>
 
-                </form>
+
+                    <form
+                        onSubmit={
+                            handleSubmit
+                        }
+                        className="flex flex-col gap-5"
+                    >
+
+
+                        {/* =================================================
+                            TIPE SOAL
+                        ================================================= */}
+
+                        <div>
+
+                            <label className="block text-xs font-bold text-gray-700 mb-2">
+                                Tipe Soal
+                            </label>
+
+                            <select
+                                disabled
+                                value={qType}
+                                className="w-full p-3 border border-gray-300 rounded-xl bg-gray-100 text-gray-600 text-sm"
+                            >
+
+                                <option value="multiple_choice">
+                                    Pilihan Ganda
+                                </option>
+
+                                <option value="complex_multiple_choice">
+                                    Pilihan Ganda Kompleks
+                                </option>
+
+                                <option value="true_false_matrix">
+                                    Benar / Salah
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        {/* =================================================
+                            TEKS SOAL
+                        ================================================= */}
+
+                        <div>
+
+                            <label className="block text-xs font-bold text-gray-700 mb-2">
+                                Teks Soal
+                            </label>
+
+                            <textarea
+                                value={qText}
+                                onChange={e =>
+                                    setQText(
+                                        e.target.value
+                                    )
+                                }
+                                rows={5}
+                                className="w-full p-3 border border-gray-300 rounded-xl resize-none bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="Masukkan teks soal..."
+                            />
+
+
+                            {/* PREVIEW */}
+
+                            {qText && (
+
+                                <div className="mt-2 p-4 bg-blue-50 border border-blue-100 rounded-xl text-sm text-blue-900">
+
+                                    <p className="font-bold mb-2">
+                                        Pratinjau:
+                                    </p>
+
+                                    <div className="whitespace-pre-wrap">
+                                        {renderMathText(
+                                            qText
+                                        )}
+                                    </div>
+
+                                </div>
+
+                            )}
+
+                        </div>
+
+
+                        {/* =================================================
+                            PILIHAN GANDA
+                        ================================================= */}
+
+                        {(qType ===
+                            'multiple_choice' ||
+                            qType ===
+                                'complex_multiple_choice') && (
+
+                            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200">
+
+
+                                {/* HEADER */}
+
+                                <div className="flex items-center justify-between gap-3 mb-4">
+
+                                    <h2 className="text-xs font-bold text-gray-700 uppercase">
+                                        Opsi Jawaban
+                                    </h2>
+
+
+                                    <button
+                                        type="button"
+                                        onClick={
+                                            addOption
+                                        }
+                                        className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition"
+                                    >
+                                        + Tambah Opsi
+                                    </button>
+
+                                </div>
+
+
+                                {/* OPTIONS */}
+
+                                <div className="flex flex-col gap-3">
+
+                                    {Object.entries(
+                                        optionsObj
+                                    ).map(
+                                        (
+                                            [
+                                                key,
+                                                value
+                                            ]
+                                        ) => (
+
+                                            <div
+                                                key={key}
+                                                className="flex items-center gap-2"
+                                            >
+
+
+                                                {/* HURUF */}
+
+                                                <div className="w-9 h-9 shrink-0 flex items-center justify-center bg-white border border-gray-300 rounded-lg text-xs font-bold text-gray-900">
+                                                    {key}
+                                                </div>
+
+
+                                                {/* INPUT */}
+
+                                                <input
+                                                    type="text"
+                                                    value={
+                                                        value
+                                                    }
+                                                    onChange={e =>
+                                                        setOptionsObj(
+                                                            prev => ({
+                                                                ...prev,
+                                                                [key]:
+                                                                    e
+                                                                        .target
+                                                                        .value
+                                                            })
+                                                        )
+                                                    }
+                                                    className="flex-1 min-w-0 p-2.5 border border-gray-300 rounded-xl bg-white text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                    placeholder={`Opsi ${key}`}
+                                                />
+
+
+                                                {/* JAWABAN MC */}
+
+                                                {qType ===
+                                                    'multiple_choice' && (
+
+                                                    <label className="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-purple-50 border border-purple-100 rounded-xl text-xs font-bold text-purple-700 cursor-pointer">
+
+                                                        <input
+                                                            type="radio"
+                                                            name="correct-answer"
+                                                            checked={
+                                                                correctAnsMC ===
+                                                                key
+                                                            }
+                                                            onChange={() =>
+                                                                setCorrectAnsMC(
+                                                                    key
+                                                                )
+                                                            }
+                                                            className="accent-purple-600"
+                                                        />
+
+                                                        Benar
+
+                                                    </label>
+
+                                                )}
+
+
+                                                {/* JAWABAN COMPLEX */}
+
+                                                {qType ===
+                                                    'complex_multiple_choice' && (
+
+                                                    <label className="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-purple-50 border border-purple-100 rounded-xl text-xs font-bold text-purple-700 cursor-pointer">
+
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={correctAnsComplex.includes(
+                                                                key
+                                                            )}
+                                                            onChange={() => {
+
+                                                                setCorrectAnsComplex(
+                                                                    prev => {
+
+                                                                        if (
+                                                                            prev.includes(
+                                                                                key
+                                                                            )
+                                                                        ) {
+
+                                                                            return prev.filter(
+                                                                                item =>
+                                                                                    item !==
+                                                                                    key
+                                                                            )
+
+                                                                        }
+
+
+                                                                        return [
+                                                                            ...prev,
+                                                                            key
+                                                                        ]
+
+                                                                    }
+                                                                )
+
+                                                            }}
+                                                            className="accent-purple-600"
+                                                        />
+
+                                                        Benar
+
+                                                    </label>
+
+                                                )}
+
+
+                                                {/* HAPUS */}
+
+                                                {Object.keys(
+                                                    optionsObj
+                                                ).length >
+                                                    2 && (
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            removeOption(
+                                                                key
+                                                            )
+                                                        }
+                                                        className="shrink-0 text-xs font-bold text-red-500 hover:text-red-700 transition"
+                                                    >
+                                                        Hapus
+                                                    </button>
+
+                                                )}
+
+                                            </div>
+
+                                        )
+                                    )}
+
+                                </div>
+
+                            </div>
+
+                        )}
+
+
+                        {/* =================================================
+                            MATRIX
+                        ================================================= */}
+
+                        {qType ===
+                            'true_false_matrix' && (
+
+                            <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl">
+
+                                <div className="flex items-center justify-between mb-4">
+
+                                    <h2 className="text-xs font-bold text-blue-900 uppercase">
+                                        Pernyataan
+                                    </h2>
+
+                                    <button
+                                        type="button"
+                                        onClick={
+                                            addMatrixStatement
+                                        }
+                                        className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold"
+                                    >
+                                        + Tambah
+                                    </button>
+
+                                </div>
+
+
+                                <div className="flex flex-col gap-3">
+
+                                    {Object.entries(
+                                        optionsObj
+                                    ).map(
+                                        (
+                                            [
+                                                key,
+                                                value
+                                            ]
+                                        ) => (
+
+                                            <div
+                                                key={key}
+                                                className="flex items-center gap-3 bg-white p-3 rounded-xl border border-gray-200"
+                                            >
+
+                                                <input
+                                                    type="text"
+                                                    value={
+                                                        value
+                                                    }
+                                                    onChange={e =>
+                                                        setOptionsObj(
+                                                            prev => ({
+                                                                ...prev,
+                                                                [key]:
+                                                                    e
+                                                                        .target
+                                                                        .value
+                                                            })
+                                                        )
+                                                    }
+                                                    className="flex-1 min-w-0 p-2.5 border border-gray-300 rounded-xl bg-white text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    placeholder="Pernyataan..."
+                                                />
+
+
+                                                <select
+                                                    value={
+                                                        correctAnsMatrix[
+                                                            key
+                                                        ] ||
+                                                        'Benar'
+                                                    }
+                                                    onChange={e =>
+                                                        setCorrectAnsMatrix(
+                                                            prev => ({
+                                                                ...prev,
+                                                                [key]:
+                                                                    e
+                                                                        .target
+                                                                        .value
+                                                            })
+                                                        )
+                                                    }
+                                                    className="p-2.5 border border-gray-300 rounded-xl bg-white text-gray-900 text-sm"
+                                                >
+
+                                                    <option value="Benar">
+                                                        Benar
+                                                    </option>
+
+                                                    <option value="Salah">
+                                                        Salah
+                                                    </option>
+
+                                                </select>
+
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        removeMatrixStatement(
+                                                            key
+                                                        )
+                                                    }
+                                                    className="text-xs font-bold text-red-500 hover:text-red-700"
+                                                >
+                                                    Hapus
+                                                </button>
+
+                                            </div>
+
+                                        )
+                                    )}
+
+                                </div>
+
+                            </div>
+
+                        )}
+
+
+                        {/* =================================================
+                            PEMBAHASAN
+                        ================================================= */}
+
+                        <div>
+
+                            <label className="block text-xs font-bold text-gray-700 mb-2">
+
+                                Pembahasan
+
+                                <span className="font-normal text-gray-400">
+                                    {' '}
+                                    (Opsional)
+                                </span>
+
+                            </label>
+
+
+                            <textarea
+                                value={
+                                    qExplanation
+                                }
+                                onChange={e =>
+                                    setQExplanation(
+                                        e.target.value
+                                    )
+                                }
+                                rows={6}
+                                className="w-full p-3 border border-gray-300 rounded-xl resize-none bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="Masukkan pembahasan..."
+                            />
+
+                        </div>
+
+
+                        {/* =================================================
+                            BUTTON
+                        ================================================= */}
+
+                        <div className="flex justify-end gap-3 pt-2">
+
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    router.back()
+                                }
+                                disabled={
+                                    submitting
+                                }
+                                className="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-bold transition disabled:opacity-50"
+                            >
+                                Batal
+                            </button>
+
+
+                            <button
+                                type="submit"
+                                disabled={
+                                    submitting
+                                }
+                                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition disabled:opacity-50"
+                            >
+
+                                {submitting
+                                    ? 'Menyimpan...'
+                                    : 'Simpan Perubahan'}
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
 
             </div>
 
