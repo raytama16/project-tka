@@ -126,7 +126,7 @@ export default function ChapterDetailPage({ params }: { params: { chapterid: str
 
                                     <div className="flex items-center gap-2 self-end sm:self-center">
                                         <button 
-                                            onClick={() => router.push(`/admin/practice/${chapterId}/edit/${q.id}`)}
+                                            onClick={() => router.push(`/admin/practice/question/${q.id}/edit`)}
                                             className="px-3.5 py-1.5 text-xs font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 hover:text-gray-900 border border-gray-200 rounded-xl transition-all"
                                         >
                                             Edit
