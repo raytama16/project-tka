@@ -82,6 +82,11 @@ export default function EditQuestionPage({
                         'Error mengambil soal:',
                         error
                     )
+                    console.log('============================')
+                    console.log('QUESTION ID:', questionId)
+                    console.log('DATA:', data)
+                    console.log('ERROR:', error)
+                    console.log('============================')
 
                     if (mounted) {
                         setErrorMessage(
