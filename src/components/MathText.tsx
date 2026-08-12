@@ -165,9 +165,10 @@ export default function MathText({ content, inline = false }: { content: string;
           p: ({ node, ...props }) => <p className={inline ? 'm-0 inline' : 'mb-3 text-gray-700 leading-relaxed'} {...props} />,
           
           // Memberi jarak aman antar list
-          ul: ({ node, ...props }) => <ul className="my-2 space-y-1.5 text-gray-700" {...props} />,
-          ol: ({ node, ...props }) => <ol className="my-2 space-y-1.5 text-gray-700" {...props} />,
-          li: ({ node, ...props }) => <li className="text-gray-700 my-0 [&>p]:my-0" {...props} />,
+          // Memastikan list menggunakan bullet disc (titik bundar) yang jelas
+          ul: ({ node, ...props }) => <ul className="list-disc pl-6 my-2 space-y-1.5 text-gray-700" {...props} />,
+          ol: ({ node, ...props }) => <ol className="list-decimal pl-6 my-2 space-y-1.5 text-gray-700" {...props} />,
+          li: ({ node, ...props }) => <li className="text-gray-700 pl-1 my-0 leading-relaxed [&>p]:my-0" {...props} />,
           strong: ({ node, ...props }) => <strong className="font-bold text-gray-900" {...props} />,
           
           table: ({ node, ...props }) => (
