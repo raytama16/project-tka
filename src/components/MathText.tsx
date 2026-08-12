@@ -143,7 +143,7 @@ export default function MathText({ content, inline = false }: { content: string;
 
 // FRONTEND AUTO-SANITIZER: Membersihkan teks rusak & anomali $$ secara total
   const processedContent = String(content)
-    .replace(/\\n/g, '\n')
+    // .replace(/\\n/g, '\n')
     // Membersihkan secara paksa semua anomali teks yang nempel ke $$ atau \subseteq yang rusak
     .replace(/([a-zA-Z0-9_]+)\$\$([A-Za-z\\])/g, '$1 $$ $2')
     .replace(/ot\\subseteq/g, 'A \\subseteq')
