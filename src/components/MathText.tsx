@@ -154,7 +154,7 @@ export default function MathText({ content, inline = false }: { content: string;
     .replace(/\\\\\}/g, '}')
 
   return (
-    <div className={`prose prose-slate max-w-none whitespace-pre-line ${inline ? 'inline-block [&>p]:m-0' : 'leading-relaxed'}`}>
+    <div className={`text-slate-800 text-base leading-normal whitespace-pre-line ${inline ? 'inline-block [&>p]:m-0' : 'my-1'}`}>
       <ReactMarkdown
         remarkPlugins={[remarkMath, remarkGfm]}
         rehypePlugins={[rehypeKatex]}
