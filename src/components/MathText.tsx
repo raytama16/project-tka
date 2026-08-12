@@ -142,11 +142,21 @@ export default function MathText({ content, inline = false }: { content: string;
   if (!content) return null
 
   // FRONTEND AUTO-SANITIZER: Membersihkan teks rusak, \n mentah, dan LaTeX error secara otomatis
- const processedContent = String(content)
+// FRONTEND AUTO-SANITIZER: Membersihkan teks rusak & salah format $$ secara otomatis
+  const processedContent = String(content)
     .replace(/\\n/g, '\n')
-    // Perbaikan otomatis buat teks yang telanjur nempel ke rumus LaTeX
-    .replace(/([a-zA-Z0-9])\$\$([A-Za-z])/g, '$1 $$ $2')
+    // Memperbaiki teks biasa yang nempel ke penutup/pembuka $$
+    .replace(/([a-zA-Z0-9_]+)\$\$([A-Za-z\\])/g, '$1 $$ $2')
+    // Membersihkan sisa fragmen error seperti ot\subseteq
     .replace(/ot\\subseteq/g, 'A \\subseteq')
+    // Membersihkan anomali $$ di tengah kalimat agar berubah jadi tanda $ tunggal (inline math) yang aman
+    .replace(/([a-zA-Z0-9\s,\.]*)\$\$([^\$]+)\$\$([a-zA-Z0-9\s,\.]*)/g, (match, p1, p2, p3) => {
+      // Jika di dalam $$ tidak ada baris baru, ubah jadi inline math aman ($...$)
+      if (!p2.includes('\n')) {
+        return `${p1}$${p2.trim()}$${p3}`;
+      }
+      return match;
+    })
     .replace(/xmid1/g, '$x \\mid 1$')
     .replace(/xle10/g, '$x \\le 10$')
     .replace(/xtext/g, '$\\text')
