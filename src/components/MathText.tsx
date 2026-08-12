@@ -142,9 +142,11 @@ export default function MathText({ content, inline = false }: { content: string;
   if (!content) return null
 
   // FRONTEND AUTO-SANITIZER: Membersihkan teks rusak, \n mentah, dan LaTeX error secara otomatis
-  const processedContent = String(content)
+ const processedContent = String(content)
     .replace(/\\n/g, '\n')
-    .replace(/ot\\subseteq/g, 'A \\subseteq') // Mencegah teks nyangkut
+    // Perbaikan otomatis buat teks yang telanjur nempel ke rumus LaTeX
+    .replace(/([a-zA-Z0-9])\$\$([A-Za-z])/g, '$1 $$ $2')
+    .replace(/ot\\subseteq/g, 'A \\subseteq')
     .replace(/xmid1/g, '$x \\mid 1$')
     .replace(/xle10/g, '$x \\le 10$')
     .replace(/xtext/g, '$\\text')
