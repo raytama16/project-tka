@@ -143,13 +143,11 @@ export default function MathText({ content, inline = false }: { content: string;
 
   // FRONTEND AUTO-SANITIZER: Membersihkan teks rusak, \n mentah, dan LaTeX error secara otomatis
   const processedContent = String(content)
-    // 1. Ubah teks literal \n dari database menjadi baris baru asli
     .replace(/\\n/g, '\n')
-    // 2. Otomatis memperbaiki keyword LaTeX yang backslash-nya hilang dari database
+    .replace(/ot\\subseteq/g, 'A \\subseteq') // Mencegah teks nyangkut
     .replace(/xmid1/g, '$x \\mid 1$')
     .replace(/xle10/g, '$x \\le 10$')
     .replace(/xtext/g, '$\\text')
-    // 3. Membersihkan escape backslash berlebih yang bikin opsi jadi \{ \{ 
     .replace(/\\\\\{/g, '{')
     .replace(/\\\\\}/g, '}')
 
