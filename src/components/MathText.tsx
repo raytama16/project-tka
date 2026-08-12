@@ -141,21 +141,18 @@ function VennSvgRenderer({ type }: { type: string }) {
 export default function MathText({ content, inline = false }: { content: string; inline?: boolean }) {
   if (!content) return null
 
-  // FRONTEND AUTO-SANITIZER: Membersihkan teks rusak, \n mentah, dan LaTeX error secara otomatis
-// FRONTEND AUTO-SANITIZER: Membersihkan teks rusak & salah format $$ secara otomatis
+// FRONTEND AUTO-SANITIZER: Membersihkan teks rusak & anomali $$ secara total
   const processedContent = String(content)
     .replace(/\\n/g, '\n')
-    // Memperbaiki teks biasa yang nempel ke penutup/pembuka $$
+    // Membersihkan secara paksa semua anomali teks yang nempel ke $$ atau \subseteq yang rusak
     .replace(/([a-zA-Z0-9_]+)\$\$([A-Za-z\\])/g, '$1 $$ $2')
-    // Membersihkan sisa fragmen error seperti ot\subseteq
     .replace(/ot\\subseteq/g, 'A \\subseteq')
-    // Membersihkan anomali $$ di tengah kalimat agar berubah jadi tanda $ tunggal (inline math) yang aman
-    .replace(/([a-zA-Z0-9\s,\.]*)\$\$([^\$]+)\$\$([a-zA-Z0-9\s,\.]*)/g, (match, p1, p2, p3) => {
-      // Jika di dalam $$ tidak ada baris baru, ubah jadi inline math aman ($...$)
-      if (!p2.includes('\n')) {
-        return `${p1}$${p2.trim()}$${p3}`;
+    // Mengubah $$ yang nyasar di tengah kalimat menjadi $ tunggal agar aman dibaca parser
+    .replace(/\$\$([^$]+?)\$\$/g, (match, p1) => {
+      if (!p1.includes('\n')) {
+        return `$${p1.trim()}$`
       }
-      return match;
+      return match
     })
     .replace(/xmid1/g, '$x \\mid 1$')
     .replace(/xle10/g, '$x \\le 10$')
