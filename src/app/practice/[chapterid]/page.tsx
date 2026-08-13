@@ -266,7 +266,10 @@ export default function PracticeSessionPage() {
                             </div>
 
                             {/* Teks Soal */}
-                            <div className="mb-6 text-sm md:text-base font-medium text-gray-900 leading-relaxed">
+                            <div 
+                            className="mb-6 text-sm md:text-base font-medium text-gray-900 leading-relaxed"
+                            dangerouslySetInnerHTML={{ __html: q.question_text }}
+                            >
                                 {renderMathText(q.question_text)}
                             </div>
 
