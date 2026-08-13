@@ -339,8 +339,10 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
                 </div>
 
                 {/* Konten Materi (Anti Meluber / Overflow Fix) */}
-                <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed text-sm sm:text-base wrap-break-word overflow-x-hidden">
-                  <MathText content={activeSubMaterial.content} />
+                <div className="w-full overflow-x-hidden min-w-0">
+                  <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed text-sm sm:text-base wrap-break-word whitespace-normal">
+                    <MathText content={activeSubMaterial.content} />
+                  </div>
                 </div>
               </div>
             ) : (
