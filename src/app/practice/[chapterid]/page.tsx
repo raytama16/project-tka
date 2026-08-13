@@ -4,6 +4,7 @@ import { createClient } from '@/utils/supabase/client'
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { InlineMath } from 'react-katex'
+import parse from 'html-react-parser'
 
 type Question = {
     id: string
@@ -18,13 +19,13 @@ export default function PracticeSessionPage() {
     const params = useParams()
     const chapterId = (params.chapterid || params.chapterId) as string
     const router = useRouter()
-    
+
     const [questions, setQuestions] = useState<Question[]>([])
     const [selectedAnswers, setSelectedAnswers] = useState<Record<string, any>>({})
     const [submittedQuestions, setSubmittedQuestions] = useState<Record<string, boolean>>({})
     const [loading, setLoading] = useState(true)
     const [chapterTitle, setChapterTitle] = useState('Latihan Soal')
-    
+
     const supabase = createClient()
 
     useEffect(() => {
@@ -64,13 +65,16 @@ export default function PracticeSessionPage() {
         const parts = text.split(/(\$.*?\$)/g)
         return (
             <span>
-                {parts.map((part, index) => {
-                    if (part.startsWith('$') && part.endsWith('$')) {
-                        const mathContent = part.slice(1, -1)
-                        return <InlineMath key={index} math={mathContent} />
-                    }
-                    return <span key={index}>{part}</span>
-                })}
+               {parts.map((part, index) => {
+                // Kalau bagian ini adalah rumus LaTeX ($...$)
+                if (part.startsWith('$') && part.endsWith('$')) {
+                    const mathContent = part.slice(1, -1)
+                    return <InlineMath key={index} math={mathContent} />
+                }
+                
+                // Kalau bukan LaTeX, parsing teks biasa YANG MUNGKIN ADA TAG HTML-NYA (<p>, <br>, dll)
+                return <span key={index}>{parse(part)}</span>
+            })}
             </span>
         )
     }
@@ -153,8 +157,8 @@ export default function PracticeSessionPage() {
 
         if (q.question_type === 'multiple_choice') {
             return userAns === q.correct_answer ? 1 : 0
-        } 
-        
+        }
+
         else if (q.question_type === 'complex_multiple_choice') {
             const userArr = (userAns as string[]) || []
             const correctArr = (q.correct_answer as string[]) || []
@@ -169,8 +173,8 @@ export default function PracticeSessionPage() {
                 }
             })
             return Math.max(0, Math.min(1, earned / correctArr.length))
-        } 
-        
+        }
+
         else if (q.question_type === 'true_false_matrix') {
             const userObj = (userAns as Record<string, string>) || {}
             const correctObj = q.correct_answer || {}
@@ -236,7 +240,7 @@ export default function PracticeSessionPage() {
     return (
         <main className="min-h-screen bg-gray-50 p-4 md:p-8 flex justify-center">
             <div className="w-full max-w-3xl flex flex-col gap-6">
-                
+
                 {/* Header Informasi */}
                 <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 flex items-center justify-between">
                     <div>
@@ -256,7 +260,7 @@ export default function PracticeSessionPage() {
 
                     return (
                         <div key={q.id} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 flex flex-col">
-                            
+
                             {/* Header Nomor Soal & Tipe */}
                             <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
                                 <span className="text-xs font-bold text-gray-500">Soal {index + 1} dari {questions.length}</span>
@@ -266,9 +270,15 @@ export default function PracticeSessionPage() {
                             </div>
 
                             {/* Teks Soal */}
-                            <div 
+                            {/* <div 
                             className="mb-6 text-sm md:text-base font-medium text-gray-900 leading-relaxed"
                             dangerouslySetInnerHTML={{ __html: q.question_text }}
+                            >
+                                {renderMathText(q.question_text)}
+                            </div> */}
+
+                            <div
+                                className="mb-6 text-sm md:text-base font-medium text-gray-900 leading-relaxed"
                             >
                                 {renderMathText(q.question_text)}
                             </div>
@@ -279,7 +289,7 @@ export default function PracticeSessionPage() {
                                     {Object.entries(q.options).map(([key, value]) => {
                                         const isSelected = selectedAnswers[q.id] === key
                                         const status = getOptionStatus(q, key)
-                                        
+
                                         let borderStyle = 'border-gray-200 hover:border-gray-300 bg-white text-gray-700'
                                         let badgeStyle = 'bg-gray-100 text-gray-600'
 
@@ -422,7 +432,7 @@ export default function PracticeSessionPage() {
 
                 {/* Kartu Rekapitulasi Nilai (Muncul Otomatis Ketika Semua Soal Selesai) */}
                 {isAllFinished && (
-                    <div className="bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-3xl p-6 md:p-8 shadow-lg flex flex-col items-center text-center animate-fade-in">
+                    <div className="bg-linear-to-br from-blue-600 to-indigo-700 text-white rounded-3xl p-6 md:p-8 shadow-lg flex flex-col items-center text-center animate-fade-in">
                         <span className="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-3">
                             Sesi Selesai
                         </span>
@@ -432,7 +442,7 @@ export default function PracticeSessionPage() {
                         <p className="text-blue-100 text-xs md:text-sm mb-6">
                             Kamu telah menjawab semua pertanyaan dengan tuntas. Berikut adalah hasil rekapitulasi latihanmu:
                         </p>
-                        
+
                         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 w-full max-w-xs border border-white/20 mb-6 flex flex-col items-center">
                             <span className="text-xs uppercase tracking-widest text-blue-200 font-bold mb-1">Nilai Akhir</span>
                             <span className="text-4xl md:text-5xl font-black mb-2">{finalScore}</span>
