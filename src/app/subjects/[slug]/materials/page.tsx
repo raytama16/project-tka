@@ -1,6 +1,6 @@
 'use client'
 
-import { use, useEffect, useState } from 'react'
+import { use, useEffect, useState, useRef } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import MathText from '@/components/MathText'
 import { Lock, Sparkles, X, MessageCircle, CheckCircle2, Search, BookOpen, Menu, ChevronRight } from 'lucide-react'
@@ -33,6 +33,9 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
   // State untuk sistem pengecekan premium user & modal WhatsApp
   const [isPremium, setIsPremium] = useState<boolean>(false)
   const [showModal, setShowModal] = useState<boolean>(false)
+
+  // Ref untuk kontainer scroll konten agar bisa di-reset ke atas
+  const contentContainerRef = useRef<HTMLDivElement>(null)
 
   const supabase = createClient()
 
@@ -110,6 +113,13 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
       isMounted = false
     }
   }, [slug, supabase])
+
+  // Efek untuk mereset posisi scroll ke paling atas setiap kali sub-materi diganti
+  useEffect(() => {
+    if (contentContainerRef.current) {
+      contentContainerRef.current.scrollTop = 0
+    }
+  }, [activeSubMaterial])
 
   const toggleMaterial = (materialId: string) => {
     setOpenMaterialId(openMaterialId === materialId ? null : materialId)
@@ -289,8 +299,11 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
           </span>
         </div>
 
-        {/* Content Scrollable Container */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-6 md:p-10 flex justify-center">
+        {/* Content Scrollable Container (Dilengkapi ref untuk auto-scroll ke atas) */}
+        <div 
+          ref={contentContainerRef} 
+          className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-6 md:p-10 flex justify-center"
+        >
           <div className="w-full max-w-4xl bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-slate-200/80 p-5 sm:p-10 md:p-12 my-auto min-h-[75vh] flex flex-col justify-between transition-all">
             
             {isLoading ? (
