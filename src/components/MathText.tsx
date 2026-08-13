@@ -212,10 +212,10 @@ export default function MathText({ content, inline = false }: { content: string;
              ) 
              : 
              (
-              <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-4 font-mono text-sm leading-tight">
-                {/* <code className={className} {...props}>
+              <pre className="bg-gray-100 text-gray-900 p-4 rounded-lg overflow-x-auto my-4 font-mono text-sm leading-tight">
+                <code className={className} {...props}>
                   {children}
-                </code> */}
+                </code>
               </pre>
             )
           },
