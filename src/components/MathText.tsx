@@ -52,7 +52,7 @@ function FunctionPlotBlock({ fn }: { fn: string }) {
           data: [
             {
               fn: fn.trim(),
-              color: 'rgb(37, 99, 235)',
+              color: 'rgb(41, 103, 238)',
             },
           ],
         })
@@ -209,11 +209,13 @@ export default function MathText({ content, inline = false }: { content: string;
               <code className="bg-gray-100 text-red-600 px-1 py-0.5 rounded text-sm font-mono" {...props}>
                 {children}
               </code>
-            ) : (
+             ) 
+             : 
+             (
               <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-4 font-mono text-sm leading-tight">
-                <code className={className} {...props}>
+                {/* <code className={className} {...props}>
                   {children}
-                </code>
+                </code> */}
               </pre>
             )
           },
