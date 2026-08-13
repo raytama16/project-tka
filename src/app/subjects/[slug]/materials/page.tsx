@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import MathText from '@/components/MathText'
-import { Lock, Sparkles, X, MessageCircle, CheckCircle2 } from 'lucide-react'
+import { Lock, Sparkles, X, MessageCircle, CheckCircle2, Search, BookOpen, Menu, ChevronRight } from 'lucide-react'
 
 type SubMaterial = {
   id: string
@@ -28,7 +28,7 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
   const [activeSubMaterial, setActiveSubMaterial] = useState<SubMaterial | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [searchQuery, setSearchQuery] = useState<string>('')
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true)
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false)
 
   // State untuk sistem pengecekan premium user & modal WhatsApp
   const [isPremium, setIsPremium] = useState<boolean>(false)
@@ -69,7 +69,7 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
           return
         }
 
-        // 3. Ambil data materials beserta sub_materials (pastikan is_free ikut diselect)
+        // 3. Ambil data materials beserta sub_materials
         const { data, error } = await supabase
           .from('materials')
           .select(`
@@ -117,12 +117,10 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
 
   // Handler saat sub-materi diklik di sidebar
   const handleSubMaterialClick = (sub: SubMaterial) => {
-    // Jika sub-materi gratis ATAU user sudah premium, izinkan buka materi
     if (sub.is_free || isPremium) {
       setActiveSubMaterial(sub)
-      if (window.innerWidth < 1024) setSidebarOpen(false)
+      setSidebarOpen(false) // Otomatis tutup sidebar di HP setelah diklik
     } else {
-      // Jika terkunci, tampilkan modal langganan WhatsApp
       setShowModal(true)
     }
   }
@@ -135,56 +133,62 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
     return matchesChapter || matchesSub
   })
 
-  // Kontak WhatsApp Admin (Ganti dengan nomor aslimu)
-  const adminWhatsAppNumber = "6281234567890" 
+  // Kontak WhatsApp Admin
+  const adminWhatsAppNumber = "6285792108262" 
   const messageText = encodeURIComponent("Halo Admin, saya ingin berlangganan akun Premium Platform Belajar untuk membuka semua akses materi dan modul pembelajaran.")
   const whatsappUrl = `https://wa.me/${adminWhatsAppNumber}?text=${messageText}`
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] bg-slate-50 overflow-hidden relative font-sans">
+    <div className="flex h-[calc(100vh-4rem)] bg-slate-100 overflow-hidden relative font-sans">
+      
+      {/* ================= SIDEBAR DESKTOP & MOBILE DRAWER ================= */}
       <aside
-        className={`${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } fixed lg:static z-30 inset-y-0 left-0 w-80 bg-white border-r border-slate-200 flex flex-col h-full shrink-0 transition-transform duration-300 ease-in-out shadow-xl lg:shadow-none`}
+        className={`fixed lg:static inset-y-0 left-0 z-40 w-80 sm:w-88 bg-white border-r border-slate-200/80 flex flex-col h-full shrink-0 transition-transform duration-300 ease-in-out shadow-2xl lg:shadow-none ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}
       >
-        <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
-          <div>
-            <h2 className="font-bold text-base text-slate-900 tracking-tight">Daftar Bab Materi</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Pilih bab dan sub-bab untuk belajar</p>
+        {/* Header Sidebar */}
+        <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20">
+              <BookOpen className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="font-bold text-sm sm:text-base text-slate-900 tracking-tight">Daftar Bab Materi</h2>
+              <p className="text-[11px] text-slate-500">Pilih bab & sub-bab belajar</p>
+            </div>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+            className="lg:hidden p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition cursor-pointer"
             aria-label="Tutup Sidebar"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-3 border-b border-slate-100 bg-slate-50/50 shrink-0">
+        {/* Input Pencarian */}
+        <div className="p-3.5 border-b border-slate-100 bg-slate-50/60 shrink-0">
           <div className="relative">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+              <Search className="w-4 h-4" />
             </span>
             <input
               type="text"
               placeholder="Cari materi atau sub-bab..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-sm"
+              className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-2xs"
             />
           </div>
         </div>
 
-        <div className="space-y-3 overflow-y-auto flex-1 p-3 scrollbar-thin scrollbar-thumb-slate-200">
+        {/* List Bab & Sub-Bab */}
+        <div className="space-y-3 overflow-y-auto flex-1 p-3.5 scrollbar-thin scrollbar-thumb-slate-200">
           {isLoading ? (
             <div className="space-y-3 pt-2">
-              {[1, 2, 3].map((n) => (
-                <div key={n} className="animate-pulse bg-slate-100 h-16 rounded-xl w-full" />
+              {[1, 2, 3, 4].map((n) => (
+                <div key={n} className="animate-pulse bg-slate-100 h-16 rounded-2xl w-full" />
               ))}
             </div>
           ) : filteredMaterials.length > 0 ? (
@@ -195,19 +199,19 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
                 <div
                   key={material.id}
                   className={`border rounded-2xl overflow-hidden transition-all duration-200 ${
-                    isOpen ? 'border-blue-200 shadow-md bg-blue-50/10' : 'border-slate-200/80 hover:border-slate-300 bg-white shadow-sm'
+                    isOpen ? 'border-blue-300 shadow-sm bg-blue-50/10' : 'border-slate-200/80 hover:border-slate-300 bg-white'
                   }`}
                 >
-                  <div className="flex items-center justify-between p-3.5 bg-gradient-to-r from-slate-50/50 to-white">
-                    <span className="font-semibold text-xs text-slate-800 line-clamp-2 pr-2 leading-relaxed">
+                  <div className="flex items-center justify-between p-3.5 bg-linear-to-r from-slate-50/60 to-white">
+                    <span className="font-semibold text-xs sm:text-sm text-slate-800 line-clamp-2 pr-2 leading-relaxed">
                       {material.title}
                     </span>
                     <button
                       onClick={() => toggleMaterial(material.id)}
-                      className={`text-xs font-semibold px-3 py-1.5 rounded-xl transition-all duration-200 shrink-0 shadow-sm ${
+                      className={`text-xs font-semibold px-3 py-1.5 rounded-xl transition-all duration-200 shrink-0 shadow-2xs cursor-pointer ${
                         isOpen
                           ? 'bg-blue-600 text-white shadow-blue-500/20 hover:bg-blue-700'
-                          : 'bg-white text-blue-600 border border-blue-100 hover:bg-blue-50'
+                          : 'bg-white text-blue-600 border border-blue-200 hover:bg-blue-50'
                       }`}
                     >
                       {isOpen ? 'Tutup' : 'Buka'}
@@ -215,7 +219,7 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
                   </div>
 
                   {isOpen && (
-                    <div className="p-2 space-y-1 bg-white border-t border-slate-100">
+                    <div className="p-2 space-y-1.5 bg-white border-t border-slate-100">
                       {material.sub_materials?.length > 0 ? (
                         material.sub_materials.map((sub) => {
                           const isActive = activeSubMaterial?.id === sub.id
@@ -225,24 +229,20 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
                             <button
                               key={sub.id}
                               onClick={() => handleSubMaterialClick(sub)}
-                              className={`w-full text-left px-3 py-2.5 rounded-xl text-xs transition-all duration-150 flex items-center justify-between group ${
+                              className={`w-full text-left px-3 py-2.5 rounded-xl text-xs sm:text-sm transition-all duration-150 flex items-center justify-between group cursor-pointer ${
                                 isActive
-                                  ? 'bg-blue-600 text-white font-medium shadow-md shadow-blue-500/20'
+                                  ? 'bg-blue-600 text-white font-medium shadow-md shadow-blue-500/25'
                                   : isAccessible 
                                     ? 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
-                                    : 'text-slate-400 hover:bg-slate-50 bg-slate-50/50'
+                                    : 'text-slate-400 hover:bg-slate-50 bg-slate-50/60'
                               }`}
                             >
-                              <div className="flex items-center gap-2 pr-2 overflow-hidden">
+                              <div className="flex items-center gap-2.5 pr-2 min-w-0">
                                 {!isAccessible && <Lock className="w-3.5 h-3.5 shrink-0 text-amber-500" />}
-                                <span className="line-clamp-1">{sub.title}</span>
+                                <span className="truncate">{sub.title}</span>
                               </div>
 
-                              <span
-                                className={`w-1.5 h-1.5 rounded-full shrink-0 transition-all ${
-                                  isActive ? 'bg-white' : 'bg-transparent group-hover:bg-slate-300'
-                                }`}
-                              />
+                              <ChevronRight className={`w-3.5 h-3.5 shrink-0 transition-transform ${isActive ? 'text-white translate-x-0.5' : 'text-slate-300 group-hover:text-slate-400'}`} />
                             </button>
                           )
                         })
@@ -256,41 +256,43 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
             })
           ) : (
             <div className="text-center py-12 px-4">
-              <svg className="w-10 h-10 mx-auto text-slate-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
-              <p className="text-xs text-slate-500 font-medium">Materi tidak ditemukan</p>
-              <p className="text-[11px] text-slate-400 mt-0.5">Coba kata kunci pencarian lain.</p>
+              <Search className="w-10 h-10 mx-auto text-slate-300 mb-2 stroke-[1.5]" />
+              <p className="text-xs sm:text-sm text-slate-600 font-semibold">Materi tidak ditemukan</p>
+              <p className="text-xs text-slate-400 mt-0.5">Coba gunakan kata kunci pencarian lain.</p>
             </div>
           )}
         </div>
       </aside>
 
+      {/* Backdrop Sidebar Mobile */}
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 bg-slate-900/20 backdrop-blur-xs z-20 lg:hidden transition-opacity"
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-30 lg:hidden transition-opacity"
         />
       )}
 
-      <main className="flex-1 flex flex-col h-full bg-slate-50/50 overflow-hidden relative">
-        <div className="lg:hidden p-3 bg-white border-b border-slate-200 flex items-center justify-between shrink-0 shadow-xs">
+      {/* ================= MAIN CONTENT AREA ================= */}
+      <main className="flex-1 flex flex-col h-full bg-slate-100/70 overflow-hidden relative min-w-0">
+        
+        {/* Mobile Top Navigation Bar */}
+        <div className="lg:hidden p-3.5 bg-white border-b border-slate-200 flex items-center justify-between shrink-0 shadow-2xs z-10">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-xl text-xs font-semibold hover:bg-blue-100 transition"
+            className="flex items-center gap-2 px-3.5 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-bold hover:bg-blue-100 transition cursor-pointer"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-            Buka Daftar Bab
+            <Menu className="w-4 h-4" />
+            <span>Daftar Bab</span>
           </button>
-          <span className="text-xs font-medium text-slate-500 truncate max-w-50">
+          <span className="text-xs font-semibold text-slate-700 truncate max-w-45 sm:max-w-xs px-2">
             {activeSubMaterial?.title || 'Pilih Materi'}
           </span>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 sm:p-8 md:p-12 flex justify-center">
-          <div className="w-full max-w-4xl bg-white rounded-3xl shadow-sm border border-slate-200/80 p-6 sm:p-10 md:p-12 my-auto min-h-[75vh] flex flex-col justify-between transition-all">
+        {/* Content Scrollable Container */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-6 md:p-10 flex justify-center">
+          <div className="w-full max-w-4xl bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-slate-200/80 p-5 sm:p-10 md:p-12 my-auto min-h-[75vh] flex flex-col justify-between transition-all">
+            
             {isLoading ? (
               <div className="space-y-6 animate-pulse my-auto">
                 <div className="h-8 bg-slate-100 rounded-xl w-3/4 mx-auto" />
@@ -301,46 +303,47 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
                 </div>
               </div>
             ) : activeSubMaterial ? (
-              <div className="space-y-8">
+              <div className="space-y-6 sm:space-y-8 min-w-0">
+                {/* Judul & Badge Header */}
                 <div className="border-b border-slate-100 pb-6 text-center">
                   <div className="flex items-center justify-center gap-2 mb-3">
-                    <span className="inline-block px-3 py-1 bg-blue-50 text-blue-600 font-semibold text-xs rounded-full uppercase tracking-wider">
+                    <span className="inline-block px-3 py-1 bg-blue-50 text-blue-600 font-bold text-[10px] sm:text-xs rounded-full uppercase tracking-wider">
                       Modul Pembelajaran
                     </span>
                     {activeSubMaterial.is_free ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-extrabold rounded-full">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200/60 text-[10px] font-extrabold rounded-full">
                         <CheckCircle2 className="w-3 h-3" /> Gratis
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 text-[10px] font-extrabold rounded-full">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-200/60 text-[10px] font-extrabold rounded-full">
                         <Lock className="w-3 h-3" /> Premium
                       </span>
                     )}
                   </div>
-                  <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">
+                  <h1 className="text-xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-snug wrap-break-word px-2">
                     {activeSubMaterial.title}
                   </h1>
                 </div>
 
-                <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed text-sm sm:text-base">
+                {/* Konten Materi (Anti Meluber / Overflow Fix) */}
+                <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed text-sm sm:text-base wrap-break-word overflow-x-hidden">
                   <MathText content={activeSubMaterial.content} />
                 </div>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center my-auto py-16 text-center">
                 <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-4 shadow-sm">
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
+                  <BookOpen className="w-8 h-8" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-800 mb-1">Belum ada materi yang dipilih</h3>
-                <p className="text-xs text-slate-500 max-w-sm">
+                <h3 className="text-base sm:text-lg font-bold text-slate-800 mb-1">Belum ada materi yang dipilih</h3>
+                <p className="text-xs sm:text-sm text-slate-500 max-w-sm px-4">
                   Silakan klik tombol <span className="font-semibold text-blue-600">&quot;Buka&quot;</span> pada salah satu bab di sebelah kiri untuk mulai membaca materi dan rumus.
                 </p>
               </div>
             )}
 
-            <div className="border-t border-slate-100 pt-6 mt-12 flex items-center justify-between text-xs text-slate-400">
+            {/* Footer Kartu Materi */}
+            <div className="border-t border-slate-100 pt-6 mt-12 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-2 text-center sm:text-left">
               <span>Platform Pembelajaran TKA</span>
               <span>Modul Interaktif & KaTeX</span>
             </div>
@@ -350,19 +353,19 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
 
       {/* ================= MODAL POP-UP LANGGANAN WHATSAPP ================= */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative border border-gray-100 text-center overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative border border-slate-100 text-center overflow-hidden">
             
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100/60 rounded-full blur-2xl pointer-events-none" />
 
             <button 
               onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 w-9 h-9 bg-gray-100 hover:bg-gray-200 text-gray-500 rounded-full flex items-center justify-center transition cursor-pointer"
+              className="absolute top-4 right-4 w-9 h-9 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full flex items-center justify-center transition cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <div className="w-16 h-16 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-blue-200">
+            <div className="w-16 h-16 bg-linear-to-tr from-blue-600 to-indigo-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-blue-500/25">
               <Lock className="w-8 h-8" />
             </div>
 
@@ -371,11 +374,11 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
               <span>Konten Khusus Premium</span>
             </div>
 
-            <h3 className="text-xl font-black text-slate-900 tracking-tight">
+            <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
               Akses Terbatas ke Sub-Materi Ini
             </h3>
 
-            <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-500 mt-2 leading-relaxed px-2">
               Materi dan pembahasan mendalam ini hanya terbuka untuk akun yang telah berlangganan paket Premium. Hubungi admin untuk upgrade sekarang!
             </p>
 
@@ -384,7 +387,7 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-4 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-emerald-200 transition flex items-center justify-center gap-2.5 cursor-pointer"
+                className="w-full py-3.5 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm rounded-2xl shadow-lg shadow-emerald-500/25 transition flex items-center justify-center gap-2.5 cursor-pointer"
               >
                 <MessageCircle className="w-5 h-5 fill-current" />
                 <span>Langganan via Chat WhatsApp</span>
@@ -392,7 +395,7 @@ export default function MaterialsPage({ params }: { params: Promise<{ slug: stri
 
               <button
                 onClick={() => setShowModal(false)}
-                className="w-full py-3 px-6 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold text-xs rounded-2xl transition cursor-pointer"
+                className="w-full py-3 px-6 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs sm:text-sm rounded-2xl transition cursor-pointer"
               >
                 Nanti Saja
               </button>
