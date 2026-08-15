@@ -4,6 +4,8 @@ import { use, useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import MathText from '@/components/MathText'
+import parse from 'html-react-parser'
+import { InlineMath } from 'react-katex'
 
 type Question = {
   id?: string
@@ -41,6 +43,25 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
     fetchExamData()
   }, [slug])
 
+  const renderMathText = (text: string) => {
+          if (!text) return null
+          const parts = text.split(/(\$.*?\$)/g)
+          return (
+              <span>
+                 {parts.map((part, index) => {
+                  // Kalau bagian ini adalah rumus LaTeX ($...$)
+                  if (part.startsWith('$') && part.endsWith('$')) {
+                      const mathContent = part.slice(1, -1)
+                      return <InlineMath key={index} math={mathContent} />
+                  }
+                  
+                  // Kalau bukan LaTeX, parsing teks biasa YANG MUNGKIN ADA TAG HTML-NYA (<p>, <br>, dll)
+                  return <span key={index}>{parse(part)}</span>
+              })}
+              </span>
+          )
+      }
+      
   const fetchExamData = async () => {
     setLoading(true)
     let foundSubject = null
@@ -347,7 +368,8 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
               </div>
 
               <div className="text-base font-semibold text-gray-900">
-                <MathText content={currentQ.question_text} />
+                {/* <MathText content={currentQ.question_text} /> */}
+                {renderMathText(currentQ.question_text)}
               </div>
 
               {(currentQ.question_type === 'multiple_choice' || currentQ.question_type === 'complex_multiple_choice') && (
