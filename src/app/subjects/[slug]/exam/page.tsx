@@ -367,7 +367,7 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
                 </span>
               </div>
 
-              <div className="text-base font-semibold text-gray-900">
+              <div className="text-base font-medium text-gray-900">
                 {/* <MathText content={currentQ.question_text} /> */}
                 {renderMathText(currentQ.question_text)}
               </div>
