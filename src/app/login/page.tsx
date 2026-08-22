@@ -1,26 +1,25 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
+import { Suspense } from 'react'
 
-// Kita tangkap 'searchParams' langsung dari props halaman (Server-to-Client bridge)
-export default function LoginPage({
-  searchParams,
-}: {
-  searchParams: { error?: string }
-}) {
+// 1. Bungkus komponen utama ke dalam sub-komponen agar aman menggunakan useSearchParams
+function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
 
-  // Ambil error dari props URL
-  const urlError = searchParams?.error ? decodeURIComponent(searchParams.error) : null
+  // 2. Ambil error dari URL secara benar menggunakan hook useSearchParams
+  const rawError = searchParams.get('error')
+  const urlError = rawError ? decodeURIComponent(rawError) : null
 
   // Fungsi Login Manual
   const handleLogin = async (e: React.FormEvent) => {
@@ -70,7 +69,7 @@ export default function LoginPage({
           <p className="text-sm text-slate-500 mt-1">Masuk untuk melanjutkan ke akun Anda</p>
         </div>
 
-        {/* NOTIFIKASI ERROR DARI URL (LANGSUNG DARI PROPS) */}
+        {/* NOTIFIKASI ERROR DARI URL (CALLBACK) */}
         {urlError && (
           <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-xl text-sm flex items-start gap-3 shadow-sm">
             <span className="text-lg">⚠️</span>
@@ -160,5 +159,14 @@ export default function LoginPage({
 
       </div>
     </main>
+  )
+}
+
+// 3. Export default dibungkus Suspense agar Next.js tidak error saat membaca useSearchParams di Client Component
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Memuat...</div>}>
+      <LoginForm />
+    </Suspense>
   )
 }
