@@ -5,7 +5,9 @@ import { createClient } from '@/utils/supabase/server'
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/onboarding'
+  
+  // Ambil parameter 'next' jika ada, default kosong dulu karena kita mau cek onboarding
+  const nextParam = searchParams.get('next') ?? '/'
 
   if (code) {
     const supabase = await createClient()
@@ -17,31 +19,38 @@ export async function GET(request: Request) {
       // 2. Ambil data user yang sedang login
       const { data: { user } } = await supabase.auth.getUser()
 
-      if (user && user.email) {
-        // 3. Cek apakah email user sudah terdaftar di tabel 'profiles'
-        const { data: existingProfile, error: profileError } = await supabase
+      if (user) {
+        // 3. Cek apakah profil user sudah ada di tabel 'profiles'
+        // Asumsi: Kita cek kolom penanda seperti 'full_name' atau 'onboarding_completed' atau cukup ada tidaknya baris data
+        const { data: profile } = await supabase
           .from('profiles')
-          .select('id')
-          .eq('id', user.id) // atau sesuaikan .eq('email', user.email) jika tabel profiles pakai kolom email
+          .select('*') // Ambil semua kolom untuk dicek kelengkapannya
+          .eq('id', user.id)
           .maybeSingle()
 
-        // 4. Jika profil belum ada di database, gagalkan login!
-        if (profileError || !existingProfile) {
-          // Sign out agar sesi loginnya terhapus
-          await supabase.auth.signOut()
-
-          // Lempar kembali ke halaman login dengan pesan error
-          return NextResponse.redirect(
-            `${origin}/login?error=Akun belum terdaftar. Silakan hubungi admin atau daftar terlebih dahulu.`
-          )
+        // 4. Logika Penentuan Halaman Tujuan
+        // Jika profil belum ada, atau kolom penting (misal nama/onboarding) belum diisi:
+        if (!profile || !profile.full_name) {
+          // Jika data profil belum ada sama sekali, kita buatkan baris dasarnya dulu (opsional tapi aman)
+          if (!profile) {
+            await supabase.from('profiles').insert([
+              { 
+                id: user.id, 
+                email: user.email,
+              }
+            ])
+          }
+          
+          // Lempar ke halaman onboarding karena belum lengkap
+          return NextResponse.redirect(`${origin}/onboarding`)
         }
-      }
 
-      // Jika email sudah terdaftar, lanjutkan ke tujuan (onboarding / dashboard)
-      return NextResponse.redirect(`${origin}${next}`)
+        // 5. Jika profil SUDAH ADA dan sudah lengkap, langsung ke halaman utama / tujuan awal
+        return NextResponse.redirect(`${origin}${nextParam}`)
+      }
     }
   }
 
-  // Jika kode gagal atau tidak valid
+  // Jika gagal autentikasi
   return NextResponse.redirect(`${origin}/login?error=Gagal melakukan autentikasi Google`)
 }
