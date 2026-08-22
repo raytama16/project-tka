@@ -1,4 +1,3 @@
-// app/login/page.tsx
 'use client'
 
 import { useState, Suspense } from 'react'
@@ -6,19 +5,20 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
 
-// Komponen terpisah khusus untuk menangani parameter error dari URL (harus dibungkus Suspense)
-function LoginErrorAlert() {
+// Komponen terpisah untuk menangkap error dari parameter URL (misal dari callback)
+function URLParamError() {
   const searchParams = useSearchParams()
-  const errorMessage = searchParams.get('error')
+  const error = searchParams.get('error')
 
-  if (!errorMessage) return null
+  if (!error) return null
 
   return (
-    <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex items-start gap-3 shadow-sm">
-      <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-      </svg>
-      <span>{errorMessage}</span>
+    <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-xl text-sm flex items-start gap-3 shadow-sm animate-fade-in">
+      <span className="text-lg">⚠️</span>
+      <div className="flex-1">
+        <p className="font-semibold">Autentikasi Gagal</p>
+        <p className="text-red-600 mt-0.5">{decodeURIComponent(error)}</p>
+      </div>
     </div>
   )
 }
@@ -27,16 +27,16 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [formError, setFormError] = useState<string | null>(null)
 
   const router = useRouter()
   const supabase = createClient()
 
-  // Fungsi Login dengan Email & Password
+  // Fungsi Login Manual (Email & Password)
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setError(null)
+    setFormError(null)
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -44,10 +44,10 @@ export default function LoginPage() {
     })
 
     if (error) {
-      setError(error.message)
+      setFormError(error.message)
       setLoading(false)
     } else {
-      router.push('/') // Mengarahkan ke dashboard utama setelah sukses login
+      router.push('/')
       router.refresh()
     }
   }
@@ -55,55 +55,53 @@ export default function LoginPage() {
   // Fungsi Login dengan Google OAuth
   const handleGoogleLogin = async () => {
     setLoading(true)
-    setError(null)
+    setFormError(null)
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/`,
+        redirectTo: `${window.location.origin}/auth/callback`,
       },
     })
 
     if (error) {
-      setError(error.message)
+      setFormError(error.message)
       setLoading(false)
     }
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4">
-      <div className="max-w-md w-full bg-white/80 backdrop-blur-xl p-8 rounded-2xl shadow-xl border border-white/20 my-8 transition-all duration-300">
-        
-        {/* Suspense boundary untuk menangani useSearchParams dari URL */}
-        <Suspense fallback={null}>
-          <LoginErrorAlert />
-        </Suspense>
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+      <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
 
-        {/* Header Section */}
+        {/* Header Title */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-600 text-white font-bold text-xl mb-3 shadow-lg shadow-blue-500/30">
-            T
-          </div>
-          <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Masuk ke Web TKA</h1>
-          <p className="text-sm text-slate-500 mt-1">Silakan masuk untuk melanjutkan latihan ujianmu</p>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Selamat Datang Kembali</h1>
+          <p className="text-sm text-slate-500 mt-1">Masuk untuk melanjutkan ke akun Anda</p>
         </div>
 
-        {/* Error Alert Message (Internal Form Error) */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex items-start gap-3">
-            <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <span>{error}</span>
+        {/* Notifikasi Error dari URL (Redirect Callback) - Wajib dibungkus Suspense */}
+        <Suspense fallback={null}>
+          <URLParamError />
+        </Suspense>
+
+        {/* Notifikasi Error dari Form Manual */}
+        {formError && (
+          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-xl text-sm flex items-start gap-3 shadow-sm">
+            <span className="text-lg">⚠️</span>
+            <div className="flex-1">
+              <p className="font-semibold">Terjadi Kesalahan</p>
+              <p className="text-red-600 mt-0.5">{formError}</p>
+            </div>
           </div>
         )}
 
-        {/* Google OAuth Button */}
+        {/* Tombol Login Google */}
         <button
-          type="button"
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-slate-200 rounded-xl shadow-sm bg-white text-slate-700 font-medium hover:bg-slate-50 hover:border-slate-300 focus:outline-none focus:ring-4 focus:ring-slate-100 transition-all duration-200 disabled:opacity-50 cursor-pointer"
+          type="button"
+          className="w-full flex items-center justify-center gap-3 py-2.5 px-4 border border-slate-300 rounded-xl font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-sm disabled:opacity-50"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -123,69 +121,63 @@ export default function LoginPage() {
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
             />
           </svg>
-          <span>Masuk dengan Akun Google</span>
+          Lanjutkan dengan Google
         </button>
 
-        {/* Divider OR */}
         <div className="flex items-center my-6">
           <div className="flex-grow border-t border-slate-200"></div>
-          <span className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Atau dengan email</span>
+          <span className="px-3 text-xs uppercase tracking-wider text-slate-400 font-medium">Atau dengan email</span>
           <div className="flex-grow border-t border-slate-200"></div>
         </div>
 
-        {/* Email Login Form */}
+        {/* Form Login Manual */}
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
-              Alamat Email
+            <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+              Email
             </label>
             <input
               type="email"
               required
+              placeholder="nama@domain.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition text-slate-800 text-sm"
-              placeholder="nama@email.com"
+              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-sm focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
-              Password
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                Password
+              </label>
+              <Link href="/forgot-password" className="text-xs text-blue-600 hover:underline">
+                Lupa password?
+              </Link>
+            </div>
             <input
               type="password"
               required
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition text-slate-800 text-sm"
-              placeholder="••••••••"
+              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-sm focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-200 disabled:opacity-50 text-sm cursor-pointer"
+            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl text-sm transition-all shadow-md shadow-blue-500/20 disabled:opacity-50 mt-2"
           >
-            {loading ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Memproses...
-              </span>
-            ) : (
-              'Masuk Sekarang'
-            )}
+            {loading ? 'Memproses...' : 'Masuk'}
           </button>
         </form>
 
-        {/* Footer Link to Register */}
-        <p className="mt-8 text-center text-sm text-slate-500">
+        {/* Footer Link Register */}
+        <p className="mt-8 text-sm text-center text-slate-500">
           Belum punya akun?{' '}
-          <Link href="/register" className="text-blue-600 font-semibold hover:text-blue-700 hover:underline">
+          <Link href="/register" className="text-blue-600 font-semibold hover:underline">
             Daftar sekarang
           </Link>
         </p>
