@@ -6,17 +6,25 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   
-  // Ambil parameter 'next' jika ada, default ke '/'
+  // Ambil parameter error bawaan dari Google / Supabase Auth jika ada di URL awal
+  const oauthError = searchParams.get('error_description') || searchParams.get('error')
+  if (oauthError) {
+    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(oauthError)}`)
+  }
+
   const nextParam = searchParams.get('next') ?? '/'
 
-  if (code) {
+  if (!code) {
+    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Kode autentikasi tidak ditemukan')}`)
+  }
+
+  try {
     const supabase = await createClient()
     
     // 1. Tukar code dengan session Google
     const { error: authError } = await supabase.auth.exchangeCodeForSession(code)
     
     if (authError) {
-      console.error("Gagal exchange code:", authError.message)
       return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(authError.message)}`)
     }
 
@@ -24,7 +32,7 @@ export async function GET(request: Request) {
     const { data: { user }, error: userError } = await supabase.auth.getUser()
 
     if (userError || !user) {
-      return NextResponse.redirect(`${origin}/login?error=Gagal+mendapatkan+data+user`)
+      return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Gagal mendapatkan data user dari sesi')}`)
     }
 
     // 3. Cek apakah profil user sudah ada di tabel 'profiles'
@@ -35,11 +43,10 @@ export async function GET(request: Request) {
       .maybeSingle()
 
     if (profileError) {
-      console.error("Gagal mengambil profil:", profileError.message)
+      return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Database error: ' + profileError.message)}`)
     }
 
-    // 4. Logika Penentuan Halaman Tujuan & Onboarding
-    // Jika profil belum ada sama sekali:
+    // 4. Jika profil belum ada, coba buat baru
     if (!profile) {
       const { error: insertError } = await supabase.from('profiles').insert([
         { 
@@ -49,22 +56,25 @@ export async function GET(request: Request) {
       ])
 
       if (insertError) {
-        console.error("GAGAL INSERT PROFILES:", insertError.message)
+        // INI DIA PENYEBABNYA! Kalau database nolak insert, tangkap dan lempar ke login biar kelihatan
+        return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Database error saving new user: ' + insertError.message)}`)
       }
 
-      // Lempar ke halaman onboarding karena data baru dibuat
+      // Pastikan halaman /onboarding benar-benar ada, jika belum ada, ganti arah ke '/' atau '/login'
       return NextResponse.redirect(`${origin}/onboarding`)
     }
 
-    // Jika profil sudah ada, tapi nama lengkap (full_name) belum diisi/kosong
+    // Jika profil sudah ada tapi full_name kosong
     if (!profile.full_name) {
       return NextResponse.redirect(`${origin}/onboarding`)
     }
 
-    // 5. Jika profil SUDAH ADA dan lengkap, langsung ke halaman tujuan awal
+    // 5. Sukses total, masuk ke tujuan awal
     return NextResponse.redirect(`${origin}${nextParam}`)
-  }
 
-  // Jika parameter 'code' tidak ada di URL
-  return NextResponse.redirect(`${origin}/login?error=Kode+autentikasi+tidak+ditemukan`)
+  } catch (err: any) {
+    // Menangkap error tak terduga (unexpected failure) di server
+    const errorMessage = err?.message || 'Terjadi kesalahan sistem yang tidak diketahui'
+    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(errorMessage)}`)
+  }
 }
