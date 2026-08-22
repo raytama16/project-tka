@@ -1,42 +1,35 @@
 'use client'
 
-import { useState, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
-
-// Komponen terpisah untuk menangkap error dari parameter URL (misal dari callback)
-function URLParamError() {
-  const searchParams = useSearchParams()
-  const error = searchParams.get('error')
-
-  if (!error) return null
-
-  return (
-    <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-xl text-sm flex items-start gap-3 shadow-sm animate-fade-in">
-      <span className="text-lg">⚠️</span>
-      <div className="flex-1">
-        <p className="font-semibold">Autentikasi Gagal</p>
-        <p className="text-red-600 mt-0.5">{decodeURIComponent(error)}</p>
-      </div>
-    </div>
-  )
-}
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [formError, setFormError] = useState<string | null>(null)
-
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  
   const router = useRouter()
   const supabase = createClient()
+
+  // Tangkap error dari URL secara langsung menggunakan window.location (Anti Gagal & Pasti Muncul)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const errorParam = params.get('error')
+      if (errorParam) {
+        setErrorMessage(decodeURIComponent(errorParam))
+      }
+    }
+  }, [])
 
   // Fungsi Login Manual (Email & Password)
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setFormError(null)
+    setErrorMessage(null)
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -44,7 +37,7 @@ export default function LoginPage() {
     })
 
     if (error) {
-      setFormError(error.message)
+      setErrorMessage(error.message)
       setLoading(false)
     } else {
       router.push('/')
@@ -55,17 +48,17 @@ export default function LoginPage() {
   // Fungsi Login dengan Google OAuth
   const handleGoogleLogin = async () => {
     setLoading(true)
-    setFormError(null)
-
+    setErrorMessage(null)
+    
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
       },
     })
-
+    
     if (error) {
-      setFormError(error.message)
+      setErrorMessage(error.message)
       setLoading(false)
     }
   }
@@ -73,25 +66,20 @@ export default function LoginPage() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
       <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
-
+        
         {/* Header Title */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Selamat Datang Kembali</h1>
           <p className="text-sm text-slate-500 mt-1">Masuk untuk melanjutkan ke akun Anda</p>
         </div>
 
-        {/* Notifikasi Error dari URL (Redirect Callback) - Wajib dibungkus Suspense */}
-        <Suspense fallback={null}>
-          <URLParamError />
-        </Suspense>
-
-        {/* Notifikasi Error dari Form Manual */}
-        {formError && (
-          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-xl text-sm flex items-start gap-3 shadow-sm">
+        {/* Notifikasi Error (Dari URL redirect callback ataupun dari form) */}
+        {errorMessage && (
+          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-xl text-sm flex items-start gap-3 shadow-sm animate-fade-in">
             <span className="text-lg">⚠️</span>
             <div className="flex-1">
-              <p className="font-semibold">Terjadi Kesalahan</p>
-              <p className="text-red-600 mt-0.5">{formError}</p>
+              <p className="font-semibold">Perhatian</p>
+              <p className="text-red-600 mt-0.5">{errorMessage}</p>
             </div>
           </div>
         )}
@@ -151,9 +139,6 @@ export default function LoginPage() {
               <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider">
                 Password
               </label>
-              <Link href="/forgot-password" className="text-xs text-blue-600 hover:underline">
-                Lupa password?
-              </Link>
             </div>
             <input
               type="password"
