@@ -1,18 +1,31 @@
 // app/login/page.tsx
+'using client'
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
+
+// Komponen terpisah khusus untuk menangani parameter error dari URL
+function LoginErrorAlert() {
+  const searchParams = useSearchParams()
+  const errorMessage = searchParams.get('error')
+
+  if (!errorMessage) return null
+
+  return (
+    <div className="p-4 mb-4 text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-2xl">
+      {errorMessage}
+    </div>
+  )
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const searchParams = useSearchParams()
-  const errorMessage = searchParams.get('error')
 
   const router = useRouter()
   const supabase = createClient()
@@ -58,12 +71,12 @@ export default function LoginPage() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4">
       <div className="max-w-md w-full bg-white/80 backdrop-blur-xl p-8 rounded-2xl shadow-xl border border-white/20 my-8 transition-all duration-300">
-        {/* Jika ada error, tampilkan kotaknya */}
-      {errorMessage && (
-        <div className="p-4 mb-4 text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-2xl">
-          {errorMessage}
-        </div>
-      )}
+        
+        {/* Suspense boundary untuk menangani useSearchParams saat build */}
+        <Suspense fallback={null}>
+          <LoginErrorAlert />
+        </Suspense>
+
         {/* Header Section */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-600 text-white font-bold text-xl mb-3 shadow-lg shadow-blue-500/30">
@@ -73,7 +86,7 @@ export default function LoginPage() {
           <p className="text-sm text-slate-500 mt-1">Silakan masuk untuk melanjutkan latihan ujianmu</p>
         </div>
 
-        {/* Error Alert Message */}
+        {/* Error Alert Message (Internal Form Error) */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex items-start gap-3">
             <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -88,7 +101,7 @@ export default function LoginPage() {
           type="button"
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-slate-200 rounded-xl shadow-sm bg-white text-slate-700 font-medium hover:bg-slate-50 hover:border-slate-300 focus:outline-none focus:ring-4 focus:ring-slate-100 transition-all duration-200 disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-slate-200 rounded-xl shadow-sm bg-white text-slate-700 font-medium hover:bg-slate-50 hover:border-slate-300 focus:outline-none focus:ring-4 focus:ring-slate-100 transition-all duration-200 disabled:opacity-50 cursor-pointer"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -151,7 +164,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-200 disabled:opacity-50 text-sm"
+            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-200 disabled:opacity-50 text-sm cursor-pointer"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
