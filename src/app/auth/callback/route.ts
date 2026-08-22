@@ -32,18 +32,23 @@ export async function GET(request: Request) {
         // Jika profil belum ada, atau kolom penting (misal nama/onboarding) belum diisi:
         if (!profile || !profile.full_name) {
           // Jika data profil belum ada sama sekali, kita buatkan baris dasarnya dulu (opsional tapi aman)
-          if (!profile) {
-            await supabase.from('profiles').insert([
-              { 
-                id: user.id, 
-                email: user.email,
-              }
-            ])
+          // 4. LOGIKA ONBOARDING:
+          // 4. LOGIKA ONBOARDING:
+        if (!profile) {
+          const { error: insertError } = await supabase.from('profiles').insert([
+            { 
+              id: user.id, 
+              email: user.email,
+            }
+          ])
+
+          // Cek apakah ada error saat insert ke database
+          if (insertError) {
+            console.error("GAGAL INSERT PROFILES:", insertError.message)
           }
-          
-          // Lempar ke halaman onboarding karena belum lengkap
+
           return NextResponse.redirect(`${origin}/onboarding`)
-        }
+        }}
 
         // 5. Jika profil SUDAH ADA dan sudah lengkap, langsung ke halaman utama / tujuan awal
         return NextResponse.redirect(`${origin}${nextParam}`)
