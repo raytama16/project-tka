@@ -6,7 +6,7 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   
-  // Ambil parameter error bawaan dari Google / Supabase Auth jika ada di URL awal
+  // Tangkap error bawaan dari Google / Supabase OAuth di URL awal
   const oauthError = searchParams.get('error_description') || searchParams.get('error')
   if (oauthError) {
     return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(oauthError)}`)
@@ -43,6 +43,8 @@ export async function GET(request: Request) {
       .maybeSingle()
 
     if (profileError) {
+      // Jika database error, amankan dengan signout paksa lalu lempar ke login
+      await supabase.auth.signOut()
       return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Database error: ' + profileError.message)}`)
     }
 
@@ -56,11 +58,12 @@ export async function GET(request: Request) {
       ])
 
       if (insertError) {
-        // INI DIA PENYEBABNYA! Kalau database nolak insert, tangkap dan lempar ke login biar kelihatan
+        // Jika gagal insert (misal database menolak), signout paksa user & lempar error ke /login
+        await supabase.auth.signOut()
         return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Database error saving new user: ' + insertError.message)}`)
       }
 
-      // Pastikan halaman /onboarding benar-benar ada, jika belum ada, ganti arah ke '/' atau '/login'
+      // Lempar ke onboarding jika data baru
       return NextResponse.redirect(`${origin}/onboarding`)
     }
 
