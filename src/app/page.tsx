@@ -7,6 +7,8 @@ import {
   BookOpen,
   Sparkles,
   GraduationCap,
+  Menu,
+  X,
   ArrowRight,
   Clock,
   Send,
@@ -133,17 +135,18 @@ export default function LandingPage() {
     <main className="min-h-screen bg-linear-to-b from-slate-50 via-white to-indigo-50/30 flex flex-col justify-between selection:bg-purple-600 selection:text-white font-sans text-gray-900">
 
       {/* ================= TOP NAVBAR ================= */}
-      <nav className="w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
+      <nav className="w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between relative">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 bg-linear-to-tr from-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-purple-200">
             <GraduationCap className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-base font-extrabold tracking-tight block text-gray-900">Platform Ujian</span>
+            <span className="text-base font-extrabold tracking-tight block text-gray-900">Palisademy</span>
             <span className="block text-[10px] font-extrabold text-purple-600 uppercase tracking-widest">Edukasi Digital</span>
           </div>
         </div>
 
+        {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-8 text-xs font-bold text-gray-600">
           <a href="#fitur" className="hover:text-purple-600 transition">Fitur Unggulan</a>
           <a href="#modul" className="hover:text-purple-600 transition">Modul Ujian</a>
@@ -151,11 +154,83 @@ export default function LandingPage() {
           <a href="#kontak" className="hover:text-purple-600 transition">Kritik &amp; Saran</a>
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* Desktop Button */}
+        <div className="hidden md:flex items-center gap-3">
           <button
             onClick={handleMainButtonClick2}
             disabled={loadingUser}
             className="flex items-center gap-2 text-xs font-extrabold text-white bg-purple-600 hover:bg-purple-700 px-5 py-3 rounded-2xl shadow-md shadow-purple-200 transition cursor-pointer disabled:opacity-50"
+          >
+            <span>{user ? "Mulai Belajar" : "Login / Register"}</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Mobile Hamburger Button */}
+        <div className="flex md:hidden items-center">
+          <button
+            onClick={() => {
+              const mobileMenu = document.getElementById('mobile-menu')
+              if (mobileMenu) {
+                mobileMenu.classList.toggle('hidden')
+              }
+            }}
+            className="p-2.5 rounded-2xl bg-purple-50 text-purple-600 hover:bg-purple-100 transition cursor-pointer"
+            aria-label="Toggle Menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Mobile Dropdown Menu */}
+        <div id="mobile-menu" className="hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-xl border border-gray-100 shadow-xl rounded-3xl p-6 flex flex-col gap-4 mt-2 z-50 md:hidden">
+          <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Menu Navigasi</span>
+            <button
+              onClick={() => {
+                const mobileMenu = document.getElementById('mobile-menu')
+                if (mobileMenu) mobileMenu.classList.add('hidden')
+              }}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <a 
+            href="#fitur" 
+            onClick={() => document.getElementById('mobile-menu')?.classList.add('hidden')}
+            className="text-xs font-bold text-gray-700 hover:text-purple-600 transition py-1"
+          >
+            Fitur Unggulan
+          </a>
+          <a 
+            href="#modul" 
+            onClick={() => document.getElementById('mobile-menu')?.classList.add('hidden')}
+            className="text-xs font-bold text-gray-700 hover:text-purple-600 transition py-1"
+          >
+            Modul Ujian
+          </a>
+          <a 
+            href="#faq" 
+            onClick={() => document.getElementById('mobile-menu')?.classList.add('hidden')}
+            className="text-xs font-bold text-gray-700 hover:text-purple-600 transition py-1"
+          >
+            FAQ
+          </a>
+          <a 
+            href="#kontak" 
+            onClick={() => document.getElementById('mobile-menu')?.classList.add('hidden')}
+            className="text-xs font-bold text-gray-700 hover:text-purple-600 transition py-1"
+          >
+            Kritik &amp; Saran
+          </a>
+          <button
+            onClick={() => {
+              document.getElementById('mobile-menu')?.classList.add('hidden')
+              handleMainButtonClick2()
+            }}
+            disabled={loadingUser}
+            className="w-full flex items-center justify-center gap-2 text-xs font-extrabold text-white bg-purple-600 hover:bg-purple-700 py-3.5 rounded-2xl shadow-md shadow-purple-200 transition cursor-pointer disabled:opacity-50 mt-2"
           >
             <span>{user ? "Mulai Belajar" : "Login / Register"}</span>
             <ArrowRight className="w-4 h-4" />

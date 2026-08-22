@@ -2,7 +2,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
 
@@ -11,7 +11,9 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
+  const searchParams = useSearchParams()
+  const errorMessage = searchParams.get('error')
+
   const router = useRouter()
   const supabase = createClient()
 
@@ -56,7 +58,12 @@ export default function LoginPage() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4">
       <div className="max-w-md w-full bg-white/80 backdrop-blur-xl p-8 rounded-2xl shadow-xl border border-white/20 my-8 transition-all duration-300">
-        
+        {/* Jika ada error, tampilkan kotaknya */}
+      {errorMessage && (
+        <div className="p-4 mb-4 text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-2xl">
+          {errorMessage}
+        </div>
+      )}
         {/* Header Section */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-600 text-white font-bold text-xl mb-3 shadow-lg shadow-blue-500/30">
