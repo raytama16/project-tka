@@ -30,7 +30,7 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Gagal mendapatkan data user dari sesi')}`)
     }
 
-    // Ambil data profil
+    // Ambil data profil dari database
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('*')
@@ -42,14 +42,8 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Database error: ' + profileError.message)}`)
     }
 
-    // --- DEBUGGING LOG (Cek di terminal/log hostingmu) ---
-    console.log("DATA USER ID:", user.id)
-    console.log("DATA PROFILE DARI DB:", profile)
-    console.log("NILAI FULL_NAME:", profile?.full_name, typeof profile?.full_name)
-    // --------------------------------------------------
-
+    // KONDISI 1: Jika profil sama sekali belum ada di database
     if (!profile) {
-      console.log("-> Kondisi 1: Profil belum ada, melakukan INSERT...")
       const { error: insertError } = await supabase.from('profiles').insert([
         { 
           id: user.id, 
@@ -63,29 +57,26 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Database error saving new user: ' + insertError.message)}`)
       }
 
-      console.log("-> Hasil INSERT sukses, mengarahkan ke /onboarding")
+      // PAKSA MUTLAK KE ONBOARDING (Abaikan parameter next!)
       return NextResponse.redirect(`${origin}/onboarding`)
     }
 
-    // Pengecekan ketat status full_name
+    // KONDISI 2: Jika profil sudah ada, tapi full_name masih kosong / null
     const isNameEmpty = 
       profile.full_name === null || 
       profile.full_name === undefined || 
       String(profile.full_name).trim() === '' ||
       String(profile.full_name).toLowerCase() === 'null'
 
-    console.log("-> Apakah nama kosong?", isNameEmpty)
-
     if (isNameEmpty) {
-      console.log("-> Mengarahkan ke /onboarding karena nama kosong.")
+      // PAKSA MUTLAK KE ONBOARDING (Abaikan parameter next!)
       return NextResponse.redirect(`${origin}/onboarding`)
     }
 
-    console.log("-> Profil lengkap! Masuk ke tujuan:", nextParam)
+    // KONDISI 3: Hanya jika data sudah lengkap, boleh ke halaman tujuan awal (nextParam)
     return NextResponse.redirect(`${origin}${nextParam}`)
 
   } catch (err: any) {
-    console.log("TERJADI ERROR CATCH:", err)
     const errorMessage = err?.message || 'Terjadi kesalahan sistem yang tidak diketahui'
     return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(errorMessage)}`)
   }
