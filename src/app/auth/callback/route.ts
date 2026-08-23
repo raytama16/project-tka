@@ -25,7 +25,6 @@ export async function GET(request: Request) {
     const { error: authError } = await supabase.auth.exchangeCodeForSession(code)
     
     if (authError) {
-      // PASTIKAN INI KE /login
       return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(authError.message)}`)
     }
 
@@ -33,7 +32,6 @@ export async function GET(request: Request) {
     const { data: { user }, error: userError } = await supabase.auth.getUser()
 
     if (userError || !user) {
-      // PASTIKAN INI KE /login
       return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Gagal mendapatkan data user dari sesi')}`)
     }
 
@@ -46,7 +44,6 @@ export async function GET(request: Request) {
 
     if (profileError) {
       await supabase.auth.signOut()
-      // PASTIKAN INI KE /login
       return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Database error: ' + profileError.message)}`)
     }
 
@@ -56,28 +53,29 @@ export async function GET(request: Request) {
         { 
           id: user.id, 
           email: user.email,
+          full_name: null, // Paksa null agar terdeteksi belum diisi
         }
       ])
 
       if (insertError) {
         await supabase.auth.signOut()
-        // PASTIKAN INI KE /login
         return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Database error saving new user: ' + insertError.message)}`)
       }
 
+      // Wajib ke onboarding untuk user baru
       return NextResponse.redirect(`${origin}/onboarding`)
     }
 
-    if (!profile.full_name) {
+    // 6. Jika profil sudah ada tapi full_name kosong/null
+    if (!profile.full_name || profile.full_name.trim() === '') {
       return NextResponse.redirect(`${origin}/onboarding`)
     }
 
-    // 6. Sukses total baru ke halaman tujuan awal
+    // 7. Sukses total, data sudah lengkap, baru ke halaman tujuan awal
     return NextResponse.redirect(`${origin}${nextParam}`)
 
   } catch (err: any) {
     const errorMessage = err?.message || 'Terjadi kesalahan sistem yang tidak diketahui'
-    // PASTIKAN INI KE /login
     return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(errorMessage)}`)
   }
 }
