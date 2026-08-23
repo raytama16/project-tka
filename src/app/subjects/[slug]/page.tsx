@@ -21,12 +21,13 @@ import {
 import { Metadata } from 'next'
 
 type Props = {
-  params: Promise<{ slug: string }>
+  params: { slug: string }
 }
 
+// 1. Fungsi metadata otomatis untuk SEO halaman dinamis
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params
-  const formattedTitle = slug.replace(/-/g, ' ').toUpperCase()
+  const slug = params.slug
+  const formattedTitle = slug ? slug.replace(/-/g, ' ').toUpperCase() : 'TKA'
 
   return {
     title: `Latihan Soal ${formattedTitle} TKA`,
