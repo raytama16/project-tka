@@ -6,6 +6,22 @@ import { useParams, useRouter } from 'next/navigation'
 import { InlineMath } from 'react-katex'
 import parse from 'html-react-parser'
 
+import { Metadata } from 'next'
+
+type Props = {
+  params: Promise<{ slug: string }>
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params
+  const formattedTitle = slug.replace(/-/g, ' ').toUpperCase()
+
+  return {
+    title: `Latihan Soal ${formattedTitle} TKA`,
+    description: `Kerjakan latihan soal dan tryout online materi ${formattedTitle} untuk persiapan Tes Kompetensi Akademik (TKA).`,
+  }
+}
+
 type Question = {
     id: string
     question_text: string

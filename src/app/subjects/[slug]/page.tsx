@@ -4,19 +4,35 @@ import { createClient } from '@/utils/supabase/client'
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { 
-  BookOpen, 
-  CheckSquare, 
-  Zap, 
-  Lock, 
-  Sparkles, 
-  X, 
-  MessageCircle, 
+import {
+  BookOpen,
+  CheckSquare,
+  Zap,
+  Lock,
+  Sparkles,
+  X,
+  MessageCircle,
   ArrowLeft,
   ShieldCheck,
   Clock,
   HelpCircle
 } from 'lucide-react'
+
+import { Metadata } from 'next'
+
+type Props = {
+  params: Promise<{ slug: string }>
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params
+  const formattedTitle = slug.replace(/-/g, ' ').toUpperCase()
+
+  return {
+    title: `Latihan Soal ${formattedTitle} TKA`,
+    description: `Kerjakan latihan soal dan tryout online materi ${formattedTitle} untuk persiapan Tes Kompetensi Akademik (TKA).`,
+  }
+}
 
 type Subject = {
   id: string
@@ -33,7 +49,7 @@ export default function SubjectDetailPage() {
   // State baru untuk sistem verifikasi akses premium Exam
   const [isPremium, setIsPremium] = useState(false)
   const [showExamLockModal, setShowExamLockModal] = useState(false)
-  
+
   const params = useParams()
   const router = useRouter()
   const supabase = createClient()
@@ -51,7 +67,7 @@ export default function SubjectDetailPage() {
           .select('is_premium')
           .eq('id', user.id)
           .single()
-        
+
         if (profileData) {
           setIsPremium(!!profileData.is_premium)
         }
@@ -137,7 +153,7 @@ export default function SubjectDetailPage() {
   }
 
   // Detail nomor WhatsApp admin (Sesuaikan dengan nomor aslimu)
-  const adminWhatsAppNumber = "6285792108262" 
+  const adminWhatsAppNumber = "6285792108262"
   const messageText = encodeURIComponent("Halo Admin, saya ingin berlangganan akun Premium Palisademy untuk membuka akses penuh ke menu Exam (Simulasi Ujian).")
   const whatsappUrl = `https://wa.me/${adminWhatsAppNumber}?text=${messageText}`
 
@@ -154,12 +170,12 @@ export default function SubjectDetailPage() {
 
   return (
     <main className="min-h-screen bg-linear-to-b from-slate-50 via-white to-indigo-50/30 flex items-center justify-center p-4 sm:p-6 md:p-12 relative font-sans text-gray-900 selection:bg-blue-600 selection:text-white">
-      
+
       {/* ================= MODAL KONFIRMASI RESET HISTORY EXAM ================= */}
       {showExamConfirm && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-gray-100 flex flex-col gap-4 text-center relative overflow-hidden">
-            
+
             <div className="absolute top-0 right-0 w-32 h-32 bg-amber-100/60 rounded-full blur-2xl pointer-events-none" />
 
             <div className="w-16 h-16 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mx-auto border border-amber-100 shadow-inner">
@@ -202,10 +218,10 @@ export default function SubjectDetailPage() {
       {showExamLockModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-gray-100 text-center relative overflow-hidden">
-            
+
             <div className="absolute top-0 right-0 w-32 h-32 bg-amber-100/60 rounded-full blur-2xl pointer-events-none" />
 
-            <button 
+            <button
               onClick={() => setShowExamLockModal(false)}
               className="absolute top-4 right-4 w-9 h-9 bg-gray-100 hover:bg-gray-200 text-gray-500 rounded-full flex items-center justify-center transition cursor-pointer z-10"
             >
@@ -254,15 +270,15 @@ export default function SubjectDetailPage() {
 
       {/* ================= CONTAINER UTAMA ================= */}
       <div className="w-full max-w-5xl bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-gray-100 p-6 sm:p-10 md:p-12 flex flex-col relative overflow-hidden">
-        
+
         {/* Hiasan background tipis di pojok */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50/50 rounded-full blur-3xl pointer-events-none" />
 
         {/* Header Navigasi & Informasi Mapel */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-gray-100 relative z-10">
           <div>
-            <Link 
-              href="/mapel-tka" 
+            <Link
+              href="/mapel-tka"
               className="inline-flex items-center gap-2 text-xs font-extrabold text-gray-600 bg-gray-50 hover:bg-blue-50 hover:text-blue-600 px-4 py-2.5 rounded-2xl border border-gray-200/80 shadow-sm transition-all mb-4"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -292,7 +308,7 @@ export default function SubjectDetailPage() {
 
         {/* ================= GRID 3 CARD MENU UTAMA ================= */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 relative z-10">
-          
+
           {/* 1. Modul (Materi) */}
           <Link
             href={`/subjects/${slug}/materials`}
@@ -364,11 +380,10 @@ export default function SubjectDetailPage() {
 
             <div>
               <div className="flex items-center justify-between mb-6">
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-sm ${
-                  isPremium 
-                    ? 'bg-amber-100 text-amber-700 group-hover:bg-amber-600 group-hover:text-white' 
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-sm ${isPremium
+                    ? 'bg-amber-100 text-amber-700 group-hover:bg-amber-600 group-hover:text-white'
                     : 'bg-gray-200 text-gray-500'
-                }`}>
+                  }`}>
                   {isPremium ? <Zap className="w-7 h-7" /> : <Lock className="w-7 h-7 text-amber-600" />}
                 </div>
 
@@ -393,9 +408,8 @@ export default function SubjectDetailPage() {
               </p>
             </div>
 
-            <div className={`mt-6 pt-4 border-t flex items-center justify-between text-xs font-extrabold transition-transform ${
-              isPremium ? 'border-amber-100 text-amber-600 group-hover:translate-x-1' : 'border-gray-200 text-gray-400'
-            }`}>
+            <div className={`mt-6 pt-4 border-t flex items-center justify-between text-xs font-extrabold transition-transform ${isPremium ? 'border-amber-100 text-amber-600 group-hover:translate-x-1' : 'border-gray-200 text-gray-400'
+              }`}>
               <span>{isPremium ? 'Mulai Simulasi Ujian' : 'Terkunci (Butuh Premium)'}</span>
               <span>{isPremium ? '→' : '🔒'}</span>
             </div>
@@ -414,7 +428,7 @@ export default function SubjectDetailPage() {
               <p className="text-[11px] text-gray-500 mt-0.5">Tim support kami siap membantu kendala teknis maupun aktivasi akun premium Anda.</p>
             </div>
           </div>
-          
+
           <a
             href={whatsappUrl}
             target="_blank"
