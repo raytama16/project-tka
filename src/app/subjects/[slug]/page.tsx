@@ -137,8 +137,8 @@ export default function SubjectDetailPage() {
   }
 
   // Detail nomor WhatsApp admin (Sesuaikan dengan nomor aslimu)
-  const adminWhatsAppNumber = "6281234567890" 
-  const messageText = encodeURIComponent("Halo Admin, saya ingin berlangganan akun Premium TKA Master untuk membuka akses penuh ke menu Exam (Simulasi Ujian).")
+  const adminWhatsAppNumber = "6285792108262" 
+  const messageText = encodeURIComponent("Halo Admin, saya ingin berlangganan akun Premium Palisademy untuk membuka akses penuh ke menu Exam (Simulasi Ujian).")
   const whatsappUrl = `https://wa.me/${adminWhatsAppNumber}?text=${messageText}`
 
   if (loading) {

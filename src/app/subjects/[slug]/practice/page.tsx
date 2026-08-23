@@ -103,12 +103,12 @@ export default function SubjectPracticeChaptersPage() {
     }
 
     // Detail nomor WhatsApp admin (Ganti dengan nomor aslimu, format: 628xxxxxxxxxx)
-    const adminWhatsAppNumber = "6281234567890" 
+    const adminWhatsAppNumber = "6285792108262" 
     const messageText = encodeURIComponent("Halo Admin, saya ingin berlangganan akun Premium Platform Ujian untuk membuka semua modul latihan soal.")
     const whatsappUrl = `https://wa.me/${adminWhatsAppNumber}?text=${messageText}`
 
     return (
-        <main className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-indigo-50/30 p-4 sm:p-6 md:p-12 font-sans text-gray-900 selection:bg-purple-600 selection:text-white">
+        <main className="min-h-screen bg-linear-to-b from-slate-50 via-white to-indigo-50/30 p-4 sm:p-6 md:p-12 font-sans text-gray-900 selection:bg-purple-600 selection:text-white">
             <div className="max-w-4xl mx-auto">
                 
                 {/* Header Navigasi Kembali */}
@@ -141,7 +141,7 @@ export default function SubjectPracticeChaptersPage() {
                         </div>
 
                         {isPremium && (
-                            <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-extrabold px-4 py-2.5 rounded-2xl shadow-md flex items-center gap-2 shrink-0 self-start sm:self-center">
+                            <div className="bg-linear-to-r from-purple-600 to-indigo-600 text-white text-xs font-extrabold px-4 py-2.5 rounded-2xl shadow-md flex items-center gap-2 shrink-0 self-start sm:self-center">
                                 <Sparkles className="w-4 h-4" />
                                 <span>Akun Premium Aktif</span>
                             </div>
@@ -251,7 +251,7 @@ export default function SubjectPracticeChaptersPage() {
                         </button>
 
                         {/* Icon Lock */}
-                        <div className="w-16 h-16 bg-gradient-to-tr from-purple-600 to-indigo-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-purple-200">
+                        <div className="w-16 h-16 bg-linear-to-tr from-purple-600 to-indigo-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-purple-200">
                             <Lock className="w-8 h-8" />
                         </div>
 
