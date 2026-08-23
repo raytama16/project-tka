@@ -46,21 +46,39 @@ export default function LandingPage() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 
+  // Cek user & validasi profil (redirect ke onboarding jika nama kosong)
   useEffect(() => {
-    async function checkUser() {
+    async function checkUserAndProfile() {
       const { data: { session } } = await supabase.auth.getSession()
-      setUser(session?.user || null)
+      const currentUser = session?.user || null
+      setUser(currentUser)
+
+      if (currentUser) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', currentUser.id)
+          .maybeSingle()
+
+        const isNameEmpty = !profile || !profile.full_name || String(profile.full_name).trim() === ''
+        
+        if (isNameEmpty) {
+          router.push('/onboarding')
+          return
+        }
+      }
+
       setLoadingUser(false)
     }
-    checkUser()
-  }, [supabase])
+    checkUserAndProfile()
+  }, [supabase, router])
 
   // Fungsi tombol utama navbar & card
   const handleMainButtonClick = () => {
     if (user) {
       router.push('/mapel-tka')
     } else {
-      router.push('/login') // Sesuaikan dengan halaman loginmu jika ada
+      router.push('/login')
     }
   }
 
@@ -68,7 +86,7 @@ export default function LandingPage() {
     if (user) {
       router.push('/#modul')
     } else {
-      router.push('/login') // Sesuaikan dengan halaman loginmu jika ada
+      router.push('/login')
     }
   }
 
