@@ -11,8 +11,6 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(oauthError)}`)
   }
 
-  const nextParam = searchParams.get('next') ?? '/'
-
   if (!code) {
     return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Kode autentikasi tidak ditemukan')}`)
   }
@@ -20,61 +18,38 @@ export async function GET(request: Request) {
   try {
     const supabase = await createClient()
     
+    // 1. Tukar code dengan session
     const { error: authError } = await supabase.auth.exchangeCodeForSession(code)
     if (authError) {
       return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(authError.message)}`)
     }
 
+    // 2. Ambil data user yang sedang login
     const { data: { user }, error: userError } = await supabase.auth.getUser()
     if (userError || !user) {
       return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Gagal mendapatkan data user dari sesi')}`)
     }
 
-    // Ambil data profil dari database
-    const { data: profile, error: profileError } = await supabase
+    // 3. Cek apakah profil sudah ada di database (opsional, buat amankan data row-nya)
+    const { data: profile } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
       .maybeSingle()
 
-    if (profileError) {
-      await supabase.auth.signOut()
-      return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Database error: ' + profileError.message)}`)
-    }
-
-    // KONDISI 1: Jika profil sama sekali belum ada di database
+    // Kalau profil belum ada, insert baris dasarnya dulu biar gak error di onboarding
     if (!profile) {
-      const { error: insertError } = await supabase.from('profiles').insert([
+      await supabase.from('profiles').insert([
         { 
           id: user.id, 
           email: user.email,
           full_name: null, 
         }
       ])
-
-      if (insertError) {
-        await supabase.auth.signOut()
-        return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Database error saving new user: ' + insertError.message)}`)
-      }
-
-      // PAKSA MUTLAK KE ONBOARDING (Abaikan parameter next!)
-      return NextResponse.redirect(`${origin}/onboarding`)
     }
 
-    // KONDISI 2: Jika profil sudah ada, tapi full_name masih kosong / null
-    const isNameEmpty = 
-      profile.full_name === null || 
-      profile.full_name === undefined || 
-      String(profile.full_name).trim() === '' ||
-      String(profile.full_name).toLowerCase() === 'null'
-
-    if (isNameEmpty) {
-      // PAKSA MUTLAK KE ONBOARDING (Abaikan parameter next!)
-      return NextResponse.redirect(`${origin}/onboarding`)
-    }
-
-    // KONDISI 3: Hanya jika data sudah lengkap, boleh ke halaman tujuan awal (nextParam)
-    return NextResponse.redirect(`${origin}${nextParam}`)
+    // 4. PAKSA 100% LANGSUNG MASUK KE ONBOARDING TANPA PENGECEKAN LAIN
+    return NextResponse.redirect(`${origin}/onboarding`)
 
   } catch (err: any) {
     const errorMessage = err?.message || 'Terjadi kesalahan sistem yang tidak diketahui'
