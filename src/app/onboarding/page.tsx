@@ -92,7 +92,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4">
+    <main className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 via-blue-50 to-indigo-100 p-4">
       <div className="max-w-md w-full bg-white/85 backdrop-blur-xl p-8 rounded-2xl shadow-xl border border-white/20 my-8">
         
         {/* Header Section */}
@@ -107,7 +107,7 @@ export default function OnboardingPage() {
         {/* Error Message */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex items-start gap-3">
-            <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
             <span>{error}</span>
@@ -126,7 +126,7 @@ export default function OnboardingPage() {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition text-slate-800 text-sm"
-              placeholder="Contoh: Raya Geandy Pratama"
+              placeholder="Tulis Namamu..."
             />
           </div>
 
@@ -140,7 +140,7 @@ export default function OnboardingPage() {
               value={schoolName}
               onChange={(e) => setSchoolName(e.target.value)}
               className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition text-slate-800 text-sm"
-              placeholder="Contoh: SMK Negeri 1..."
+              placeholder="Tulis Nama Sekolahmu"
             />
           </div>
 
@@ -154,7 +154,7 @@ export default function OnboardingPage() {
               value={province}
               onChange={(e) => setProvince(e.target.value)}
               className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition text-slate-800 text-sm"
-              placeholder="Contoh: Jawa Timur"
+              placeholder="Tulis Provinsimu, contoh: Jawa Timur"
             />
           </div>
 

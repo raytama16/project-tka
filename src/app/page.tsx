@@ -201,7 +201,7 @@ export default function LandingPage() {
         </div>
 
         {/* Mobile Dropdown Menu */}
-        <div id="mobile-menu" className="hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-xl border border-gray-100 shadow-xl rounded-3xl p-6 flex flex-col gap-4 mt-2 z-50 md:hidden">
+        <div id="mobile-menu" className="hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-xl border border-gray-100 shadow-xl rounded-3xl p-6 flex-col gap-4 mt-2 z-50 md:hidden">
           <div className="flex items-center justify-between pb-3 border-b border-gray-100">
             <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Menu Navigasi</span>
             <button
@@ -590,9 +590,9 @@ export default function LandingPage() {
       <footer className="w-full bg-white border-t border-gray-100 py-8 text-xs text-gray-400">
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
           <div className="flex items-center gap-2">
-            <span className="font-extrabold text-gray-800">Platform Simulasi Ujian</span>
+            <span className="font-extrabold text-gray-800">Palisademy</span>
             <span>&bull;</span>
-            <span>Edukasi Digital Indonesia</span>
+            <span>Platform Edukasi Untuk TKA</span>
           </div>
           <div>
             &copy; {new Date().getFullYear()} All rights reserved.
