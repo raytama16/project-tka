@@ -18,22 +18,6 @@ import {
   HelpCircle
 } from 'lucide-react'
 
-import { Metadata } from 'next'
-
-type Props = {
-  params: { slug: string }
-}
-
-// 1. Fungsi metadata otomatis untuk SEO halaman dinamis
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const slug = params.slug
-  const formattedTitle = slug ? slug.replace(/-/g, ' ').toUpperCase() : 'TKA'
-
-  return {
-    title: `Latihan Soal ${formattedTitle} TKA`,
-    description: `Kerjakan latihan soal dan tryout online materi ${formattedTitle} untuk persiapan Tes Kompetensi Akademik (TKA).`,
-  }
-}
 
 type Subject = {
   id: string
