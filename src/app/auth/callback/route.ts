@@ -6,7 +6,6 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   
-  // 1. Tangkap error dari penyedia OAuth (Google / Supabase)
   const oauthError = searchParams.get('error_description') || searchParams.get('error')
   if (oauthError) {
     return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(oauthError)}`)
@@ -21,21 +20,17 @@ export async function GET(request: Request) {
   try {
     const supabase = await createClient()
     
-    // 2. Tukar code dengan session
     const { error: authError } = await supabase.auth.exchangeCodeForSession(code)
-    
     if (authError) {
       return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(authError.message)}`)
     }
 
-    // 3. Ambil data user
     const { data: { user }, error: userError } = await supabase.auth.getUser()
-
     if (userError || !user) {
       return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Gagal mendapatkan data user dari sesi')}`)
     }
 
-    // 4. Cek profil di database
+    // Ambil data profil
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('*')
@@ -47,8 +42,14 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Database error: ' + profileError.message)}`)
     }
 
-    // 5. Jika profil belum ada, buat baru
+    // --- DEBUGGING LOG (Cek di terminal/log hostingmu) ---
+    console.log("DATA USER ID:", user.id)
+    console.log("DATA PROFILE DARI DB:", profile)
+    console.log("NILAI FULL_NAME:", profile?.full_name, typeof profile?.full_name)
+    // --------------------------------------------------
+
     if (!profile) {
+      console.log("-> Kondisi 1: Profil belum ada, melakukan INSERT...")
       const { error: insertError } = await supabase.from('profiles').insert([
         { 
           id: user.id, 
@@ -62,19 +63,29 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Database error saving new user: ' + insertError.message)}`)
       }
 
-      // Wajib ke onboarding untuk user baru
+      console.log("-> Hasil INSERT sukses, mengarahkan ke /onboarding")
       return NextResponse.redirect(`${origin}/onboarding`)
     }
 
-    // 6. Jika profil sudah ada tapi full_name masih kosong/null (Aman dari TypeError)
-    if (!profile.full_name || String(profile.full_name).trim() === '') {
+    // Pengecekan ketat status full_name
+    const isNameEmpty = 
+      profile.full_name === null || 
+      profile.full_name === undefined || 
+      String(profile.full_name).trim() === '' ||
+      String(profile.full_name).toLowerCase() === 'null'
+
+    console.log("-> Apakah nama kosong?", isNameEmpty)
+
+    if (isNameEmpty) {
+      console.log("-> Mengarahkan ke /onboarding karena nama kosong.")
       return NextResponse.redirect(`${origin}/onboarding`)
     }
 
-    // 7. Sukses total, data sudah lengkap, baru ke halaman tujuan awal
+    console.log("-> Profil lengkap! Masuk ke tujuan:", nextParam)
     return NextResponse.redirect(`${origin}${nextParam}`)
 
   } catch (err: any) {
+    console.log("TERJADI ERROR CATCH:", err)
     const errorMessage = err?.message || 'Terjadi kesalahan sistem yang tidak diketahui'
     return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(errorMessage)}`)
   }
