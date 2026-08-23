@@ -53,7 +53,7 @@ export async function GET(request: Request) {
         { 
           id: user.id, 
           email: user.email,
-          full_name: null, // Paksa null agar terdeteksi belum diisi
+          full_name: null, 
         }
       ])
 
@@ -66,8 +66,8 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}/onboarding`)
     }
 
-    // 6. Jika profil sudah ada tapi full_name kosong/null
-    if (!profile.full_name || profile.full_name.trim() === '') {
+    // 6. Jika profil sudah ada tapi full_name masih kosong/null (Aman dari TypeError)
+    if (!profile.full_name || String(profile.full_name).trim() === '') {
       return NextResponse.redirect(`${origin}/onboarding`)
     }
 
