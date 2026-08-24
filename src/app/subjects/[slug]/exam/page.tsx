@@ -405,7 +405,7 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
                         }`}>
                           {key}
                         </span>
-                        <div className="text-sm flex-1 flex items-center">
+                        <div className="text-sm flex-1 flex text-gray-700 dark:text-gray-300 items-center">
                           <MathText content={val as string} inline={true} />
                         </div>
                       </button>
@@ -421,7 +421,7 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
 
                     return (
                       <div key={stKey} className="p-4 rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                        <div className="text-sm text-gray-800 dark:text-gray-200 font-medium flex-1">
+                        <div className="text-sm text-gray-700 dark:text-gray-300 font-medium flex-1">
                           <MathText content={stText as string} />
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
