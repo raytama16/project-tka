@@ -161,31 +161,49 @@ export default function MathText({ content, inline = false }: { content: string;
     .replace(/\\\\\}/g, '}')
 
   return (
-    <div className={`prose prose-slate max-w-none text-slate-800 ${inline ? 'inline-block [&>p]:m-0' : 'my-1'}`}>
+    // <div className={`prose prose-slate max-w-none text-slate-800 ${inline ? 'inline-block [&>p]:m-0' : 'my-1'}`}>
+    <div className={`prose prose-slate dark:prose-invert max-w-none text-slate-800 dark:text-slate-200 ${inline ? 'inline-block [&>p]:m-0' : 'my-1'}`}>
       <ReactMarkdown
         remarkPlugins={[remarkMath, remarkGfm]}
         rehypePlugins={[rehypeKatex]}
         components={{
-          h1: ({ node, ...props }) => <h1 className="text-2xl font-bold mt-6 mb-3 text-gray-900" {...props} />,
-          h2: ({ node, ...props }) => <h2 className="text-xl font-bold mt-5 mb-2 text-gray-900" {...props} />,
-          h3: ({ node, ...props }) => <h3 className="text-lg font-bold mt-4 mb-2 text-gray-800" {...props} />,
-          p: ({ node, ...props }) => <p className={inline ? 'm-0 inline' : 'mb-3 text-gray-700 leading-relaxed'} {...props} />,
-          
+          // h1: ({ node, ...props }) => <h1 className="text-2xl font-bold mt-6 mb-3 text-gray-900" {...props} />,
+          // h2: ({ node, ...props }) => <h2 className="text-xl font-bold mt-5 mb-2 text-gray-900" {...props} />,
+          // h3: ({ node, ...props }) => <h3 className="text-lg font-bold mt-4 mb-2 text-gray-800" {...props} />,
+          // p: ({ node, ...props }) => <p className={inline ? 'm-0 inline' : 'mb-3 text-gray-700 leading-relaxed'} {...props} />,
+          h1: ({ node, ...props }) => <h1 className="text-2xl font-bold mt-6 mb-3 text-gray-900 dark:text-gray-100" {...props} />,
+          h2: ({ node, ...props }) => <h2 className="text-xl font-bold mt-5 mb-2 text-gray-900 dark:text-gray-100" {...props} />,
+          h3: ({ node, ...props }) => <h3 className="text-lg font-bold mt-4 mb-2 text-gray-800 dark:text-gray-200" {...props} />,
+          p: ({ node, ...props }) => <p className={inline ? 'm-0 inline' : 'mb-3 text-gray-700 dark:text-gray-300 leading-relaxed'} {...props} />,
           // Memberi jarak aman antar list
           // Memastikan list menggunakan bullet disc (titik bundar) yang jelas
-          ul: ({ node, ...props }) => <ul className="list-disc pl-6 my-2 space-y-1.5 text-gray-700" {...props} />,
-          ol: ({ node, ...props }) => <ol className="list-decimal pl-6 my-2 space-y-1.5 text-gray-700" {...props} />,
-          li: ({ node, ...props }) => <li className="text-gray-700 pl-1 my-0 leading-relaxed [&>p]:my-0" {...props} />,
-          strong: ({ node, ...props }) => <strong className="font-bold text-gray-900" {...props} />,
+          // ul: ({ node, ...props }) => <ul className="list-disc pl-6 my-2 space-y-1.5 text-gray-700" {...props} />,
+          // ol: ({ node, ...props }) => <ol className="list-decimal pl-6 my-2 space-y-1.5 text-gray-700" {...props} />,
+          // li: ({ node, ...props }) => <li className="text-gray-700 pl-1 my-0 leading-relaxed [&>p]:my-0" {...props} />,
+          // strong: ({ node, ...props }) => <strong className="font-bold text-gray-900" {...props} />,
           
+          ul: ({ node, ...props }) => <ul className="list-disc pl-6 my-2 space-y-1.5 text-gray-700 dark:text-gray-300" {...props} />,
+          ol: ({ node, ...props }) => <ol className="list-decimal pl-6 my-2 space-y-1.5 text-gray-700 dark:text-gray-300" {...props} />,
+          li: ({ node, ...props }) => <li className="text-gray-700 dark:text-gray-300 pl-1 my-0 leading-relaxed [&>p]:my-0" {...props} />,
+          strong: ({ node, ...props }) => <strong className="font-bold text-gray-900 dark:text-gray-100" {...props} />,
+
+          // table: ({ node, ...props }) => (
+          //   <div className="overflow-x-auto my-4">
+          //     <table className="min-w-full border-collapse border border-gray-300 text-left text-sm" {...props} />
+          //   </div>
+          // ),
+          // thead: ({ node, ...props }) => <thead className="bg-gray-100" {...props} />,
+          // th: ({ node, ...props }) => <th className="border border-gray-300 px-4 py-2 font-semibold text-gray-900" {...props} />,
+          // td: ({ node, ...props }) => <td className="border border-gray-300 px-4 py-2 text-gray-700" {...props} />,
+
           table: ({ node, ...props }) => (
-            <div className="overflow-x-auto my-4">
-              <table className="min-w-full border-collapse border border-gray-300 text-left text-sm" {...props} />
-            </div>
-          ),
-          thead: ({ node, ...props }) => <thead className="bg-gray-100" {...props} />,
-          th: ({ node, ...props }) => <th className="border border-gray-300 px-4 py-2 font-semibold text-gray-900" {...props} />,
-          td: ({ node, ...props }) => <td className="border border-gray-300 px-4 py-2 text-gray-700" {...props} />,
+              <div className="overflow-x-auto my-4">
+            <table className="min-w-full border-collapse border border-gray-300 dark:border-gray-700 text-left text-sm" {...props} />
+              </div>
+            ),
+            thead: ({ node, ...props }) => <thead className="bg-gray-100 dark:bg-gray-800" {...props} />,
+            th: ({ node, ...props }) => <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-semibold text-gray-900 dark:text-gray-100" {...props} />,
+            td: ({ node, ...props }) => <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-gray-700 dark:text-gray-300" {...props} />,
 
           code: ({ node, inline, className, children, ...props }: any) => {
             const codeString = String(children).replace(/\n$/, '')
@@ -205,14 +223,27 @@ export default function MathText({ content, inline = false }: { content: string;
               return <FunctionPlotBlock fn={codeString} />
             }
 
+            // return inline ? (
+            //   <code className="bg-gray-100 text-red-600 px-1 py-0.5 rounded text-sm font-mono" {...props}>
+            //     {children}
+            //   </code>
+            //  ) 
+            //  : 
+            //  (
+            //   <pre className="bg-gray-100 text-gray-900 p-4 rounded-lg overflow-x-auto my-4 font-mono text-sm leading-tight">
+            //     <code className={className} {...props}>
+            //       {children}
+            //     </code>
+            //   </pre>
+            // )
             return inline ? (
-              <code className="bg-gray-100 text-red-600 px-1 py-0.5 rounded text-sm font-mono" {...props}>
+              <code className="bg-gray-100 dark:bg-gray-800 text-red-600 dark:text-red-400 px-1 py-0.5 rounded text-sm font-mono" {...props}>
                 {children}
               </code>
-             ) 
-             : 
-             (
-              <pre className="bg-gray-100 text-gray-900 p-4 rounded-lg overflow-x-auto my-4 font-mono text-sm leading-tight">
+            ) 
+            : 
+            (
+              <pre className="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-4 rounded-lg overflow-x-auto my-4 font-mono text-sm leading-tight">
                 <code className={className} {...props}>
                   {children}
                 </code>
