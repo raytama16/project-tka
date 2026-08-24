@@ -33,10 +33,11 @@ type Profile = {
 }
 
 // Daftar variasi tema warna modern untuk card mapel (Glassmorphism & Gradient accents)
+// Daftar variasi tema warna modern untuk card mapel (Warna solid & bersih tanpa transparan bawah)
 const cardColorThemes = [
   {
-    bg: 'bg-gradient-to-br from-emerald-50/80 via-white to-emerald-50/30 hover:from-emerald-100/80 hover:to-emerald-50/50',
-    border: 'border-emerald-100/80 hover:border-emerald-300',
+    bg: 'bg-emerald-50/90 hover:bg-emerald-50',
+    border: 'border-emerald-200/80 hover:border-emerald-300',
     accent: 'bg-emerald-500',
     badge: 'bg-emerald-100 text-emerald-700',
     text: 'text-emerald-700',
@@ -44,8 +45,8 @@ const cardColorThemes = [
     shadow: 'hover:shadow-emerald-100/60',
   },
   {
-    bg: 'bg-gradient-to-br from-amber-50/80 via-white to-amber-50/30 hover:from-amber-100/80 hover:to-amber-50/50',
-    border: 'border-amber-100/80 hover:border-amber-300',
+    bg: 'bg-amber-50/90 hover:bg-amber-50',
+    border: 'border-amber-200/80 hover:border-amber-300',
     accent: 'bg-amber-500',
     badge: 'bg-amber-100 text-amber-700',
     text: 'text-amber-700',
@@ -53,8 +54,8 @@ const cardColorThemes = [
     shadow: 'hover:shadow-amber-100/60',
   },
   {
-    bg: 'bg-gradient-to-br from-indigo-50/80 via-white to-indigo-50/30 hover:from-indigo-100/80 hover:to-indigo-50/50',
-    border: 'border-indigo-100/80 hover:border-indigo-300',
+    bg: 'bg-indigo-50/90 hover:bg-indigo-50',
+    border: 'border-indigo-200/80 hover:border-indigo-300',
     accent: 'bg-indigo-500',
     badge: 'bg-indigo-100 text-indigo-700',
     text: 'text-indigo-700',
@@ -62,8 +63,8 @@ const cardColorThemes = [
     shadow: 'hover:shadow-indigo-100/60',
   },
   {
-    bg: 'bg-gradient-to-br from-rose-50/80 via-white to-rose-50/30 hover:from-rose-100/80 hover:to-rose-50/50',
-    border: 'border-rose-100/80 hover:border-rose-300',
+    bg: 'bg-rose-50/90 hover:bg-rose-50',
+    border: 'border-rose-200/80 hover:border-rose-300',
     accent: 'bg-rose-500',
     badge: 'bg-rose-100 text-rose-700',
     text: 'text-rose-700',
@@ -71,8 +72,8 @@ const cardColorThemes = [
     shadow: 'hover:shadow-rose-100/60',
   },
   {
-    bg: 'bg-gradient-to-br from-cyan-50/80 via-white to-cyan-50/30 hover:from-cyan-100/80 hover:to-cyan-50/50',
-    border: 'border-cyan-100/80 hover:border-cyan-300',
+    bg: 'bg-cyan-50/90 hover:bg-cyan-50',
+    border: 'border-cyan-200/80 hover:border-cyan-300',
     accent: 'bg-cyan-500',
     badge: 'bg-cyan-100 text-cyan-700',
     text: 'text-cyan-700',
@@ -210,7 +211,7 @@ export default function DashboardPage() {
 
           {/* Quick Stat Card (1 Kolom) */}
           <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between">
-            <div>
+            {/* <div>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-xs font-extrabold text-gray-400 uppercase tracking-wider">Ringkasan Cepat</span>
                 <span className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
@@ -219,7 +220,7 @@ export default function DashboardPage() {
               </div>
               <h3 className="text-base font-black text-gray-800 mb-1">Performa Belajar</h3>
               <p className="text-xs text-gray-500 mb-4">Selesaikan modul latihan secara rutin untuk meningkatkan skor rata-rata ujianmu.</p>
-            </div>
+            </div> */}
 
             <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 flex items-center justify-between">
               <div>

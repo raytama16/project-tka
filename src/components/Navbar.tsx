@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { signOut } from '@/utils/supabase/auth'
 import Link from 'next/link'
+import { GraduationCap } from 'lucide-react'
 
 export default function Navbar() {
   const [userEmail, setUserEmail] = useState<string | null>(null)
@@ -74,16 +75,14 @@ export default function Navbar() {
         {/* Sisi Kiri: Logo & Tombol Kembali Cepat */}
         <div className="flex items-center gap-6">
           <Link href="/" className="group flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-linear-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-black shadow-md shadow-blue-500/20 group-hover:scale-105 transition duration-300">
-              T
-            </div>
-            <div className="flex flex-col">
-              <span className="text-base font-extrabold tracking-tight text-gray-900 group-hover:text-blue-600 transition">
-                Palisademy
-              </span>
-              <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">
-                TKA Platform
-              </span>
+            <div className="flex items-center gap-3 group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+              <div className="w-10 h-10 sm:w-11 sm:h-11 bg-linear-to-tr from-purple-600 via-indigo-600 to-violet-500 rounded-2xl flex items-center justify-center text-white shadow-md shadow-purple-500/20 group-hover:scale-105 transition duration-300 shrink-0">
+                <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6" />
+              </div>
+              <div>
+                <span className="text-sm sm:text-base font-extrabold tracking-tight block text-gray-900 group-hover:text-purple-600 transition">Palisademy</span>
+                <span className="block text-[9px] sm:text-[10px] font-extrabold text-purple-600 uppercase tracking-widest">Edukasi Digital</span>
+              </div>
             </div>
           </Link>
 
@@ -102,7 +101,7 @@ export default function Navbar() {
 
         {/* Menu Navigasi Desktop (Di Tengah) */}
         <div className="hidden md:flex items-center gap-1 bg-gray-50/80 p-1.5 rounded-full border border-gray-200/60 text-xs font-bold text-gray-600">
-          <Link 
+          {/* <Link 
             href="/" 
             className={`px-4 py-2 rounded-full transition ${
               pathname === '/' 
@@ -111,7 +110,7 @@ export default function Navbar() {
             }`}
           >
             Dashboard
-          </Link>
+          </Link> */}
           <Link 
             href="/mapel-tka" 
             className={`px-4 py-2 rounded-full transition ${
@@ -223,7 +222,7 @@ export default function Navbar() {
           </div>
 
           <div className="flex flex-col gap-1 pt-1">
-            <Link
+            {/* <Link
               href="/"
               onClick={() => setIsMobileMenuOpen(false)}
               className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition ${
@@ -231,7 +230,7 @@ export default function Navbar() {
               }`}
             >
               <span>📊 Dashboard</span>
-            </Link>
+            </Link> */}
             <Link
               href="/mapel-tka"
               onClick={() => setIsMobileMenuOpen(false)}
