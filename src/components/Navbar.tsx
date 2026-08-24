@@ -74,7 +74,7 @@ export default function Navbar() {
         {/* Sisi Kiri: Logo & Tombol Kembali Cepat */}
         <div className="flex items-center gap-6">
           <Link href="/" className="group flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-black shadow-md shadow-blue-500/20 group-hover:scale-105 transition duration-300">
+            <div className="w-10 h-10 rounded-2xl bg-linear-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-black shadow-md shadow-blue-500/20 group-hover:scale-105 transition duration-300">
               T
             </div>
             <div className="flex flex-col">
@@ -94,7 +94,7 @@ export default function Navbar() {
             title="Kembali ke halaman sebelumnya"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round5" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             <span>Kembali</span>
           </button>
@@ -140,10 +140,10 @@ export default function Navbar() {
             onClick={() => setIsAccountDropdownOpen(!isAccountDropdownOpen)}
             className="flex items-center gap-2.5 px-3.5 py-2 rounded-2xl hover:bg-gray-100/80 active:scale-95 transition border border-transparent hover:border-gray-200 text-sm font-medium text-gray-700"
           >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-500 text-white flex items-center justify-center font-bold shadow-sm shadow-blue-500/20">
+            <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-blue-500 to-indigo-500 text-white flex items-center justify-center font-bold shadow-sm shadow-blue-500/20">
               {userEmail ? userEmail.charAt(0).toUpperCase() : 'U'}
             </div>
-            <span className="max-w-[120px] truncate text-xs font-bold text-gray-800">{userEmail || 'Akun'}</span>
+            <span className="max-w-30 truncate text-xs font-bold text-gray-800">{userEmail || 'Akun'}</span>
             <svg className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isAccountDropdownOpen ? 'rotate-180 text-blue-600' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
             </svg>

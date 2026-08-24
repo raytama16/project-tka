@@ -171,7 +171,7 @@ export default function DashboardPage() {
     <main className="min-h-screen bg-slate-50/50 text-gray-900 selection:bg-blue-600 selection:text-white pb-16">
       
       {/* ================= HEADER / NAVBAR DASHBOARD ================= */}
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-100 shadow-xs">
+      {/* <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-100 shadow-xs">
         <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
           
           <div className="flex items-center gap-3">
@@ -202,7 +202,7 @@ export default function DashboardPage() {
           </div>
 
         </div>
-      </header>
+      </header> */}
 
       {/* ================= CONTAINER UTAMA ================= */}
       <div className="max-w-6xl mx-auto px-6 pt-8">
