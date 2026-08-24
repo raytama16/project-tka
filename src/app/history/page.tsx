@@ -144,7 +144,7 @@ export default function ExamHistoryPage() {
             </div>
 
             <button
-              onClick={() => router.push('/subjects')}
+              onClick={() => router.push('/mapel-tka')}
               className="bg-white text-blue-700 hover:bg-blue-50 px-5 py-3 rounded-2xl text-xs font-black transition shadow-md flex items-center gap-2 cursor-pointer shrink-0"
             >
               <BookOpen className="w-4 h-4" />

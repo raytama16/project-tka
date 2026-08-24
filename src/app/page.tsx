@@ -131,23 +131,42 @@ export default function LandingPage() {
   }
 
   const faqData = [
-    {
-      question: "Apa itu Platform Simulasi Ujian TKA?",
-      answer: "Platform ini adalah media pembelajaran dan evaluasi digital mandiri yang dirancang untuk membantu siswa melatih kemampuan akademik secara terstruktur dengan sistem penilaian otomatis."
-    },
-    {
-      question: "Apakah modul latihan ini bisa diakses secara gratis?",
-      answer: "Ya! Modul Latihan & Ujian TKA saat ini dapat diakses secara bebas untuk mendukung proses belajar siswa tanpa dipungut biaya."
-    },
-    {
-      question: "Kapan modul SNBT dan Ujian Mandiri dirilis?",
-      answer: "Modul tambahan seperti SNBT/UTBK serta Ujian Mandiri/Kedinasan sedang dalam tahap pengembangan intensif dan akan segera dirilis dalam waktu dekat."
-    },
-    {
-      question: "Bagaimana cara mengirimkan masukan atau melaporkan kendala sistem?",
-      answer: "Anda dapat menggunakan formulir Kritik & Saran yang tersedia di bagian bawah halaman ini. Setiap pesan akan langsung terkirim ke tim pengembang."
-    }
-  ]
+  {
+    question: "Apa yang bisa saya lakukan di Palisademy?",
+    answer:
+      "Palisademy adalah platform persiapan ujian yang membantu kamu belajar melalui materi, latihan soal, dan simulasi yang disusun secara terstruktur. Saat ini, Palisademy berfokus pada persiapan TKA untuk membantu kamu belajar dan berlatih dengan lebih terarah."
+  },
+  {
+    question: "Apakah Palisademy bisa digunakan secara gratis?",
+    answer:
+      "Bisa. Palisademy menyediakan sejumlah materi dan latihan TKA yang dapat kamu akses secara gratis. Jika ingin mendapatkan akses ke lebih banyak materi, latihan, dan fitur pembelajaran, kamu dapat menggunakan paket berbayar yang tersedia."
+  },
+  {
+    question: "Apa perbedaan akses gratis dan akses berbayar?",
+    answer:
+      "Akses gratis memberikan kesempatan untuk mencoba sebagian materi dan latihan yang tersedia di Palisademy. Akses berbayar memberikan akses yang lebih lengkap sehingga kamu dapat menggunakan lebih banyak materi, latihan, dan konten persiapan yang tersedia di platform."
+  },
+  {
+    question: "Bagaimana latihan dan materi di Palisademy membantu persiapan TKA?",
+    answer:
+      "Materi dan latihan disusun berdasarkan topik agar kamu dapat belajar secara bertahap. Kamu bisa memahami materi, menguji pemahaman melalui latihan soal, kemudian mengevaluasi hasilnya untuk mengetahui bagian yang masih perlu ditingkatkan."
+  },
+  {
+    question: "Apakah saya bisa melihat hasil latihan setelah mengerjakan soal?",
+    answer:
+      "Ya. Setelah menyelesaikan latihan, kamu dapat melihat hasil pengerjaan untuk membantu mengevaluasi pemahamanmu. Gunakan hasil tersebut sebagai acuan untuk menentukan materi yang perlu kamu pelajari kembali."
+  },
+  {
+    question: "Apakah Palisademy nantinya menyediakan latihan selain TKA?",
+    answer:
+      "Ya. TKA adalah tahap awal pengembangan Palisademy. Ke depannya, kami berencana menghadirkan persiapan SNBT serta Academy Skills untuk membantu siswa mengembangkan kemampuan akademik dan keterampilan yang relevan di luar ujian."
+  },
+  {
+    question: "Bagaimana jika saya menemukan kesalahan atau mengalami kendala?",
+    answer:
+      "Kami sangat terbuka terhadap masukan. Jika kamu menemukan kesalahan pada soal atau materi, maupun mengalami kendala saat menggunakan platform, silakan sampaikan melalui formulir Kritik & Saran agar tim Palisademy dapat menindaklanjutinya."
+  }
+];
 
   return (
     <main className="min-h-screen bg-linear-to-b from-slate-50 via-white to-indigo-50/30 dark:bg-slate-50 dark:text-gray-900 flex flex-col justify-between selection:bg-purple-600 selection:text-white font-sans text-gray-900">
@@ -298,27 +317,27 @@ export default function LandingPage() {
 
         {/* Judul Utama */}
         <h1 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tight max-w-4xl leading-[1.15]">
-          Persiapkan Ujian Terbaikmu Bersama <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-600 via-indigo-600 to-blue-600">Sistem Evaluasi Terpadu</span>
+          Persiapkan TKA dengan Strategi, <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-600 via-indigo-600 to-blue-600">Bukan Sekadar Menghafal.</span>
         </h1>
 
         {/* Deskripsi Web */}
         <p className="text-sm md:text-base text-gray-500 mt-6 max-w-2xl leading-relaxed">
-          Website ini dirancang khusus untuk membantu siswa menguji kemampuan akademik melalui bank soal terstruktur, latihan berbasis bobot nilai yang akurat, serta materi pembelajaran mendalam.
+         Latih kemampuanmu melalui soal-soal terstruktur, pahami materi yang belum dikuasai, dan pantau perkembanganmu dari waktu ke waktu.
         </p>
 
         {/* Statistik Singkat */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-3xl mt-10 pt-10 border-t border-gray-100">
           <div className="flex flex-col items-center">
-            <span className="text-2xl md:text-3xl font-black text-gray-900">100+</span>
+            <span className="text-2xl md:text-3xl font-black text-gray-900">900+</span>
             <span className="text-xs text-gray-400 font-medium mt-1">Bank Soal Tervalidasi</span>
           </div>
           <div className="flex flex-col items-center">
-            <span className="text-2xl md:text-3xl font-black text-gray-900">24/7</span>
-            <span className="text-xs text-gray-400 font-medium mt-1">Akses Belajar Fleksibel</span>
+            <span className="text-2xl md:text-3xl font-black text-gray-900">Real Time</span>
+            <span className="text-xs text-gray-400 font-medium mt-1">Analisis Hasil</span>
           </div>
           <div className="col-span-2 md:col-span-1 flex flex-col items-center">
-            <span className="text-2xl md:text-3xl font-black text-gray-900">100%</span>
-            <span className="text-xs text-gray-400 font-medium mt-1">Sistem Penilaian Otomatis</span>
+            <span className="text-2xl md:text-3xl font-black text-gray-900">Terstruktur</span>
+            <span className="text-xs text-gray-400 font-medium mt-1">Materi & Pembahasan</span>
           </div>
         </div>
 
@@ -381,7 +400,7 @@ export default function LandingPage() {
               <div className="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center text-gray-400 mb-4 shadow-inner">
                 <BookOpen className="w-7 h-7" />
               </div>
-              <h3 className="text-base font-extrabold text-gray-400 tracking-tight">Ujian Mandiri / Kedinasan</h3>
+              <h3 className="text-base font-extrabold text-gray-400 tracking-tight">Academy</h3>
             </div>
 
           </div>
@@ -468,10 +487,10 @@ export default function LandingPage() {
               Keunggulan Platform
             </span>
             <h2 className="text-2xl md:text-3xl font-black text-gray-900 mt-3 tracking-tight">
-              Kenapa Harus Belajar di Sini?
+              Belajar Lebih Terarah, Hasil Lebih Terukur.
             </h2>
             <p className="text-xs md:text-sm text-gray-500 mt-2">
-              Fitur-fitur modern yang dirancang khusus untuk memaksimalkan hasil belajarmu.
+              Fitur Palisademy dirancang untuk membantu kamu memahami materi, berlatih lebih efektif, dan mengetahui perkembangan kemampuanmu.
             </p>
           </div>
 
@@ -480,9 +499,9 @@ export default function LandingPage() {
               <div className="w-12 h-12 bg-purple-600 text-white rounded-2xl flex items-center justify-center shadow-md shadow-purple-200">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-black text-gray-900">Penilaian Real-Time</h3>
+              <h3 className="text-base font-black text-gray-900">Hasil Instan, Evaluasi Lebih Mudah</h3>
               <p className="text-xs text-gray-500 leading-relaxed">
-                Dapatkan hasil nilai secara instan setelah menyelesaikan latihan soal lengkap dengan analisis jawaban.
+                Dapatkan hasil latihan secara langsung dan gunakan evaluasinya untuk mengetahui bagian yang sudah kamu kuasai maupun yang masih perlu ditingkatkan.
               </p>
             </div>
 
@@ -490,9 +509,9 @@ export default function LandingPage() {
               <div className="w-12 h-12 bg-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-md shadow-indigo-200">
                 <Layers className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-black text-gray-900">Variasi Soal Lengkap</h3>
+              <h3 className="text-base font-black text-gray-900">Latihan dengan Beragam Tipe Soal</h3>
               <p className="text-xs text-gray-500 leading-relaxed">
-                Mulai dari pilihan ganda standar, PG kompleks, hingga matriks evaluasi yang menantang kemampuan berpikir kritis.
+               Kenali berbagai tipe soal dan latih kemampuanmu melalui latihan yang dirancang untuk menguji pemahaman, ketelitian, dan kemampuan berpikir kritis.
               </p>
             </div>
 
@@ -500,9 +519,9 @@ export default function LandingPage() {
               <div className="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-md shadow-blue-200">
                 <Users className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-black text-gray-900">Akses Tanpa Batas</h3>
+              <h3 className="text-base font-black text-gray-900">Belajar Kapan Saja</h3>
               <p className="text-xs text-gray-500 leading-relaxed">
-                Bisa diakses kapan saja dan di mana saja menggunakan perangkat komputer maupun smartphone secara responsif.
+                Akses Palisademy kapan pun kamu siap belajar melalui komputer maupun smartphone, tanpa terikat waktu dan tempat.
               </p>
             </div>
           </div>
@@ -559,9 +578,9 @@ export default function LandingPage() {
             <span className="text-xs font-bold text-purple-600 bg-purple-50 px-3.5 py-1 rounded-full border border-purple-100">
               Masukan &amp; Evaluasi
             </span>
-            <h2 className="text-2xl md:text-3xl font-black text-gray-900 mt-3 tracking-tight">Kritik &amp; Saran</h2>
+            <h2 className="text-2xl md:text-3xl font-black text-gray-900 mt-3 tracking-tight">Bantu Kami Menjadi Lebih Baik</h2>
             <p className="text-xs md:text-sm text-gray-500 mt-2 leading-relaxed">
-              Punya masukan berharga atau menemukan kendala pada platform ini? Kirimkan langsung melalui formulir di bawah agar kami bisa terus meningkatkannya.
+              Menemukan kendala, memiliki ide, atau punya masukan tentang pengalamanmu di Palisademy? Sampaikan kepada kami. Setiap masukan membantu kami mengembangkan platform yang lebih baik untuk kamu.
             </p>
           </div>
 
@@ -589,12 +608,12 @@ export default function LandingPage() {
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-bold text-gray-700">Pesan, Kritik, atau Saran</label>
+              <label className="text-xs font-bold text-gray-700">Apa yang ingin kamu sampaikan?</label>
               <textarea
                 name="message"
                 rows={4}
                 required
-                placeholder="Tuliskan masukan atau laporan kendala di sini..."
+                placeholder="Ceritakan masukan, ide, atau kendala yang kamu temukan..."
                 className="px-4 py-3.5 rounded-2xl border border-gray-200 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50/50 resize-none font-medium"
               />
             </div>

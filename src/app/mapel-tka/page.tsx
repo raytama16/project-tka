@@ -15,7 +15,11 @@ import {
   ArrowRight,
   Flame,
   Target,
-  Search
+  Search,
+  Crown,
+  ShieldCheck,
+  X,
+  MessageCircle
 } from 'lucide-react'
 
 type Subject = {
@@ -29,10 +33,10 @@ type Subject = {
 type Profile = {
   full_name: string
   school_name: string
+  is_premium?: boolean
   updated_at?: string
 }
 
-// Daftar variasi tema warna modern untuk card mapel (Glassmorphism & Gradient accents)
 // Daftar variasi tema warna modern untuk card mapel (Warna solid & bersih tanpa transparan bawah)
 const cardColorThemes = [
   {
@@ -89,6 +93,9 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   
+  // State untuk kontrol Modal Popup Pembelian Premium
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  
   const router = useRouter()
   const supabase = createClient()
 
@@ -101,10 +108,10 @@ export default function DashboardPage() {
         return
       }
 
-      // 2. Ambil Profil User
+      // 2. Ambil Profil User (termasuk kolom is_premium)
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('full_name, school_name')
+        .select('full_name, school_name, is_premium')
         .eq('id', user.id)
         .maybeSingle()
 
@@ -148,6 +155,16 @@ export default function DashboardPage() {
     }
   }, [searchQuery, subjects])
 
+  // Fungsi untuk mengarahkan ke WhatsApp dengan pesan otomatis
+  const handleWhatsAppCheckout = () => {
+    const phoneNumber = '6285792108262' // Ganti dengan nomor WhatsApp kamu
+    const userName = profile?.full_name || 'User'
+    const message = `Halo Admin, saya ${userName} ingin mengaktifkan akun Premium Palisademy TKA saya. Mohon info proses selanjutnya.`
+    const encodedMessage = encodeURIComponent(message)
+    
+    window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank')
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-3">
@@ -158,7 +175,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50/60 text-gray-900 dark:bg-slate-50 dark:text-gray-900 selection:bg-blue-600 selection:text-white pb-20">
+    <main className="min-h-screen bg-slate-50/60 text-gray-900 dark:bg-slate-50 dark:text-gray-900 selection:bg-blue-600 selection:text-white pb-20 relative">
       
       {/* ================= NAVBAR TERPISAH ================= */}
       <Navbar />
@@ -209,23 +226,14 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Quick Stat Card (1 Kolom) */}
-          <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between">
-            {/* <div>
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-extrabold text-gray-400 uppercase tracking-wider">Ringkasan Cepat</span>
-                <span className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-                  <TrendingUp className="w-4 h-4" />
-                </span>
-              </div>
-              <h3 className="text-base font-black text-gray-800 mb-1">Performa Belajar</h3>
-              <p className="text-xs text-gray-500 mb-4">Selesaikan modul latihan secara rutin untuk meningkatkan skor rata-rata ujianmu.</p>
-            </div> */}
-
+          {/* Quick Stat & Akun Status Card (1 Kolom) */}
+          <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between gap-4">
+            
+            {/* Total Mapel Info */}
             <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 flex items-center justify-between">
               <div>
                 <span className="text-[10px] text-gray-400 font-bold block">Total Mapel Tersedia</span>
-                <span className="text-lg font-black text-blue-600">{subjects.length} Mata Pelajaran</span>
+                <span className="text-base font-black text-blue-600">{subjects.length} Mata Pelajaran</span>
               </div>
               <Link 
                 href="/mapel-tka" 
@@ -235,6 +243,42 @@ export default function DashboardPage() {
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
+
+            {/* Status Akun (Premium / Free User) */}
+            <div className="bg-slate-50 p-4 rounded-2xl border border-gray-100 flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-gray-400 font-bold block uppercase tracking-wider">Status Akun</span>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    {profile?.is_premium ? (
+                      <span className="inline-flex items-center gap-1 text-xs font-black text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+                        <Crown className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                        <span>PREMIUM</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-xs font-black text-gray-600 bg-gray-200/70 px-2.5 py-0.5 rounded-full">
+                        <span>FREE USER</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${profile?.is_premium ? 'bg-amber-100 text-amber-600' : 'bg-gray-200 text-gray-600'}`}>
+                  <Crown className="w-4 h-4" />
+                </div>
+              </div>
+
+              {!profile?.is_premium && (
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="w-full mt-1 py-2.5 bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl text-xs font-extrabold shadow-sm shadow-orange-500/20 transition flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Upgrade ke Premium</span>
+                </button>
+              )}
+            </div>
+
           </div>
 
         </div>
@@ -243,7 +287,7 @@ export default function DashboardPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
             <h2 className="text-xl font-black text-gray-900 tracking-tight">Daftar Mata Pelajaran TKA</h2>
-            <p className="text-xs text-gray-500 mt-0.5">Pilih salah satu mapel di bawah untuk mulai mengerjakan latihan soal.</p>
+            <p className="text-xs text-gray-500 mt-0.5">Pilih salah satu mapel di bawah untuk mulai belajar dan mengerjakan latihan soal.</p>
           </div>
 
           {/* Kotak Pencarian Interaktif */}
@@ -291,7 +335,7 @@ export default function DashboardPage() {
                         <BookOpen className="w-6 h-6" />
                       </div>
                       <span className={`text-[10px] font-extrabold px-3 py-1 rounded-full ${theme.badge}`}>
-                        TKA Resmi
+                        TKA Wajib
                       </span>
                     </div>
 
@@ -332,6 +376,74 @@ export default function DashboardPage() {
         </div>
 
       </div>
+
+      {/* ================= MODAL POPUP UPGRADE PREMIUM ================= */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 md:p-8 shadow-2xl border border-gray-100 relative animate-scale-up">
+            
+            {/* Tombol Close */}
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-5 right-5 w-8 h-8 bg-gray-100 hover:bg-gray-200 text-gray-500 rounded-full flex items-center justify-center transition cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mb-4 border border-amber-100 shadow-inner">
+                <Crown className="w-8 h-8 fill-amber-500 text-amber-500" />
+              </div>
+
+              <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest bg-amber-50 px-3 py-1 rounded-full mb-2">
+                Eksklusif Akses Tanpa Batas
+              </span>
+
+              <h3 className="text-xl font-black text-gray-900 mb-2">
+                Upgrade ke Akun Premium
+              </h3>
+
+              <p className="text-xs text-gray-500 leading-relaxed mb-6">
+                Nikmati akses penuh ke seluruh bank soal eksklusif, pembahasan mendalam tanpa jeda, serta simulasi ujian TKA prioritas tinggi.
+              </p>
+
+              <div className="w-full bg-slate-50 p-4 rounded-2xl border border-gray-100 flex flex-col gap-2.5 mb-6 text-left">
+                <div className="flex items-center gap-2 text-xs font-bold text-gray-700">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <span>Akses Seluruh Modul Mata Pelajaran</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs font-bold text-gray-700">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <span>Analisis Grafik Skor &amp; Riwayat Lengkap</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs font-bold text-gray-700">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <span>Dukungan Prioritas Konsultasi Belajar</span>
+                </div>
+              </div>
+
+              {/* Tombol Aksi WhatsApp */}
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-2xl text-xs font-bold transition cursor-pointer"
+                >
+                  Nanti Saja
+                </button>
+                <button
+                  onClick={handleWhatsAppCheckout}
+                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-black shadow-md shadow-emerald-500/20 transition flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Beli via WhatsApp</span>
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </main>
   )
