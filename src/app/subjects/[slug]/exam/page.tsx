@@ -32,8 +32,10 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
   const [questions, setQuestions] = useState<Question[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
 
-  // Menyimpan jawaban siswa: { [questionId]: answerValue }
+  // Menyimpan jawaban & status ragu-ragu siswa
   const [userAnswers, setUserAnswers] = useState<Record<string, any>>({})
+  const [flaggedQuestions, setFlaggedQuestions] = useState<Record<string, boolean>>({})
+  
   const [submitting, setSubmitting] = useState(false)
   const [isFinished, setIsFinished] = useState(false)
   const [scoreResult, setScoreResult] = useState<{ totalCorrect: number; totalScore: number } | null>(null)
@@ -44,29 +46,25 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
   }, [slug])
 
   const renderMathText = (text: string) => {
-          if (!text) return null
-          const parts = text.split(/(\$.*?\$)/g)
-          return (
-              <span>
-                 {parts.map((part, index) => {
-                  // Kalau bagian ini adalah rumus LaTeX ($...$)
-                  if (part.startsWith('$') && part.endsWith('$')) {
-                      const mathContent = part.slice(1, -1)
-                      return <InlineMath key={index} math={mathContent} />
-                  }
-                  
-                  // Kalau bukan LaTeX, parsing teks biasa YANG MUNGKIN ADA TAG HTML-NYA (<p>, <br>, dll)
-                  return <span key={index}>{parse(part)}</span>
-              })}
-              </span>
-          )
-      }
+    if (!text) return null
+    const parts = text.split(/(\$.*?\$)/g)
+    return (
+      <span>
+        {parts.map((part, index) => {
+          if (part.startsWith('$') && part.endsWith('$')) {
+            const mathContent = part.slice(1, -1)
+            return <InlineMath key={index} math={mathContent} />
+          }
+          return <span key={index}>{parse(part)}</span>
+        })}
+      </span>
+    )
+  }
       
   const fetchExamData = async () => {
     setLoading(true)
     let foundSubject = null
 
-    // 1. Coba cari berdasarkan kolom 'slug'
     let { data: subjBySlug } = await supabase
       .from('subjects')
       .select('id, name, slug')
@@ -76,7 +74,6 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
     if (subjBySlug) {
       foundSubject = subjBySlug
     } else {
-      // 2. Coba cari berdasarkan kolom 'id' (jika berupa UUID)
       let { data: subjById } = await supabase
         .from('subjects')
         .select('id, name, slug')
@@ -86,7 +83,6 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
       if (subjById) {
         foundSubject = subjById
       } else {
-        // 3. Coba cari berdasarkan kecocokan teks pada kolom 'name'
         const cleanQuery = slug.replace(/-/g, ' ')
         let { data: subjByName } = await supabase
           .from('subjects')
@@ -98,8 +94,6 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
       }
     }
 
-    console.log("Hasil pencarian mata pelajaran:", foundSubject)
-
     if (!foundSubject) {
       alert(`Mata pelajaran dengan identifier "${slug}" tidak ditemukan di database!`)
       setLoading(false)
@@ -109,7 +103,6 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
     setSubjectId(foundSubject.id)
     setSubjectTitle(foundSubject.name)
 
-    // Cek user yang sedang login & hapus data history exam lama jika ada
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
       await supabase
@@ -120,7 +113,6 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
     }
 
     await loadQuestions(foundSubject.id)
-
     setLoading(false)
   }
 
@@ -132,7 +124,6 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
       .eq('type', 'exam')
 
     if (!error && qData) {
-      console.log("Soal exam berhasil dimuat:", qData.length)
       setQuestions(qData)
     } else {
       console.error("Gagal memuat soal exam:", error)
@@ -158,13 +149,19 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
     }
   }
 
-  // Kalkulasi & Simpan Hasil Ujian ke exam_history (Dengan Bobot Poin & Desimal)
+  const toggleFlagCurrentQuestion = () => {
+    const qId = currentQ.id || currentQ.question_id!
+    setFlaggedQuestions(prev => ({
+      ...prev,
+      [qId]: !prev[qId]
+    }))
+  }
+
   const handleSubmitExam = async () => {
     if (!confirm('Apakah Anda yakin ingin menyelesaikan dan mengumpulkan ujian ini?')) return
 
     setSubmitting(true)
 
-    // Ambil data user yang sedang login saat ini
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       alert('Sesi Anda telah berakhir atau belum login. Silakan login kembali.')
@@ -233,7 +230,6 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
 
       if (isCorrect) correctQuestionCount++
 
-      // Susun detail per soal untuk disimpan ke JSONB
       answersDetailList.push({
         question_id: qId,
         question_type: q.question_type,
@@ -248,11 +244,9 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
       })
     })
 
-    // Hitung skala nilai akhir 0 - 100 dengan dukungan 2 digit desimal (koma)
     const rawScore = totalPossiblePoints > 0 ? (earnedPoints / totalPossiblePoints) * 100 : 0
     const finalScore = parseFloat(rawScore.toFixed(2))
 
-    // Simpan ke tabel exam_history di Supabase
     const { error: insertError } = await supabase
       .from('exam_history')
       .insert({
@@ -276,7 +270,7 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center text-purple-600 font-semibold animate-pulse">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center text-purple-600 dark:text-purple-400 font-semibold animate-pulse">
         Mempersiapkan sesi ujian...
       </div>
     )
@@ -284,10 +278,10 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
 
   if (!subjectId || questions.length === 0) {
     return (
-      <main className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
-        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 text-center max-w-md w-full flex flex-col gap-4">
-          <h1 className="text-xl font-bold text-gray-900">{subjectTitle || 'Ujian'}</h1>
-          <p className="text-sm text-gray-500">
+      <main className="min-h-screen bg-gray-50 dark:bg-gray-950 p-6 flex items-center justify-center">
+        <div className="bg-white dark:bg-gray-900 p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 text-center max-w-md w-full flex flex-col gap-4">
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">{subjectTitle || 'Ujian'}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             {!subjectId 
               ? `Mata pelajaran dengan identifier "${slug}" tidak ditemukan di database.` 
               : 'Belum ada soal ujian (exam) yang tersedia untuk mata pelajaran ini.'}
@@ -305,22 +299,22 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
 
   if (isFinished && scoreResult) {
     return (
-      <main className="min-h-screen bg-gray-50 p-4 md:p-8 flex items-center justify-center">
-        <div className="w-full max-w-lg bg-white rounded-3xl shadow-sm border border-gray-100 p-8 flex flex-col items-center text-center gap-6">
-          <div className="w-24 h-24 bg-purple-50 rounded-full flex items-center justify-center text-2xl font-extrabold text-purple-600 border border-purple-100">
+      <main className="min-h-screen bg-gray-50 dark:bg-gray-950 p-4 md:p-8 flex items-center justify-center">
+        <div className="w-full max-w-lg bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 p-8 flex flex-col items-center text-center gap-6">
+          <div className="w-24 h-24 bg-purple-50 dark:bg-purple-950/50 rounded-full flex items-center justify-center text-2xl font-extrabold text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900">
             {scoreResult.totalScore}
           </div>
           <div>
             <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Hasil Ujian &middot; {subjectTitle}</span>
-            <h1 className="text-2xl font-bold text-gray-900">Ujian Telah Selesai!</h1>
-            <p className="text-sm text-gray-500 mt-2">
-              Anda menyelesaikan soal dengan rincian benar penuh sebanyak <strong className="text-purple-600">{scoreResult.totalCorrect}</strong> dari total <strong className="text-gray-900">{questions.length}</strong> soal (Penilaian berbasis bobot poin). Riwayat & pembahasan telah disimpan.
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Ujian Telah Selesai!</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+              Anda menyelesaikan soal dengan rincian benar penuh sebanyak <strong className="text-purple-600 dark:text-purple-400">{scoreResult.totalCorrect}</strong> dari total <strong className="text-gray-900 dark:text-white">{questions.length}</strong> soal. Riwayat & pembahasan telah disimpan.
             </p>
           </div>
-          <div className="flex gap-3 w-full pt-4 border-t border-gray-100">
+          <div className="flex gap-3 w-full pt-4 border-t border-gray-100 dark:border-gray-800">
             <button
               onClick={() => router.push('/subjects')}
-              className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl text-xs font-bold hover:bg-gray-200 transition"
+              className="flex-1 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl text-xs font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition"
             >
               Daftar Mapel
             </button>
@@ -338,37 +332,53 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
 
   const currentQ = questions[currentIndex]
   const currentQId = currentQ.id || currentQ.question_id!
+  const isCurrentFlagged = !!flaggedQuestions[currentQId]
 
   return (
-    <main className="min-h-screen bg-gray-50 p-4 md:p-8 flex justify-center">
-      <div className="w-full max-w-4xl flex flex-col gap-6">
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-950 p-4 md:p-8 flex justify-center transition-colors">
+      <div className="w-full max-w-5xl flex flex-col gap-6">
         
-        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex items-center justify-between flex-wrap gap-4">
+        {/* Header Bar */}
+        <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-800 flex items-center justify-between flex-wrap gap-4">
           <div>
-            <span className="text-xs font-semibold text-purple-600 uppercase tracking-wider block mb-0.5">Sesi Ujian TKA</span>
-            <h1 className="text-xl font-bold text-gray-900">{subjectTitle}</h1>
+            <span className="text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider block mb-0.5">Sesi Ujian TKA</span>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">{subjectTitle}</h1>
           </div>
           <div className="flex items-center gap-3">
-            <div className="px-4 py-2 bg-purple-50 border border-purple-100 rounded-xl text-xs font-bold text-purple-700">
+            <div className="px-4 py-2 bg-purple-50 dark:bg-purple-950/50 border border-purple-100 dark:border-purple-900 rounded-xl text-xs font-bold text-purple-700 dark:text-purple-300">
               Soal {currentIndex + 1} dari {questions.length}
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="md:col-span-3 bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 flex flex-col justify-between gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          
+          {/* Main Question Card */}
+          <div className="lg:col-span-3 bg-white dark:bg-gray-900 rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col justify-between gap-6">
             <div className="flex flex-col gap-6">
               
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <span className="text-xs font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/50 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-900">
                   {currentQ.question_type === 'multiple_choice' && 'Pilihan Ganda'}
                   {currentQ.question_type === 'complex_multiple_choice' && 'PG Kompleks (Banyak Jawaban)'}
                   {currentQ.question_type === 'true_false_matrix' && 'Matriks Benar / Salah'}
                 </span>
+
+                {/* Tombol Flag Ragu-Ragu */}
+                <button
+                  type="button"
+                  onClick={toggleFlagCurrentQuestion}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition flex items-center gap-1.5 ${
+                    isCurrentFlagged 
+                      ? 'bg-amber-500 text-white border-amber-500 shadow-sm' 
+                      : 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-900 hover:bg-amber-100'
+                  }`}
+                >
+                  <span>{isCurrentFlagged ? '★ Ditandai Ragu-Ragu' : '☆ Ragu-Ragu'}</span>
+                </button>
               </div>
 
-              <div className="text-base font-medium text-gray-900">
-                {/* <MathText content={currentQ.question_text} /> */}
+              <div className="text-base font-medium text-gray-900 dark:text-gray-100 leading-relaxed">
                 {renderMathText(currentQ.question_text)}
               </div>
 
@@ -386,12 +396,12 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
                         onClick={() => handleAnswerChange(currentQId, currentQ.question_type, key)}
                         className={`flex items-center gap-3 p-4 rounded-2xl border text-left transition ${
                           isSelected 
-                            ? 'bg-purple-50 border-purple-300 text-purple-900 font-bold shadow-xs' 
-                            : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
+                            ? 'bg-purple-50 dark:bg-purple-950/40 border-purple-300 dark:border-purple-700 text-purple-900 dark:text-purple-200 font-bold shadow-xs' 
+                            : 'bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                         }`}
                       >
                         <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 ${
-                          isSelected ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-600'
+                          isSelected ? 'bg-purple-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
                         }`}>
                           {key}
                         </span>
@@ -410,8 +420,8 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
                     const currentMatrixVal = (userAnswers[currentQId] || {})[stKey] || ''
 
                     return (
-                      <div key={stKey} className="p-4 rounded-2xl border border-gray-200 bg-gray-50/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                        <div className="text-sm text-gray-800 font-medium flex-1">
+                      <div key={stKey} className="p-4 rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                        <div className="text-sm text-gray-800 dark:text-gray-200 font-medium flex-1">
                           <MathText content={stText as string} />
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
@@ -423,7 +433,7 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
                               className={`px-4 py-2 rounded-xl text-xs font-bold border transition ${
                                 currentMatrixVal === opt
                                   ? opt === 'Benar' ? 'bg-green-600 text-white border-green-600 shadow-xs' : 'bg-red-600 text-white border-red-600 shadow-xs'
-                                  : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-100'
+                                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
                               }`}
                             >
                               {opt}
@@ -438,12 +448,13 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
 
             </div>
 
-            <div className="flex items-center justify-between pt-6 border-t border-gray-100">
+            {/* Footer Navigation Buttons */}
+            <div className="flex items-center justify-between pt-6 border-t border-gray-100 dark:border-gray-800">
               <button
                 type="button"
                 disabled={currentIndex === 0}
                 onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
-                className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-bold transition disabled:opacity-40"
+                className="px-5 py-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-xs font-bold transition disabled:opacity-40"
               >
                 &larr; Sebelumnya
               </button>
@@ -470,8 +481,10 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
 
           </div>
 
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col gap-4 h-fit">
-            <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Navigasi Soal</span>
+          {/* Sidebar Navigation Matrix */}
+          <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col gap-4 h-fit">
+            <span className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Navigasi Soal</span>
+            
             <div className="grid grid-cols-5 gap-2">
               {questions.map((q, idx) => {
                 const qId = q.id || q.question_id!
@@ -483,31 +496,62 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
                   else if (typeof ansObj === 'object') isAnswered = Object.keys(ansObj).length > 0
                 }
                 const isCurrent = currentIndex === idx
+                const isFlagged = !!flaggedQuestions[qId]
+
+                // Indikator Warna Tombol Navigasi:
+                // - Current: Ungu solid
+                // - Flagged (Ragu-ragu): Kuning/Amber
+                // - Answered: Ungu muda / border ungu
+                // - Unanswered: Abu-abu biasa
+                let btnStyle = "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:bg-gray-100"
+                
+                if (isAnswered) {
+                  btnStyle = "bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800"
+                }
+                if (isFlagged) {
+                  btnStyle = "bg-amber-500 text-white border-amber-600 shadow-xs"
+                }
+                if (isCurrent) {
+                  btnStyle = "bg-purple-600 text-white border-purple-600 shadow-sm"
+                }
 
                 return (
                   <button
                     key={qId}
                     type="button"
                     onClick={() => setCurrentIndex(idx)}
-                    className={`w-10 h-10 rounded-xl text-xs font-bold transition flex items-center justify-center border ${
-                      isCurrent
-                        ? 'bg-purple-600 text-white border-purple-600 shadow-sm'
-                        : isAnswered
-                        ? 'bg-purple-50 text-purple-700 border-purple-200'
-                        : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
-                    }`}
+                    className={`w-10 h-10 rounded-xl text-xs font-bold transition flex items-center justify-center border relative ${btnStyle}`}
                   >
                     {idx + 1}
+                    {isFlagged && !isCurrent && (
+                      <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full border-2 border-white dark:border-gray-900"></span>
+                    )}
                   </button>
                 )
               })}
+            </div>
+
+            {/* Keterangan Indikator */}
+            <div className="flex flex-col gap-1.5 pt-2 text-[11px] text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-800">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-purple-600 inline-block"></span>
+                <span>Sedang dikerjakan</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-purple-200 dark:bg-purple-900 inline-block"></span>
+                <span>Sudah dijawab</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
+                <span>Ragu-ragu (Ditandai)</span>
+              </div>
             </div>
 
             <button
               type="button"
               disabled={submitting}
               onClick={handleSubmitExam}
-              className="mt-4 w-full py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition shadow-sm disabled:opacity-50"
+              className="mt-2 w-full py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition shadow-sm disabled:opacity-50"
             >
               {submitting ? 'Menyimpan...' : 'Selesai & Kumpulkan'}
             </button>
