@@ -150,7 +150,7 @@ export default function LandingPage() {
   ]
 
   return (
-    <main className="min-h-screen bg-linear-to-b from-slate-50 via-white to-indigo-50/30 flex flex-col justify-between selection:bg-purple-600 selection:text-white font-sans text-gray-900">
+    <main className="min-h-screen bg-linear-to-b from-slate-50 via-white to-indigo-50/30 dark:bg-slate-50 dark:text-gray-900 flex flex-col justify-between selection:bg-purple-600 selection:text-white font-sans text-gray-900">
 
       {/* ================= TOP NAVBAR ================= */}
      <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-gray-100 transition-all">

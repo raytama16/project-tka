@@ -154,7 +154,7 @@ export default function SubjectDetailPage() {
   }
 
   return (
-    <main className="min-h-screen bg-linear-to-b from-slate-50 via-white to-indigo-50/30 flex items-center justify-center p-4 sm:p-6 md:p-12 relative font-sans text-gray-900 selection:bg-blue-600 selection:text-white">
+    <main className="min-h-screen bg-linear-to-b from-slate-50 via-white to-indigo-50/30 flex items-center dark:bg-slate-50 dark:text-gray-900  justify-center p-4 sm:p-6 md:p-12 relative font-sans text-gray-900 selection:bg-blue-600 selection:text-white">
 
       {/* ================= MODAL KONFIRMASI RESET HISTORY EXAM ================= */}
       {showExamConfirm && (
