@@ -87,8 +87,8 @@ export default function Navbar() {
           </Link>
 
           {/* Tombol Kembali / Kembali ke Utama */}
-          <button
-            onClick={() => router.back()}
+          <Link
+            href="/"
             className="hidden lg:flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-gray-500 hover:text-blue-600 hover:bg-blue-50/60 active:scale-95 transition"
             title="Kembali ke halaman sebelumnya"
           >
@@ -96,7 +96,7 @@ export default function Navbar() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             <span>Kembali</span>
-          </button>
+          </Link>
         </div>
 
         {/* Menu Navigasi Desktop (Di Tengah) */}
@@ -182,15 +182,15 @@ export default function Navbar() {
 
         {/* Tombol Hamburger Mobile */}
         <div className="flex md:hidden items-center gap-2">
-          <button
-            onClick={() => router.back()}
+          <Link
+            href="/"
             className="p-2.5 rounded-xl bg-gray-50 text-gray-600 hover:bg-gray-100 transition active:scale-95"
             aria-label="Kembali"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-          </button>
+          </Link>
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="p-2.5 rounded-2xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition active:scale-95"
