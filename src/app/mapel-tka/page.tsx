@@ -158,7 +158,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50/60 text-gray-900 selection:bg-blue-600 selection:text-white pb-20">
+    <main className="min-h-screen bg-slate-50/60 text-gray-900 dark:bg-slate-50 dark:text-gray-900 selection:bg-blue-600 selection:text-white pb-20">
       
       {/* ================= NAVBAR TERPISAH ================= */}
       <Navbar />
