@@ -108,15 +108,15 @@ export default function ExamHistoryPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-3 dark:bg-slate-50">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-gray-950 gap-3">
         <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-blue-600 font-extrabold text-xs tracking-wider uppercase animate-pulse">Memuat Riwayat Ujian...</p>
+        <p className="text-blue-600 dark:text-blue-400 font-extrabold text-xs tracking-wider uppercase animate-pulse">Memuat Riwayat Ujian...</p>
       </div>
     )
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-gray-900 dark:bg-slate-50 dark:text-gray-900 selection:bg-blue-600 selection:text-white pb-24">
+    <main className="min-h-screen bg-slate-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100 selection:bg-blue-600 selection:text-white pb-24">
       
       {/* ================= NAVBAR TERPISAH ================= */}
       <Navbar />
@@ -156,58 +156,58 @@ export default function ExamHistoryPage() {
         {/* ================= STATISTIK KARTU RINGKASAN ================= */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           
-          <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between dark:bg-white">
+          <div className="bg-white dark:bg-gray-900 p-5 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">Total Tes</span>
-              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+              <span className="text-[10px] font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Total Tes</span>
+              <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
                 <BarChart3 className="w-4 h-4" />
               </div>
             </div>
-            <span className="text-2xl font-black text-gray-900">{stats.totalExams}</span>
-            <span className="text-[11px] text-gray-500 mt-1">Ujian dikerjakan</span>
+            <span className="text-2xl font-black text-gray-900 dark:text-white">{stats.totalExams}</span>
+            <span className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Ujian dikerjakan</span>
           </div>
 
-          <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between dark:bg-white">
+          <div className="bg-white dark:bg-gray-900 p-5 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">Rata-rata Skor</span>
-              <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+              <span className="text-[10px] font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Rata-rata Skor</span>
+              <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
                 <TrendingUp className="w-4 h-4" />
               </div>
             </div>
-            <span className="text-2xl font-black text-indigo-600">{stats.avgScore}</span>
-            <span className="text-[11px] text-gray-500 mt-1">Skor keseluruhan</span>
+            <span className="text-2xl font-black text-indigo-600 dark:text-indigo-400">{stats.avgScore}</span>
+            <span className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Skor keseluruhan</span>
           </div>
 
-          <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between dark:bg-white">
+          <div className="bg-white dark:bg-gray-900 p-5 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">Skor Tertinggi</span>
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+              <span className="text-[10px] font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Skor Tertinggi</span>
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
                 <Award className="w-4 h-4" />
               </div>
             </div>
-            <span className="text-2xl font-black text-emerald-600">{stats.highestScore}</span>
-            <span className="text-[11px] text-gray-500 mt-1">Pencapaian terbaik</span>
+            <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{stats.highestScore}</span>
+            <span className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Pencapaian terbaik</span>
           </div>
 
-          <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between dark:bg-white">
+          <div className="bg-white dark:bg-gray-900 p-5 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">Lulus Kriteria</span>
-              <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
+              <span className="text-[10px] font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Lulus Kriteria</span>
+              <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold">
                 <ShieldCheck className="w-4 h-4" />
               </div>
             </div>
-            <span className="text-2xl font-black text-purple-600">{stats.passCount}</span>
-            <span className="text-[11px] text-gray-500 mt-1">Skor &ge; 75</span>
+            <span className="text-2xl font-black text-purple-600 dark:text-purple-400">{stats.passCount}</span>
+            <span className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Skor &ge; 75</span>
           </div>
 
         </div>
 
         {/* ================= FILTER & SEARCH BAR ================= */}
-        <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm mb-6 flex flex-col md:flex-row items-center justify-between gap-4 dark:bg-white">
+        <div className="bg-white dark:bg-gray-900 p-5 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
           
           {/* Input Pencarian */}
           <div className="relative w-full md:w-80">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-gray-400">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-gray-400 dark:text-gray-500">
               <Search className="w-4 h-4" />
             </span>
             <input
@@ -215,7 +215,7 @@ export default function ExamHistoryPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari berdasarkan nama mapel..."
-              className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-gray-200 rounded-2xl text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              className="w-full pl-11 pr-4 py-2.5 bg-slate-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-xs font-medium text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             />
           </div>
 
@@ -223,40 +223,40 @@ export default function ExamHistoryPage() {
           <div className="flex items-center gap-1.5 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
             <button
               onClick={() => setSelectedFilter('all')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
                 selectedFilter === 'all' 
                   ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
               Semua ({historyList.length})
             </button>
             <button
               onClick={() => setSelectedFilter('pass')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
                 selectedFilter === 'pass' 
                   ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-500/20' 
-                  : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                  : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50'
               }`}
             >
               Lulus (&ge; 75)
             </button>
             <button
               onClick={() => setSelectedFilter('warning')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
                 selectedFilter === 'warning' 
                   ? 'bg-amber-600 text-white shadow-sm shadow-amber-500/20' 
-                  : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+                  : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/50'
               }`}
             >
               Cukup (50-74)
             </button>
             <button
               onClick={() => setSelectedFilter('fail')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
                 selectedFilter === 'fail' 
                   ? 'bg-rose-600 text-white shadow-sm shadow-rose-500/20' 
-                  : 'bg-rose-50 text-rose-700 hover:bg-rose-100'
+                  : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50'
               }`}
             >
               Remidi (&lt; 50)
@@ -267,12 +267,12 @@ export default function ExamHistoryPage() {
 
         {/* ================= DAFTAR RIWAYAT UJIAN ================= */}
         {filteredHistory.length === 0 ? (
-          <div className="bg-white p-16 rounded-3xl border border-gray-100 text-center flex flex-col items-center justify-center gap-3 shadow-sm dark:bg-white">
-            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500 mb-1">
+          <div className="bg-white dark:bg-gray-900 p-16 rounded-3xl border border-gray-100 dark:border-gray-800 text-center flex flex-col items-center justify-center gap-3 shadow-sm">
+            <div className="w-16 h-16 bg-blue-50 dark:bg-blue-950/60 rounded-2xl flex items-center justify-center text-blue-500 dark:text-blue-400 mb-1">
               <History className="w-8 h-8" />
             </div>
-            <h3 className="text-base font-black text-gray-800">Tidak Ada Riwayat Ujian</h3>
-            <p className="text-xs text-gray-500 max-w-sm mb-4">
+            <h3 className="text-base font-black text-gray-800 dark:text-gray-100">Tidak Ada Riwayat Ujian</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 max-w-sm mb-4">
               {historyList.length === 0 
                 ? 'Kamu belum pernah menyelesaikan ujian apapun di platform ini. Yuk mulai latihan soal pertamamu!'
                 : 'Tidak ada riwayat ujian yang cocok dengan kriteria pencarian atau filter yang kamu pilih.'}
@@ -280,7 +280,7 @@ export default function ExamHistoryPage() {
             {historyList.length === 0 && (
               <button
                 onClick={() => router.push('/subjects')}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-xs font-extrabold transition shadow-md shadow-blue-500/20 flex items-center gap-2"
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-xs font-extrabold transition shadow-md shadow-blue-500/20 flex items-center gap-2 cursor-pointer"
               >
                 <span>Mulai Ujian Sekarang</span>
                 <ArrowRight className="w-4 h-4" />
@@ -305,16 +305,16 @@ export default function ExamHistoryPage() {
               return (
                 <div 
                   key={item.id}
-                  className="bg-white rounded-3xl p-5 md:p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition hover:shadow-md hover:border-blue-200 dark:bg-white"
+                  className="bg-white dark:bg-gray-900 rounded-3xl p-5 md:p-6 shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition hover:shadow-md hover:border-blue-200 dark:hover:border-blue-900"
                 >
                   <div className="flex items-center gap-4 w-full md:w-auto">
                     {/* Kotak Nilai Skor */}
                     <div className={`w-16 h-16 rounded-2xl flex flex-col items-center justify-center border shrink-0 shadow-xs ${
                       isPass 
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                        ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800' 
                         : isWarning 
-                        ? 'bg-amber-50 text-amber-700 border-amber-200' 
-                        : 'bg-rose-50 text-rose-700 border-rose-200'
+                        ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800' 
+                        : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-800'
                     }`}>
                       <span className="text-lg font-black leading-none">{item.score}</span>
                       <span className="text-[9px] font-bold uppercase tracking-wider mt-1 opacity-80">Skor</span>
@@ -323,19 +323,23 @@ export default function ExamHistoryPage() {
                     {/* Informasi Mapel & Waktu */}
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <h2 className="text-base font-black text-gray-900 tracking-tight">
+                        <h2 className="text-base font-black text-gray-900 dark:text-gray-100 tracking-tight">
                           {item.subjects?.name || 'Mata Pelajaran Dihapus'}
                         </h2>
                         <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${
-                          isPass ? 'bg-emerald-100 text-emerald-700' : isWarning ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'
+                          isPass 
+                            ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300' 
+                            : isWarning 
+                            ? 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300' 
+                            : 'bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300'
                         }`}>
                           {isPass ? 'Lulus' : isWarning ? 'Cukup' : 'Remidi'}
                         </span>
                       </div>
                       
-                      <div className="flex items-center gap-3 text-xs text-gray-500">
+                      <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
                         <span className="flex items-center gap-1">
-                          <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                          <Calendar className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
                           <span>{formattedDate}</span>
                         </span>
                       </div>
@@ -345,7 +349,7 @@ export default function ExamHistoryPage() {
                   {/* Tombol Lihat Pembahasan */}
                   <button
                     onClick={() => router.push(`/history/${item.id}`)}
-                    className="w-full md:w-auto px-5 py-3 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-2xl text-xs font-black transition border border-blue-100 flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+                    className="w-full md:w-auto px-5 py-3 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/70 text-blue-700 dark:text-blue-300 rounded-2xl text-xs font-black transition border border-blue-100 dark:border-blue-900 flex items-center justify-center gap-2 shrink-0 cursor-pointer"
                   >
                     <span>Lihat Pembahasan</span>
                     <ArrowRight className="w-4 h-4" />
@@ -357,9 +361,9 @@ export default function ExamHistoryPage() {
         )}
 
         {/* ================= FOOTER INFORMASI ================= */}
-        <div className="mt-16 pt-8 border-t border-gray-200/60 flex flex-col md:flex-row items-center justify-between text-xs text-gray-400 gap-4">
+        <div className="mt-16 pt-8 border-t border-gray-200/60 dark:border-gray-800 flex flex-col md:flex-row items-center justify-between text-xs text-gray-400 dark:text-gray-500 gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-gray-700">Palisademy TKA System</span>
+            <span className="font-bold text-gray-700 dark:text-gray-300">Palisademy TKA System</span>
             <span>&bull;</span>
             <span>Arsip Ujian &amp; Analisis Belajar</span>
           </div>
