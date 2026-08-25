@@ -303,7 +303,7 @@ export default function Navbar() {
               <span>⚙️ Account Settings</span>
             </Link>
           </div>
-
+          
           <div className="pt-2 border-t border-gray-100 dark:border-gray-800">
             <button
               onClick={() => {
