@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { signOut } from '@/utils/supabase/auth'
 import Link from 'next/link'
-import { GraduationCap, Sun, Moon, Monitor } from 'lucide-react'
+import { GraduationCap, Sun, Moon } from 'lucide-react'
 
 export default function Navbar() {
   const [userEmail, setUserEmail] = useState<string | null>(null)
@@ -13,33 +13,29 @@ export default function Navbar() {
   const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   
-  // State untuk Dark Mode ('light' | 'dark')
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  // State untuk mendeteksi mode aktif (hanya untuk tampilan indikator)
+  const [isDarkMode, setIsDarkMode] = useState(false)
   
   const dropdownRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const pathname = usePathname()
   const supabase = createClient()
 
-  // Inisialisasi Tema dari localStorage atau system preference
+  // Cek mode aktif dari kelas 'dark' di tag html secara real-time
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null
-    if (savedTheme) {
-      setTheme(savedTheme)
-      document.documentElement.classList.toggle('dark', savedTheme === 'dark')
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark')
-      document.documentElement.classList.add('dark')
+    const checkTheme = () => {
+      const darkEnabled = document.documentElement.classList.contains('dark')
+      setIsDarkMode(darkEnabled)
     }
-  }, [])
 
-  // Fungsi Toggle Tema
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light'
-    setTheme(newTheme)
-    localStorage.setItem('theme', newTheme)
-    document.documentElement.classList.toggle('dark', newTheme === 'dark')
-  }
+    checkTheme()
+
+    // Memantau perubahan kelas pada tag html
+    const observer = new MutationObserver(checkTheme)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+
+    return () => observer.disconnect()
+  }, [])
 
   // Efek bayangan/blur saat halaman di-scroll
   useEffect(() => {
@@ -95,7 +91,7 @@ export default function Navbar() {
     }`}>
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex justify-between items-center">
         
-        {/* Sisi Kiri: Logo & Tombol Kembali Cepat */}
+        {/* Sisi Kiri: Logo & Tombol Kembali (Sudah Ada Lagi!) */}
         <div className="flex items-center gap-6">
           <Link href="/" className="group flex items-center gap-3">
             <div className="flex items-center gap-3 group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
@@ -109,7 +105,7 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* Tombol Kembali / Kembali ke Utama */}
+          {/* Tombol Kembali Cepat */}
           <Link
             href="/"
             className="hidden lg:flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/60 dark:hover:bg-gray-800 active:scale-95 transition"
@@ -149,30 +145,29 @@ export default function Navbar() {
         {/* Bagian Kanan Desktop */}
         <div className="hidden md:flex items-center gap-3">
           
-          {/* UI Indikator Mode & Tombol Ganti Tema */}
-          <button
-            onClick={toggleTheme}
-            className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-200/80 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition active:scale-95"
-            title="Ubah Mode Tampilan"
+          {/* UI Indikator Mode (HANYA TAMPILAN, TIDAK BISA DIKLIK) */}
+          <div 
+            className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-200 select-none cursor-default"
+            title="Indikator Mode Tampilan Saat Ini"
           >
-            {theme === 'light' ? (
+            {isDarkMode ? (
               <>
-                <Sun className="w-4 h-4 text-amber-500 animate-spin-slow" />
-                <span>Terang</span>
+                <Moon className="w-4 h-4 text-indigo-400" />
+                <span>Mode Gelap</span>
               </>
             ) : (
               <>
-                <Moon className="w-4 h-4 text-indigo-400" />
-                <span>Gelap</span>
+                <Sun className="w-4 h-4 text-amber-500" />
+                <span>Mode Terang</span>
               </>
             )}
-          </button>
+          </div>
 
           {/* Account Dropdown */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsAccountDropdownOpen(!isAccountDropdownOpen)}
-              className="flex items-center gap-2.5 px-3.5 py-2 rounded-2xl hover:bg-gray-100/80 dark:hover:bg-gray-800 active:scale-95 transition border border-transparent hover:border-gray-200 dark:hover:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200"
+              className="flex items-center gap-2.5 px-3.5 py-2 rounded-2xl hover:bg-gray-100/80 dark:hover:bg-gray-800 active:scale-95 transition border border-transparent hover:border-gray-200 dark:hover:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 cursor-pointer"
             >
               <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-blue-500 to-indigo-500 text-white flex items-center justify-center font-bold shadow-sm shadow-blue-500/20">
                 {userEmail ? userEmail.charAt(0).toUpperCase() : 'U'}
@@ -203,7 +198,7 @@ export default function Navbar() {
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-2.5 mx-2 px-3 py-2.5 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 transition mt-0.5"
+                  className="w-full flex items-center gap-2.5 mx-2 px-3 py-2.5 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 transition mt-0.5 cursor-pointer"
                   style={{ width: 'calc(100% - 16px)' }}
                 >
                   <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -218,18 +213,17 @@ export default function Navbar() {
 
         {/* Tombol Hamburger Mobile */}
         <div className="flex md:hidden items-center gap-2">
-          {/* Indikator Mode versi Mobile */}
-          <button
-            onClick={toggleTheme}
-            className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition active:scale-95"
-            aria-label="Toggle Theme"
+          {/* Indikator Mode versi Mobile (Statis) */}
+          <div 
+            className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200/60 dark:border-gray-700 select-none"
+            title="Indikator Mode"
           >
-            {theme === 'light' ? <Sun className="w-5 h-5 text-amber-500" /> : <Moon className="w-5 h-5 text-indigo-400" />}
-          </button>
+            {isDarkMode ? <Moon className="w-5 h-5 text-indigo-400" /> : <Sun className="w-5 h-5 text-amber-500" />}
+          </div>
 
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2.5 rounded-2xl bg-blue-50 dark:bg-gray-800 text-blue-600 dark:text-blue-400 hover:bg-blue-100 transition active:scale-95"
+            className="p-2.5 rounded-2xl bg-blue-50 dark:bg-gray-800 text-blue-600 dark:text-blue-400 hover:bg-blue-100 transition active:scale-95 cursor-pointer"
             aria-label="Menu"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
