@@ -287,7 +287,7 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
               : 'Belum ada soal ujian (exam) yang tersedia untuk mata pelajaran ini.'}
           </p>
           <button
-            onClick={() => router.push('/subjects')}
+            onClick={() => router.push('/mapel-tka')}
             className="px-4 py-2 bg-purple-600 text-white rounded-xl text-xs font-bold hover:bg-purple-700 transition"
           >
             Kembali ke Daftar Mapel
@@ -313,7 +313,7 @@ export default function StudentExamPage({ params }: { params: Promise<{ slug: st
           </div>
           <div className="flex gap-3 w-full pt-4 border-t border-gray-100 dark:border-gray-800">
             <button
-              onClick={() => router.push('/subjects')}
+              onClick={() => router.push('/mapel-tka')}
               className="flex-1 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl text-xs font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition"
             >
               Daftar Mapel
