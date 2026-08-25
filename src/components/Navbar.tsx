@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { signOut } from '@/utils/supabase/auth'
 import Link from 'next/link'
-import { GraduationCap, Sun, Moon } from 'lucide-react'
+import { GraduationCap } from 'lucide-react'
 
 export default function Navbar() {
   const [userEmail, setUserEmail] = useState<string | null>(null)
@@ -13,30 +13,10 @@ export default function Navbar() {
   const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   
-  // State untuk mendeteksi mode aktif (untuk menampilkan status teks & ikon secara akurat)
-  const [isDarkMode, setIsDarkMode] = useState(false)
-  
   const dropdownRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const pathname = usePathname()
   const supabase = createClient()
-
-  // Cek mode aktif dari kelas 'dark' di tag html secara real-time dan saat pertama load
-  useEffect(() => {
-    const checkTheme = () => {
-      const darkEnabled = document.documentElement.classList.contains('dark')
-      setIsDarkMode(darkEnabled)
-    }
-
-    // Cek langsung saat mount
-    checkTheme()
-
-    // Memantau perubahan kelas pada tag html
-    const observer = new MutationObserver(checkTheme)
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
-
-    return () => observer.disconnect()
-  }, [])
 
   // Efek bayangan/blur saat halaman di-scroll
   useEffect(() => {
@@ -145,25 +125,6 @@ export default function Navbar() {
 
         {/* Bagian Kanan Desktop */}
         <div className="hidden md:flex items-center gap-3">
-          
-          {/* UI Indikator Mode Desktop (Statik dengan Teks Lengkap) */}
-          <div 
-            className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-200 select-none cursor-default"
-            title="Status Mode Perangkat"
-          >
-            {isDarkMode ? (
-              <>
-                <Moon className="w-4 h-4 text-indigo-400" />
-                <span>Mode Gelap</span>
-              </>
-            ) : (
-              <>
-                <Sun className="w-4 h-4 text-amber-500" />
-                <span>Mode Terang</span>
-              </>
-            )}
-          </div>
-
           {/* Account Dropdown */}
           <div className="relative" ref={dropdownRef}>
             <button
@@ -212,8 +173,19 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Tombol Hamburger Mobile */}
+        {/* Sisi Kanan Mobile: Tombol Kembali Cepat & Tombol Hamburger */}
         <div className="flex md:hidden items-center gap-2">
+          <Link
+            href="/"
+            className="p-2.5 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition active:scale-95 flex items-center justify-center"
+            aria-label="Kembali ke Beranda"
+            title="Kembali"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          </Link>
+
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="p-2.5 rounded-2xl bg-blue-50 dark:bg-gray-800 text-blue-600 dark:text-blue-400 hover:bg-blue-100 transition active:scale-95 cursor-pointer"
@@ -235,7 +207,7 @@ export default function Navbar() {
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-4 right-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-2xl border border-gray-100 dark:border-gray-800 shadow-2xl rounded-3xl p-5 flex flex-col gap-3 mt-3 z-50 animate-in fade-in slide-in-from-top-4 duration-200">
           
-          {/* Info User & Indikator Mode di Mobile */}
+          {/* Info User */}
           <div className="flex items-center gap-3">
             <div className="flex-1 px-4 py-3 bg-blue-50/60 dark:bg-gray-800 rounded-2xl border border-blue-100/60 dark:border-gray-700 flex items-center justify-between">
               <div>
@@ -248,23 +220,7 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Indikator Mode Tampilan (Mobile - Statis dengan Teks Lengkap) */}
-          <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-200 select-none">
-            {isDarkMode ? (
-              <>
-                <Moon className="w-4 h-4 text-indigo-400" />
-                <span>Status Perangkat: Mode Gelap</span>
-              </>
-            ) : (
-              <>
-                <Sun className="w-4 h-4 text-amber-500" />
-                <span>Status Perangkat: Mode Terang</span>
-              </>
-            )}
-          </div>
-
           <div className="flex flex-col gap-1 pt-1">
-            {/* Tombol Kembali di Mobile */}
             <Link
               href="/"
               onClick={() => setIsMobileMenuOpen(false)}
