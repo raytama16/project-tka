@@ -21,13 +21,14 @@ export default function Navbar() {
   const pathname = usePathname()
   const supabase = createClient()
 
-  // Cek mode aktif dari kelas 'dark' di tag html secara real-time
+  // Cek mode aktif dari kelas 'dark' di tag html secara real-time dan saat pertama load
   useEffect(() => {
     const checkTheme = () => {
       const darkEnabled = document.documentElement.classList.contains('dark')
       setIsDarkMode(darkEnabled)
     }
 
+    // Cek langsung saat mount
     checkTheme()
 
     // Memantau perubahan kelas pada tag html
@@ -303,7 +304,7 @@ export default function Navbar() {
               <span>⚙️ Account Settings</span>
             </Link>
           </div>
-          
+
           <div className="pt-2 border-t border-gray-100 dark:border-gray-800">
             <button
               onClick={() => {
