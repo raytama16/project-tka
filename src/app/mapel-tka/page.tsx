@@ -37,52 +37,52 @@ type Profile = {
   updated_at?: string
 }
 
-// Daftar variasi tema warna modern untuk card mapel (Warna solid & bersih tanpa transparan bawah)
+// Daftar variasi tema warna modern untuk card mapel (Mendukung Light & Dark Mode)
 const cardColorThemes = [
   {
-    bg: 'bg-emerald-50/90 hover:bg-emerald-50',
-    border: 'border-emerald-200/80 hover:border-emerald-300',
-    accent: 'bg-emerald-500',
-    badge: 'bg-emerald-100 text-emerald-700',
-    text: 'text-emerald-700',
-    iconBg: 'bg-emerald-100 text-emerald-600',
-    shadow: 'hover:shadow-emerald-100/60',
+    bg: 'bg-emerald-50/90 dark:bg-emerald-950/40 hover:bg-emerald-50 dark:hover:bg-emerald-900/40',
+    border: 'border-emerald-200/80 dark:border-emerald-800/60 hover:border-emerald-300 dark:hover:border-emerald-700',
+    accent: 'bg-emerald-500 dark:bg-emerald-400',
+    badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-300',
+    text: 'text-emerald-700 dark:text-emerald-400',
+    iconBg: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/60 dark:text-emerald-400',
+    shadow: 'hover:shadow-emerald-100/60 dark:hover:shadow-none',
   },
   {
-    bg: 'bg-amber-50/90 hover:bg-amber-50',
-    border: 'border-amber-200/80 hover:border-amber-300',
-    accent: 'bg-amber-500',
-    badge: 'bg-amber-100 text-amber-700',
-    text: 'text-amber-700',
-    iconBg: 'bg-amber-100 text-amber-600',
-    shadow: 'hover:shadow-amber-100/60',
+    bg: 'bg-amber-50/90 dark:bg-amber-950/40 hover:bg-amber-50 dark:hover:bg-amber-900/40',
+    border: 'border-amber-200/80 dark:border-amber-800/60 hover:border-amber-300 dark:hover:border-amber-700',
+    accent: 'bg-amber-500 dark:bg-amber-400',
+    badge: 'bg-amber-100 text-amber-700 dark:bg-amber-900/60 dark:text-amber-300',
+    text: 'text-amber-700 dark:text-amber-400',
+    iconBg: 'bg-amber-100 text-amber-600 dark:bg-amber-900/60 dark:text-amber-400',
+    shadow: 'hover:shadow-amber-100/60 dark:hover:shadow-none',
   },
   {
-    bg: 'bg-indigo-50/90 hover:bg-indigo-50',
-    border: 'border-indigo-200/80 hover:border-indigo-300',
-    accent: 'bg-indigo-500',
-    badge: 'bg-indigo-100 text-indigo-700',
-    text: 'text-indigo-700',
-    iconBg: 'bg-indigo-100 text-indigo-600',
-    shadow: 'hover:shadow-indigo-100/60',
+    bg: 'bg-indigo-50/90 dark:bg-indigo-950/40 hover:bg-indigo-50 dark:hover:bg-indigo-900/40',
+    border: 'border-indigo-200/80 dark:border-indigo-800/60 hover:border-indigo-300 dark:hover:border-indigo-700',
+    accent: 'bg-indigo-500 dark:bg-indigo-400',
+    badge: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-300',
+    text: 'text-indigo-700 dark:text-indigo-400',
+    iconBg: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/60 dark:text-indigo-400',
+    shadow: 'hover:shadow-indigo-100/60 dark:hover:shadow-none',
   },
   {
-    bg: 'bg-rose-50/90 hover:bg-rose-50',
-    border: 'border-rose-200/80 hover:border-rose-300',
-    accent: 'bg-rose-500',
-    badge: 'bg-rose-100 text-rose-700',
-    text: 'text-rose-700',
-    iconBg: 'bg-rose-100 text-rose-600',
-    shadow: 'hover:shadow-rose-100/60',
+    bg: 'bg-rose-50/90 dark:bg-rose-950/40 hover:bg-rose-50 dark:hover:bg-rose-900/40',
+    border: 'border-rose-200/80 dark:border-rose-800/60 hover:border-rose-300 dark:hover:border-rose-700',
+    accent: 'bg-rose-500 dark:bg-rose-400',
+    badge: 'bg-rose-100 text-rose-700 dark:bg-rose-900/60 dark:text-rose-300',
+    text: 'text-rose-700 dark:text-rose-400',
+    iconBg: 'bg-rose-100 text-rose-600 dark:bg-rose-900/60 dark:text-rose-400',
+    shadow: 'hover:shadow-rose-100/60 dark:hover:shadow-none',
   },
   {
-    bg: 'bg-cyan-50/90 hover:bg-cyan-50',
-    border: 'border-cyan-200/80 hover:border-cyan-300',
-    accent: 'bg-cyan-500',
-    badge: 'bg-cyan-100 text-cyan-700',
-    text: 'text-cyan-700',
-    iconBg: 'bg-cyan-100 text-cyan-600',
-    shadow: 'hover:shadow-cyan-100/60',
+    bg: 'bg-cyan-50/90 dark:bg-cyan-950/40 hover:bg-cyan-50 dark:hover:bg-cyan-900/40',
+    border: 'border-cyan-200/80 dark:border-cyan-800/60 hover:border-cyan-300 dark:hover:border-cyan-700',
+    accent: 'bg-cyan-500 dark:bg-cyan-400',
+    badge: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/60 dark:text-cyan-300',
+    text: 'text-cyan-700 dark:text-cyan-400',
+    iconBg: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/60 dark:text-cyan-400',
+    shadow: 'hover:shadow-cyan-100/60 dark:hover:shadow-none',
   },
 ]
 
@@ -167,15 +167,15 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-3">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 gap-3">
         <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-blue-600 font-extrabold text-xs tracking-wider uppercase animate-pulse">Memuat Dashboard Utama...</p>
+        <p className="text-blue-600 dark:text-blue-400 font-extrabold text-xs tracking-wider uppercase animate-pulse">Memuat Dashboard Utama...</p>
       </div>
     )
   }
 
   return (
-    <main className="min-h-screen bg-slate-50/60 text-gray-900 dark:bg-slate-50 dark:text-gray-900 selection:bg-blue-600 selection:text-white pb-20 relative">
+    <main className="min-h-screen bg-slate-50/60 text-gray-900 dark:bg-slate-950 dark:text-gray-100 selection:bg-blue-600 selection:text-white pb-20 relative">
       
       {/* ================= NAVBAR TERPISAH ================= */}
       <Navbar />
@@ -187,7 +187,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
           
           {/* Banner Utama (2 Kolom) */}
-          <div className="lg:col-span-2 relative bg-linear-to-r from-blue-600 via-indigo-600 to-purple-700 rounded-3xl p-8 text-white shadow-xl shadow-blue-500/10 overflow-hidden flex flex-col justify-between">
+          <div className="lg:col-span-2 relative bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 dark:from-blue-700 dark:via-indigo-800 dark:to-purple-900 rounded-3xl p-8 text-white shadow-xl shadow-blue-500/10 overflow-hidden flex flex-col justify-between">
             <div className="absolute -top-12 -right-12 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
             <div className="absolute -bottom-12 right-20 w-48 h-48 bg-purple-400/20 rounded-full blur-xl pointer-events-none" />
 
@@ -227,13 +227,13 @@ export default function DashboardPage() {
           </div>
 
           {/* Quick Stat & Akun Status Card (1 Kolom) */}
-          <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between gap-4">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm flex flex-col justify-between gap-4">
             
             {/* Total Mapel Info */}
-            <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 flex items-center justify-between">
+            <div className="bg-gray-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-gray-100 dark:border-slate-800 flex items-center justify-between">
               <div>
-                <span className="text-[10px] text-gray-400 font-bold block">Total Mapel Tersedia</span>
-                <span className="text-base font-black text-blue-600">{subjects.length} Mata Pelajaran</span>
+                <span className="text-[10px] text-gray-400 dark:text-slate-400 font-bold block">Total Mapel Tersedia</span>
+                <span className="text-base font-black text-blue-600 dark:text-blue-400">{subjects.length} Mata Pelajaran</span>
               </div>
               <Link 
                 href="/mapel-tka" 
@@ -245,25 +245,25 @@ export default function DashboardPage() {
             </div>
 
             {/* Status Akun (Premium / Free User) */}
-            <div className="bg-slate-50 p-4 rounded-2xl border border-gray-100 flex flex-col gap-3">
+            <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-gray-100 dark:border-slate-800 flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] text-gray-400 font-bold block uppercase tracking-wider">Status Akun</span>
+                  <span className="text-[10px] text-gray-400 dark:text-slate-400 font-bold block uppercase tracking-wider">Status Akun</span>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     {profile?.is_premium ? (
-                      <span className="inline-flex items-center gap-1 text-xs font-black text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+                      <span className="inline-flex items-center gap-1 text-xs font-black text-amber-600 bg-amber-50 dark:bg-amber-950/60 dark:text-amber-300 px-2.5 py-0.5 rounded-full border border-amber-200 dark:border-amber-800">
                         <Crown className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
                         <span>PREMIUM</span>
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-xs font-black text-gray-600 bg-gray-200/70 px-2.5 py-0.5 rounded-full">
+                      <span className="inline-flex items-center gap-1 text-xs font-black text-gray-600 dark:text-slate-300 bg-gray-200/70 dark:bg-slate-700 px-2.5 py-0.5 rounded-full">
                         <span>FREE USER</span>
                       </span>
                     )}
                   </div>
                 </div>
 
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${profile?.is_premium ? 'bg-amber-100 text-amber-600' : 'bg-gray-200 text-gray-600'}`}>
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${profile?.is_premium ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/60 dark:text-amber-400' : 'bg-gray-200 text-gray-600 dark:bg-slate-700 dark:text-slate-300'}`}>
                   <Crown className="w-4 h-4" />
                 </div>
               </div>
@@ -271,7 +271,7 @@ export default function DashboardPage() {
               {!profile?.is_premium && (
                 <button
                   onClick={() => setIsModalOpen(true)}
-                  className="w-full mt-1 py-2.5 bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl text-xs font-extrabold shadow-sm shadow-orange-500/20 transition flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full mt-1 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl text-xs font-extrabold shadow-sm shadow-orange-500/20 transition flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>Upgrade ke Premium</span>
@@ -286,8 +286,8 @@ export default function DashboardPage() {
         {/* ================= SECTION HEADER & SEARCH ================= */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
-            <h2 className="text-xl font-black text-gray-900 tracking-tight">Daftar Mata Pelajaran TKA</h2>
-            <p className="text-xs text-gray-500 mt-0.5">Pilih salah satu mapel di bawah untuk mulai belajar dan mengerjakan latihan soal.</p>
+            <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Daftar Mata Pelajaran TKA</h2>
+            <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Pilih salah satu mapel di bawah untuk mulai belajar dan mengerjakan latihan soal.</p>
           </div>
 
           {/* Kotak Pencarian Interaktif */}
@@ -300,19 +300,19 @@ export default function DashboardPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari mata pelajaran..."
-              className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-2xl text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-xs transition"
+              className="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl text-xs font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-xs transition placeholder:text-gray-400 dark:placeholder:text-slate-500"
             />
           </div>
         </div>
 
         {/* ================= GRID DAFTAR MATA PELAJARAN ================= */}
         {filteredSubjects.length === 0 ? (
-          <div className="bg-white p-12 rounded-3xl border border-gray-200/80 text-center flex flex-col items-center justify-center gap-3 shadow-xs">
-            <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400">
+          <div className="bg-white dark:bg-slate-900 p-12 rounded-3xl border border-gray-200/80 dark:border-slate-800 text-center flex flex-col items-center justify-center gap-3 shadow-xs">
+            <div className="w-14 h-14 bg-gray-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-gray-400 dark:text-slate-500">
               <BookOpen className="w-6 h-6" />
             </div>
-            <h3 className="text-sm font-bold text-gray-800">Mata Pelajaran Tidak Ditemukan</h3>
-            <p className="text-xs text-gray-400 max-w-sm">
+            <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200">Mata Pelajaran Tidak Ditemukan</h3>
+            <p className="text-xs text-gray-400 dark:text-slate-500 max-w-sm">
               Tidak ada mapel yang cocok dengan kata kunci &quot;{searchQuery}&quot;. Coba cari dengan nama lain.
             </p>
           </div>
@@ -339,20 +339,20 @@ export default function DashboardPage() {
                       </span>
                     </div>
 
-                    <h3 className={`text-lg font-black text-gray-900 mb-2 group-hover:${theme.text} transition-colors tracking-tight`}>
+                    <h3 className={`text-lg font-black text-gray-900 dark:text-white mb-2 group-hover:${theme.text} transition-colors tracking-tight`}>
                       {subject.name}
                     </h3>
                     
-                    <p className="text-xs text-gray-600 leading-relaxed line-clamp-2">
+                    <p className="text-xs text-gray-600 dark:text-slate-400 leading-relaxed line-clamp-2">
                       {subject.description || 'Akses materi lengkap, bank latihan soal pilihan ganda, dan ujian simulasi berbasis waktu.'}
                     </p>
                   </div>
 
-                  <div className="mt-8 pt-4 border-t border-gray-200/60 flex items-center justify-between text-xs font-extrabold text-gray-800">
+                  <div className="mt-8 pt-4 border-t border-gray-200/60 dark:border-slate-800 flex items-center justify-between text-xs font-extrabold text-gray-800 dark:text-slate-300">
                     <span className={`group-hover:${theme.text} transition-colors flex items-center gap-1.5`}>
                       <span>Mulai Belajar</span>
                     </span>
-                    <span className={`w-8 h-8 rounded-full bg-white shadow-xs flex items-center justify-center transform group-hover:translate-x-1 transition-transform ${theme.text}`}>
+                    <span className={`w-8 h-8 rounded-full bg-white dark:bg-slate-800 shadow-xs flex items-center justify-center transform group-hover:translate-x-1 transition-transform ${theme.text}`}>
                       &rarr;
                     </span>
                   </div>
@@ -364,9 +364,9 @@ export default function DashboardPage() {
         )}
 
         {/* ================= FOOTER INFORMASI TAMBAHAN ================= */}
-        <div className="mt-16 pt-8 border-t border-gray-200/60 flex flex-col md:flex-row items-center justify-between text-xs text-gray-400 gap-4">
+        <div className="mt-16 pt-8 border-t border-gray-200/60 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between text-xs text-gray-400 dark:text-slate-500 gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-gray-700">Palisademy TKA System</span>
+            <span className="font-bold text-gray-700 dark:text-slate-300">Palisademy TKA System</span>
             <span>&bull;</span>
             <span>Platform Evaluasi Akademik Digital</span>
           </div>
@@ -380,43 +380,43 @@ export default function DashboardPage() {
       {/* ================= MODAL POPUP UPGRADE PREMIUM ================= */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 md:p-8 shadow-2xl border border-gray-100 relative animate-scale-up">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 md:p-8 shadow-2xl border border-gray-100 dark:border-slate-800 relative animate-scale-up">
             
             {/* Tombol Close */}
             <button
               onClick={() => setIsModalOpen(false)}
-              className="absolute top-5 right-5 w-8 h-8 bg-gray-100 hover:bg-gray-200 text-gray-500 rounded-full flex items-center justify-center transition cursor-pointer"
+              className="absolute top-5 right-5 w-8 h-8 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-500 dark:text-slate-400 rounded-full flex items-center justify-center transition cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
 
             <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mb-4 border border-amber-100 shadow-inner">
+              <div className="w-16 h-16 bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 rounded-2xl flex items-center justify-center mb-4 border border-amber-100 dark:border-amber-900 shadow-inner">
                 <Crown className="w-8 h-8 fill-amber-500 text-amber-500" />
               </div>
 
-              <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest bg-amber-50 px-3 py-1 rounded-full mb-2">
+              <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest bg-amber-50 dark:bg-amber-950/60 px-3 py-1 rounded-full mb-2">
                 Eksklusif Akses Tanpa Batas
               </span>
 
-              <h3 className="text-xl font-black text-gray-900 mb-2">
+              <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">
                 Upgrade ke Akun Premium
               </h3>
 
-              <p className="text-xs text-gray-500 leading-relaxed mb-6">
+              <p className="text-xs text-gray-500 dark:text-slate-400 leading-relaxed mb-6">
                 Nikmati akses penuh ke seluruh bank soal eksklusif, pembahasan mendalam tanpa jeda, serta simulasi ujian TKA prioritas tinggi.
               </p>
 
-              <div className="w-full bg-slate-50 p-4 rounded-2xl border border-gray-100 flex flex-col gap-2.5 mb-6 text-left">
-                <div className="flex items-center gap-2 text-xs font-bold text-gray-700">
+              <div className="w-full bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-gray-100 dark:border-slate-800 flex flex-col gap-2.5 mb-6 text-left">
+                <div className="flex items-center gap-2 text-xs font-bold text-gray-700 dark:text-slate-300">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                   <span>Akses Seluruh Modul Mata Pelajaran</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs font-bold text-gray-700">
+                <div className="flex items-center gap-2 text-xs font-bold text-gray-700 dark:text-slate-300">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                   <span>Analisis Grafik Skor &amp; Riwayat Lengkap</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs font-bold text-gray-700">
+                <div className="flex items-center gap-2 text-xs font-bold text-gray-700 dark:text-slate-300">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                   <span>Dukungan Prioritas Konsultasi Belajar</span>
                 </div>
@@ -426,7 +426,7 @@ export default function DashboardPage() {
               <div className="flex flex-col sm:flex-row gap-3 w-full">
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-2xl text-xs font-bold transition cursor-pointer"
+                  className="w-full py-3 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 rounded-2xl text-xs font-bold transition cursor-pointer"
                 >
                   Nanti Saja
                 </button>
