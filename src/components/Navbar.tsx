@@ -13,7 +13,7 @@ export default function Navbar() {
   const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   
-  // State untuk mendeteksi mode aktif (hanya untuk tampilan indikator)
+  // State untuk mendeteksi mode aktif (untuk menampilkan status teks & ikon secara akurat)
   const [isDarkMode, setIsDarkMode] = useState(false)
   
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -91,7 +91,7 @@ export default function Navbar() {
     }`}>
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex justify-between items-center">
         
-        {/* Sisi Kiri: Logo & Tombol Kembali (Sudah Ada Lagi!) */}
+        {/* Sisi Kiri: Logo & Tombol Kembali (Desktop) */}
         <div className="flex items-center gap-6">
           <Link href="/" className="group flex items-center gap-3">
             <div className="flex items-center gap-3 group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
@@ -105,11 +105,11 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* Tombol Kembali Cepat */}
+          {/* Tombol Kembali Cepat (Desktop) */}
           <Link
             href="/"
             className="hidden lg:flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/60 dark:hover:bg-gray-800 active:scale-95 transition"
-            title="Kembali ke halaman sebelumnya"
+            title="Kembali ke halaman utama"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -145,10 +145,10 @@ export default function Navbar() {
         {/* Bagian Kanan Desktop */}
         <div className="hidden md:flex items-center gap-3">
           
-          {/* UI Indikator Mode (HANYA TAMPILAN, TIDAK BISA DIKLIK) */}
+          {/* UI Indikator Mode Desktop (Statik dengan Teks Lengkap) */}
           <div 
             className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-200 select-none cursor-default"
-            title="Indikator Mode Tampilan Saat Ini"
+            title="Status Mode Perangkat"
           >
             {isDarkMode ? (
               <>
@@ -213,14 +213,6 @@ export default function Navbar() {
 
         {/* Tombol Hamburger Mobile */}
         <div className="flex md:hidden items-center gap-2">
-          {/* Indikator Mode versi Mobile (Statis) */}
-          <div 
-            className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200/60 dark:border-gray-700 select-none"
-            title="Indikator Mode"
-          >
-            {isDarkMode ? <Moon className="w-5 h-5 text-indigo-400" /> : <Sun className="w-5 h-5 text-amber-500" />}
-          </div>
-
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="p-2.5 rounded-2xl bg-blue-50 dark:bg-gray-800 text-blue-600 dark:text-blue-400 hover:bg-blue-100 transition active:scale-95 cursor-pointer"
@@ -241,17 +233,48 @@ export default function Navbar() {
       {/* Menu Dropdown Mobile */}
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-4 right-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-2xl border border-gray-100 dark:border-gray-800 shadow-2xl rounded-3xl p-5 flex flex-col gap-3 mt-3 z-50 animate-in fade-in slide-in-from-top-4 duration-200">
-          <div className="px-4 py-3 bg-blue-50/60 dark:bg-gray-800 rounded-2xl border border-blue-100/60 dark:border-gray-700 flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-extrabold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Login Sebagai:</p>
-              <p className="text-xs font-bold text-gray-800 dark:text-gray-200 truncate mt-0.5">{userEmail || 'Pengguna'}</p>
-            </div>
-            <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">
-              {userEmail ? userEmail.charAt(0).toUpperCase() : 'U'}
+          
+          {/* Info User & Indikator Mode di Mobile */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 px-4 py-3 bg-blue-50/60 dark:bg-gray-800 rounded-2xl border border-blue-100/60 dark:border-gray-700 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-extrabold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Login Sebagai:</p>
+                <p className="text-xs font-bold text-gray-800 dark:text-gray-200 truncate mt-0.5">{userEmail || 'Pengguna'}</p>
+              </div>
+              <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">
+                {userEmail ? userEmail.charAt(0).toUpperCase() : 'U'}
+              </div>
             </div>
           </div>
 
+          {/* Indikator Mode Tampilan (Mobile - Statis dengan Teks Lengkap) */}
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-200 select-none">
+            {isDarkMode ? (
+              <>
+                <Moon className="w-4 h-4 text-indigo-400" />
+                <span>Status Perangkat: Mode Gelap</span>
+              </>
+            ) : (
+              <>
+                <Sun className="w-4 h-4 text-amber-500" />
+                <span>Status Perangkat: Mode Terang</span>
+              </>
+            )}
+          </div>
+
           <div className="flex flex-col gap-1 pt-1">
+            {/* Tombol Kembali di Mobile */}
+            <Link
+              href="/"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+            >
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span>← Kembali ke Utama</span>
+            </Link>
+
             <Link
               href="/mapel-tka"
               onClick={() => setIsMobileMenuOpen(false)}
