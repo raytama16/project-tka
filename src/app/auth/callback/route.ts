@@ -47,7 +47,6 @@ export async function GET(request: Request) {
         }
       ])
     }
-
     // 4. PAKSA 100% LANGSUNG MASUK KE ONBOARDING TANPA PENGECEKAN LAIN
     return NextResponse.redirect(`${origin}/onboarding`)
 
