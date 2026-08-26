@@ -65,7 +65,10 @@ function LoginForm() {
         
         {/* Header Title */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Selamat Datang Kembali</h1>
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-600 text-white font-bold text-xl mb-3 shadow-lg shadow-blue-500/30">
+                      P
+                    </div>
+          <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Selamat Datang Kembali</h1>
           <p className="text-sm text-slate-500 mt-1">Masuk untuk melanjutkan ke akun Anda</p>
         </div>
 
@@ -107,14 +110,14 @@ function LoginForm() {
           Lanjutkan dengan Google
         </button>
 
-        <div className="flex items-center my-6">
+        {/* <div className="flex items-center my-6">
           <div className="flex-grow border-t border-slate-200"></div>
           <span className="px-3 text-xs uppercase tracking-wider text-slate-400 font-medium">Atau dengan email</span>
           <div className="flex-grow border-t border-slate-200"></div>
-        </div>
+        </div> */}
 
         {/* Form Login Manual */}
-        <form onSubmit={handleLogin} className="space-y-4">
+        {/* <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Email</label>
             <input
@@ -148,7 +151,7 @@ function LoginForm() {
           >
             {loading ? 'Memproses...' : 'Masuk'}
           </button>
-        </form>
+        </form> */}
 
         <p className="mt-8 text-sm text-center text-slate-500">
           Belum punya akun?{' '}
