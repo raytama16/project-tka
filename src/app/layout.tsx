@@ -82,7 +82,7 @@ export default function RootLayout({
     <html lang="id" className="scroll-smooth">
       <head>
         {/* Favicon & Icons */}
-        <link rel="icon" href="/logo.svg" sizes="any" />
+        <link rel="icon" href="/logo.svg" sizes="any" type="image/x-icon" />
         
         {/* CDN KaTeX CSS untuk merender rumus matematika/sains dengan rapi */}
         <link 
