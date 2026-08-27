@@ -187,7 +187,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
           
           {/* Banner Utama (2 Kolom) */}
-          <div className="lg:col-span-2 relative bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 dark:from-blue-700 dark:via-indigo-800 dark:to-purple-900 rounded-3xl p-8 text-white shadow-xl shadow-blue-500/10 overflow-hidden flex flex-col justify-between">
+          <div className="lg:col-span-2 relative bg-linear-to-r from-blue-600 via-indigo-600 to-purple-700 dark:from-blue-700 dark:via-indigo-800 dark:to-purple-900 rounded-3xl p-8 text-white shadow-xl shadow-blue-500/10 overflow-hidden flex flex-col justify-between">
             <div className="absolute -top-12 -right-12 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
             <div className="absolute -bottom-12 right-20 w-48 h-48 bg-purple-400/20 rounded-full blur-xl pointer-events-none" />
 
@@ -271,7 +271,7 @@ export default function DashboardPage() {
               {!profile?.is_premium && (
                 <button
                   onClick={() => setIsModalOpen(true)}
-                  className="w-full mt-1 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl text-xs font-extrabold shadow-sm shadow-orange-500/20 transition flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full mt-1 py-2.5 bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl text-xs font-extrabold shadow-sm shadow-orange-500/20 transition flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>Upgrade ke Premium</span>
@@ -404,21 +404,21 @@ export default function DashboardPage() {
               </h3>
 
               <p className="text-xs text-gray-500 dark:text-slate-400 leading-relaxed mb-6">
-                Nikmati akses penuh ke seluruh bank soal eksklusif, pembahasan mendalam tanpa jeda, serta simulasi ujian TKA prioritas tinggi.
+                Belajar lebih lengkap, latihan lebih banyak, dan persiapan TKA jadi lebih maksimal.
               </p>
 
               <div className="w-full bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-gray-100 dark:border-slate-800 flex flex-col gap-2.5 mb-6 text-left">
                 <div className="flex items-center gap-2 text-xs font-bold text-gray-700 dark:text-slate-300">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                  <span>Akses Seluruh Modul Mata Pelajaran</span>
+                  <span>Akses Seluruh Latihan Soal</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs font-bold text-gray-700 dark:text-slate-300">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                  <span>Analisis Grafik Skor &amp; Riwayat Lengkap</span>
+                  <span>Pembahasan Soal Lengkap</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs font-bold text-gray-700 dark:text-slate-300">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                  <span>Dukungan Prioritas Konsultasi Belajar</span>
+                  <span>Membuka Simulasi Ujian</span>
                 </div>
               </div>
 
